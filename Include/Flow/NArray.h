@@ -1,0 +1,112 @@
+// Copyright (c) Juan M. G. de Agüero 2023
+
+#include <set>
+#include <string>
+#include <unordered_set>
+#include <vector>
+
+#pragma once
+
+namespace Flow
+{
+    using namespace std;
+
+    class NArray
+    {
+
+    public:
+
+        NArray( float value );
+
+        NArray( vector<int> shape, vector<float> data );
+
+        NArray( vector<int> shape, vector<float> data, bool constant );
+
+        enum Operation { NONE, ADD, MULT, MMULT, POW, TANH, EXP };
+
+        NArray( vector<int> shape, vector<float> data, vector<NArray*> operands, Operation op );
+
+        float Get( vector<int> coordinates );
+
+        vector<float> Get();
+
+        vector<int> GetShape();
+
+        int GetIndex( vector<int> coordinates );
+
+        vector<float> GetGradient();
+        
+        void Set( vector<int> coordinates, float value );
+
+        void Reshape( vector<int> shape );
+
+        void ResetGradient();
+
+        void Backpropagate();
+
+        string Trace();
+
+    private:
+
+        vector<float> Data;
+
+        vector<int> Shape;
+
+        bool Constant;
+
+        vector<float> Gradient;
+
+        vector<NArray*> Operands;
+        
+        Operation Op;
+
+        void SetStrides();
+
+        void Backward();
+
+        void BackwardAdd();
+
+        void BackwardMult();
+
+        void BackwardMMult();
+
+        void BackwardPow();
+
+        void BackwardTanh();
+
+        void BackwardExp();
+
+        vector<NArray*> TopologicalSort();
+
+        void BuildTopo( NArray* current, unordered_set<NArray*>& visited, vector<NArray*>& topo );
+
+        void BuildGraph( NArray* current, set<NArray*>& nodes, set< pair< NArray*, NArray* > >& edges );
+
+    };
+
+    NArray* Add( NArray* arr1, NArray* arr2 );
+
+    NArray* Sub( NArray* arr1, NArray* arr2 );
+
+    NArray* Sub( NArray* arr, float literal );
+
+    NArray* Neg( NArray* arr );
+
+    NArray* Mult( NArray* arr1, NArray* arr2 );
+
+    NArray* Mult( NArray* arr, float literal );
+
+    NArray* MMult( NArray* arr1, NArray* arr2 );
+
+    NArray* Div( NArray* arr1, NArray* arr2 );
+
+    NArray* Pow( NArray* arr, float exponent );
+
+    bool Less( NArray* arr1, NArray* arr2 );
+
+    NArray* Tanh( NArray* arr );
+
+    NArray* Exp( NArray* arr );
+
+    string OperationString( NArray::Operation op );
+}
