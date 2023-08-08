@@ -9,6 +9,8 @@
 #include "NArray.h"
 #include "Log.h"
 
+#include "Torch.hpp"
+
 using namespace std;
 
 Flow::NArray::NArray( float value )
@@ -223,30 +225,67 @@ namespace Flow
 {
     NArray* Add( NArray* arr1, NArray* arr2 )
     {
-        vector<int> shape = arr1->GetShape();
-        vector<float> data( arr1->Get().size(), 0.0f );
-        NArray* result = new NArray( shape, data, { arr1, arr2 }, NArray::Operation::ADD );
-        NArray* arr2Copy = new NArray( arr2->GetShape(), arr2->Get(), true );
-        if ( arr1->GetShape().size() == 2 && arr2->GetShape().size() == 1 )
+        if ( arr1->GetShape().size() > 2 ||  arr2->GetShape().size() > 2 )
         {
-            arr2Copy->Reshape({ 1, arr2->GetShape()[1] });
+            Log("[Error] Only 1D and 2D arrays are supported for addition.");
+            return nullptr;
         }
+
+        // Create a copy of the two arrays.
+        // They might need to be reshaped and we don't want to modify the input arrays.
+        NArray* arr1Copy = new NArray( arr1->GetShape(), arr1->Get(), true );
+        NArray* arr2Copy = new NArray( arr2->GetShape(), arr2->Get(), true );
+
+        // Add 1s if needed.
+        if ( arr1->GetShape().size() == 2 && arr2->GetShape().size() == 1 )
+            arr2Copy->Reshape({ 1, arr2->GetShape()[1] });
+        else if ( arr1->GetShape().size() == 1 && arr2->GetShape().size() == 2 )
+            arr1Copy->Reshape({ 1, arr1->GetShape()[1] });
+
+        // Check if shapes are compatible.
+        for ( int i = 0; i < arr1Copy->GetShape().size(); i++ )
+        {
+            if ( arr1Copy->GetShape()[i] != arr2Copy->GetShape()[i]
+                && arr1Copy->GetShape()[i] != 1 && arr2Copy->GetShape()[i] != 1 )
+            {
+                Log("[Error] Array shapes are incompatible for addition.");
+                return nullptr;
+            }
+        }
+
+        // Create the result array.
+        vector<int> resultShape;
+        for ( int i = 0; i < arr1Copy->GetShape().size(); i++ )
+        {
+            if ( arr1Copy->GetShape()[i] != 1 )
+                resultShape.push_back(arr1Copy->GetShape()[i]);
+            else resultShape.push_back(arr2Copy->GetShape()[i]);
+        }
+        int resultSize = resultShape[0];
+        for ( int i = 1; i < resultShape.size(); i++ )
+            resultSize *= resultShape[i];
+        vector<float> resultData( resultSize, 0.0f );
+        NArray* result = new NArray( resultShape, resultData, { arr1, arr2 }, NArray::Operation::ADD );
+
+        // The two arrays have compatible shapes so we can add them.
         vector<int> coords1;
         vector<int> coords2;
-        for ( int i = 0; i < shape[0]; i++ )
+        for ( int i = 0; i < resultShape[0]; i++ )
         {
-            for ( int j = 0; j < shape[1]; j++ )
+            if ( arr1Copy->GetShape().size() == 1 )
+                result->Set( { i }, arr1Copy->Get({ i }) + arr2Copy->Get({ i }) );
+            else
             {
-                if ( arr1->GetShape().size() == 2 )
+                for ( int j = 0; j < resultShape[1]; j++ )
                 {
                     coords1 = { i, j };
-                    coords2 = { 0, j };
+                    coords2 = { i, j };
+                    if ( arr1Copy->GetShape()[0] == 1 ) coords1[0] = 0;
+                    if ( arr1Copy->GetShape()[1] == 1 ) coords1[1] = 0;
+                    if ( arr2Copy->GetShape()[0] == 1 ) coords2[0] = 0;
+                    if ( arr2Copy->GetShape()[1] == 1 ) coords2[1] = 0;
+                    result->Set( { i, j }, arr1Copy->Get(coords1) + arr2Copy->Get(coords2) );
                 }
-                else
-                {
-
-                }
-                result->Set( { i, j }, arr1->Get(coords1) + arr2Copy->Get(coords2) );
             }
         }
         return result;
@@ -271,7 +310,8 @@ namespace Flow
 
     NArray* Mult( NArray* arr1, NArray* arr2 )
     {
-        return new NArray( {}, {}, {}, NArray::Operation::MULT );
+        auto result = TorchMult( { arr1->GetShape(), arr1->Get() }, { arr2->GetShape(), arr2->Get() } );
+        return new NArray( result.first, result.second, { arr1, arr2 }, NArray::Operation::MULT );
     }
 
     NArray* Mult( NArray* arr, float literal )

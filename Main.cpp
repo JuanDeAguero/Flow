@@ -3,10 +3,12 @@
 #include "Flow/Log.h"
 #include "Flow/NArray.h"
 
-#include "Test/Broadcasting.hpp"
+#include "Test/TestAdd.hpp"
+#include "Test/TestMult.hpp"
 
 int main()
 {
-    Test_Broadcasting();
+    Test_Add();
+    Test_Mult();
     
 }

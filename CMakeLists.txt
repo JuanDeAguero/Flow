@@ -11,7 +11,11 @@ add_executable(flow
 )
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Include)
-
 target_include_directories(flow PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(flow PRIVATE ${INCLUDE_DIR})
 target_include_directories(flow PRIVATE ${INCLUDE_DIR}/Flow)
+
+find_package(Torch REQUIRED)
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS})
+target_link_libraries(flow PRIVATE ${TORCH_LIBRARIES})
+target_include_directories(flow PRIVATE ${TORCH_INCLUDE_DIRS})
