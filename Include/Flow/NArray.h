@@ -16,13 +16,11 @@ namespace Flow
 
     public:
 
-        NArray( float value );
-
         NArray( vector<int> shape, vector<float> data );
 
         NArray( vector<int> shape, vector<float> data, bool constant );
 
-        enum Operation { NONE, ADD, MULT, MMULT, POW, TANH, EXP };
+        enum Operation { NONE, ADD, SUB, MULT, MMULT, POW, TANH, EXP };
 
         NArray( vector<int> shape, vector<float> data, vector<NArray*> operands, Operation op );
 
@@ -34,27 +32,28 @@ namespace Flow
 
         int GetIndex( vector<int> coordinates );
 
-        vector<float> GetGradient();
+        NArray* GetGradient();
         
         void Set( vector<int> coordinates, float value );
 
-        void Reshape( vector<int> shape );
+        void Reset( float value );
 
-        void ResetGradient();
+        void Reshape( vector<int> shape );
 
         void Backpropagate();
 
         string Trace();
 
-    private:
-
+        // TODO: private
         vector<float> Data;
+
+    private:
 
         vector<int> Shape;
 
         bool Constant;
 
-        vector<float> Gradient;
+        NArray* Gradient;
 
         vector<NArray*> Operands;
         
@@ -66,6 +65,8 @@ namespace Flow
 
         void BackwardAdd();
 
+        void BackwardSub();
+
         void BackwardMult();
 
         void BackwardMMult();
@@ -76,19 +77,21 @@ namespace Flow
 
         void BackwardExp();
 
+        void BackwardSum();
+
         vector<NArray*> TopologicalSort();
 
         void BuildTopo( NArray* current, unordered_set<NArray*>& visited, vector<NArray*>& topo );
 
         void BuildGraph( NArray* current, set<NArray*>& nodes, set< pair< NArray*, NArray* > >& edges );
 
+        int SizeFromShape( vector<int> shape );
+
     };
 
     NArray* Add( NArray* arr1, NArray* arr2 );
 
     NArray* Sub( NArray* arr1, NArray* arr2 );
-
-    NArray* Sub( NArray* arr, float literal );
 
     NArray* Neg( NArray* arr );
 
@@ -109,4 +112,6 @@ namespace Flow
     NArray* Exp( NArray* arr );
 
     string OperationString( NArray::Operation op );
+
+    NArray* Random( vector<int> shape );
 }

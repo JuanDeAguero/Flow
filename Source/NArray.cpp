@@ -13,21 +13,13 @@
 
 using namespace std;
 
-Flow::NArray::NArray( float value )
-{
-    Data = { value };
-    Shape = { 1 };
-    Constant = false;
-    Gradient = { 0.0f };
-    Op = Operation::NONE;
-}
-
 Flow::NArray::NArray( vector<int> shape, vector<float> data )
 {
     Data = data;
     Shape = shape;
     Constant = false;
-    Gradient.resize( Data.size(), 0.0f );
+    vector<float> gradientData( SizeFromShape(shape), 0.0f );
+    Gradient = new NArray( shape, gradientData, true );
     Op = Operation::NONE;
 }
 
@@ -36,7 +28,11 @@ Flow::NArray::NArray( vector<int> shape, vector<float> data, bool constant )
     Data = data;
     Shape = shape;
     Constant = constant;
-    Gradient.resize( Data.size(), 0.0f );
+    if (!Constant)
+    {
+        vector<float> gradientData( SizeFromShape(shape), 0.0f );
+        Gradient = new NArray( shape, gradientData, true );
+    }
     Op = Operation::NONE;
 }
 
@@ -45,7 +41,8 @@ Flow::NArray::NArray( vector<int> shape, vector<float> data, vector<NArray*> ope
     Data = data;
     Shape = shape;
     Constant = false;
-    Gradient.resize( Data.size(), 0.0f );
+    vector<float> gradientData( SizeFromShape(shape), 0.0f );
+    Gradient = new NArray( shape, gradientData, true );
     Operands = operands;
     Op = op;
 }
@@ -84,7 +81,7 @@ int Flow::NArray::GetIndex( vector<int> coordinates )
     return index;
 }
 
-vector<float> Flow::NArray::GetGradient()
+Flow::NArray* Flow::NArray::GetGradient()
 {
     return Gradient;
 }
@@ -96,34 +93,34 @@ void Flow::NArray::Set( vector<int> coordinates, float value )
         Data[index] = value;
 }
 
+void Flow::NArray::Reset( float value )
+{
+    for ( int i = 0; i < Data.size(); i++ )
+        Data[i] = value;
+}
+
 void Flow::NArray::Reshape( vector<int> shape )
 {
     Shape = shape;
 }
 
-void Flow::NArray::ResetGradient()
-{
-    for ( int i = 0; i < Gradient.size(); i++ )
-        Gradient[i] = 0.0f;
-}
-
 void Flow::NArray::Backpropagate()
 {
-    vector<float> gradient;
-    gradient.resize( Data.size(), 1.0f );
-    Gradient = gradient;
+    Gradient->Reset(1.0f);
+    TopologicalSort();
     for ( Flow::NArray* arr : TopologicalSort() )
         arr->Backward();
 }
 
 void Flow::NArray::Backward()
 {
-    if ( Operands.size() == 0 )
+    if ( Operands.size() == 0 || Constant )
         return;
     switch (Op)
     {
         case Operation::NONE:                     break;
         case Operation::ADD:   { BackwardAdd();   break; }
+        case Operation::SUB:   { BackwardSub();   break; }
         case Operation::MULT:  { BackwardMult();  break; }
         case Operation::MMULT: { BackwardMMult(); break; }
         case Operation::POW:   { BackwardPow();   break; }
@@ -134,32 +131,72 @@ void Flow::NArray::Backward()
 
 void Flow::NArray::BackwardAdd()
 {
+    auto gradients = TorchBackwardAdd(
+        { Operands[0]->GetShape(), Operands[0]->Get() },
+        { Operands[1]->GetShape(), Operands[1]->Get() },
+        { Gradient->GetShape(), Gradient->Get() });
+    Operands[0]->Gradient->Data = gradients.first;
+    Operands[1]->Gradient->Data = gradients.second;
+}
 
+void Flow::NArray::BackwardSub()
+{
+    auto gradients = TorchBackwardSub(
+        { Operands[0]->GetShape(), Operands[0]->Get() },
+        { Operands[1]->GetShape(), Operands[1]->Get() },
+        { Gradient->GetShape(), Gradient->Get() });
+    Operands[0]->Gradient->Data = gradients.first;
+    Operands[1]->Gradient->Data = gradients.second;
 }
 
 void Flow::NArray::BackwardMult()
 {
-
+    if ( Operands[1]->Constant )
+        Operands[0]->Gradient->Data = Gradient->Data;
+    else
+    {
+        auto gradients = TorchBackwardMult(
+            { Operands[0]->GetShape(), Operands[0]->Get() },
+            { Operands[1]->GetShape(), Operands[1]->Get() },
+            { Gradient->GetShape(), Gradient->Get() });
+        Operands[0]->Gradient->Data = gradients.first;
+        Operands[1]->Gradient->Data = gradients.second;
+    }
 }
 
 void Flow::NArray::BackwardMMult()
 {
-
+    auto gradients = TorchBackwardMMult(
+        { Operands[0]->GetShape(), Operands[0]->Get() },
+        { Operands[1]->GetShape(), Operands[1]->Get() },
+        { Gradient->GetShape(), Gradient->Get() });
+    Operands[0]->Gradient->Data = gradients.first;
+    Operands[1]->Gradient->Data = gradients.second;
 }
 
 void Flow::NArray::BackwardPow()
 {
-
+    auto gradient = TorchBackwardPow(
+        { Operands[0]->GetShape(), Operands[0]->Get() },
+        2.0f,
+        { Gradient->GetShape(), Gradient->Get() });
+    Operands[0]->Gradient->Data = gradient;
 }
 
 void Flow::NArray::BackwardTanh()
 {
-
+    vector<float> gradient = TorchBackwardTanh(
+        { Operands[0]->GetShape(), Operands[0]->Get() },
+        { Gradient->GetShape(), Gradient->Get() });
+    Operands[0]->Gradient->Data = gradient;
 }
 
 void Flow::NArray::BackwardExp()
 {
-    
+    auto gradient = TorchBackwardExp(
+        { Operands[0]->GetShape(), Operands[0]->Get() },
+        { Gradient->GetShape(), Gradient->Get() });
+    Operands[0]->Gradient->Data = gradient;
 }
 
 vector<Flow::NArray*> Flow::NArray::TopologicalSort()
@@ -173,15 +210,18 @@ vector<Flow::NArray*> Flow::NArray::TopologicalSort()
 
 void Flow::NArray::BuildTopo( NArray* current, unordered_set<NArray*>& visited, vector<NArray*>& topo )
 {
-    if ( visited.find(current) != visited.end() )
+    if ( visited.find(current) != visited.end() || current->Operands.size() == 0 )
         return;
     visited.insert(current);
     NArray* first = current->Operands[0];
-    NArray* second = current->Operands[1];
     if ( first && !first->Constant )
         BuildTopo( first, visited, topo );
-    if ( second && !second->Constant )
-        BuildTopo( second, visited, topo );
+    if ( current->Operands.size() != 1 )
+    {
+        NArray* second = current->Operands[1];
+        if ( second && !second->Constant )
+            BuildTopo( second, visited, topo );
+    }
     topo.push_back(current);
 }
 
@@ -204,27 +244,41 @@ string Flow::NArray::Trace()
 
 void Flow::NArray::BuildGraph( NArray* current, set<NArray*>& nodes, set< pair< NArray*, NArray* > >& edges )
 {
-    if ( nodes.find(current) != nodes.end() )
+    if ( nodes.find(current) != nodes.end() || current->Operands.size() == 0 )
         return;
     nodes.insert(current);
     NArray* first = current->Operands[0];
-    NArray* second = current->Operands[1];
     if ( first && !first->Constant )
     {
         edges.insert({ first, current });
         BuildGraph( first, nodes, edges );
     }
-    if ( second  && !second->Constant )
+    if ( current->Operands.size() != 1 )
     {
-        edges.insert({ second, current });
-        BuildGraph( second, nodes, edges );
+        NArray* second = current->Operands[1];
+        if ( second  && !second->Constant )
+        {
+            edges.insert({ second, current });
+            BuildGraph( second, nodes, edges );
+        }
     }
+}
+
+int Flow::NArray::SizeFromShape( vector<int> shape )
+{
+    int size = shape[0];
+    for ( int i = 1; i < shape.size(); i++ )
+        size *= shape[i];
+    return size;
 }
 
 namespace Flow
 {
     NArray* Add( NArray* arr1, NArray* arr2 )
     {
+        auto resultTorch = TorchAdd( { arr1->GetShape(), arr1->Get() }, { arr2->GetShape(), arr2->Get() } );
+        return new NArray( resultTorch.first, resultTorch.second, { arr1, arr2 }, NArray::Operation::ADD );
+
         if ( arr1->GetShape().size() > 2 ||  arr2->GetShape().size() > 2 )
         {
             Log("[Error] Only 1D and 2D arrays are supported for addition.");
@@ -270,12 +324,14 @@ namespace Flow
         // The two arrays have compatible shapes so we can add them.
         vector<int> coords1;
         vector<int> coords2;
+        // 1D
         for ( int i = 0; i < resultShape[0]; i++ )
         {
             if ( arr1Copy->GetShape().size() == 1 )
                 result->Set( { i }, arr1Copy->Get({ i }) + arr2Copy->Get({ i }) );
             else
             {
+                // 2D
                 for ( int j = 0; j < resultShape[1]; j++ )
                 {
                     coords1 = { i, j };
@@ -284,7 +340,12 @@ namespace Flow
                     if ( arr1Copy->GetShape()[1] == 1 ) coords1[1] = 0;
                     if ( arr2Copy->GetShape()[0] == 1 ) coords2[0] = 0;
                     if ( arr2Copy->GetShape()[1] == 1 ) coords2[1] = 0;
-                    result->Set( { i, j }, arr1Copy->Get(coords1) + arr2Copy->Get(coords2) );
+                    if ( arr1Copy->GetShape().size() == 2 )
+                        result->Set( { i, j }, arr1Copy->Get(coords1) + arr2Copy->Get(coords2) );
+                    else
+                    {
+                        // 3D ...
+                    }
                 }
             }
         }
@@ -293,15 +354,11 @@ namespace Flow
 
     NArray* Sub( NArray* arr1, NArray* arr2 )
     {
-        return Add( arr1, Neg(arr2) );
+        auto result = TorchSub( { arr1->GetShape(), arr1->Get() }, { arr2->GetShape(), arr2->Get() } );
+        return new NArray( result.first, result.second, { arr1, arr2 }, NArray::Operation::SUB );
+        
+        //return Add( arr1, Neg(arr2) );
     }
-
-    NArray* Sub( NArray* arr, float literal )
-    {
-        NArray* constant = new NArray( { 1 }, { -1.0f * literal }, true );
-        return Add( arr, constant );
-    }
-
     NArray* Neg( NArray* arr )
     {
         vector<float> data( arr->Get().size(), -1.0f );
@@ -316,12 +373,15 @@ namespace Flow
 
     NArray* Mult( NArray* arr, float literal )
     {
-        return new NArray( {}, {}, {}, NArray::Operation::MULT );
+        NArray* constant = new NArray( { 1 }, { literal }, true );
+        auto result = TorchMult( { arr->GetShape(), arr->Get() }, { constant->GetShape(), constant->Get() } );
+        return new NArray( result.first, result.second, { arr, constant }, NArray::Operation::MULT );
     }
 
     NArray* MMult( NArray* arr1, NArray* arr2 )
     {
-        return new NArray( {}, {}, {}, NArray::Operation::MMULT );
+        auto result = TorchMMult( { arr1->GetShape(), arr1->Get() }, { arr2->GetShape(), arr2->Get() } );
+        return new NArray( result.first, result.second, { arr1, arr2 }, NArray::Operation::MMULT );
     }
 
     NArray* Div( NArray* arr1, NArray* arr2 )
@@ -331,7 +391,9 @@ namespace Flow
 
     NArray* Pow( NArray* arr, float exponent )
     {
-        return new NArray( {}, {}, {}, NArray::Operation::POW );
+        NArray* constant = new NArray( { 1 }, { exponent }, true );
+        auto result = TorchPow( { arr->GetShape(), arr->Get() }, exponent );
+        return new NArray( result.first, result.second, { arr, constant }, NArray::Operation::POW );
     }
 
     bool Less( NArray* arr1, NArray* arr2 )
@@ -341,12 +403,14 @@ namespace Flow
 
     NArray* Tanh( NArray* arr )
     {
-        return new NArray( {}, {}, {}, NArray::Operation::TANH );
+        auto result = TorchTanh( { arr->GetShape(), arr->Get() } );
+        return new NArray( result.first, result.second, { arr }, NArray::Operation::TANH );
     }
 
     NArray* Exp( NArray* arr )
     {
-        return new NArray( {}, {}, {}, NArray::Operation::EXP );
+        auto result = TorchExp( { arr->GetShape(), arr->Get() } );
+        return new NArray( result.first, result.second, { arr }, NArray::Operation::EXP );
     }
 
     string OperationString( NArray::Operation op )
@@ -355,6 +419,7 @@ namespace Flow
         {
             case NArray::Operation::NONE:  return "";
             case NArray::Operation::ADD:   return "+";
+            case NArray::Operation::SUB:   return "-";
             case NArray::Operation::MULT:  return "*";
             case NArray::Operation::MMULT: return "mm";
             case NArray::Operation::POW:   return "^";
@@ -362,5 +427,21 @@ namespace Flow
             case NArray::Operation::EXP:   return "exp";
         }
         return "";
+    }
+
+    NArray* Random( vector<int> shape )
+    {
+        random_device randomDevice;
+        mt19937 generator(randomDevice());
+        uniform_real_distribution<float> distribution( -1.0f, 1.0f );
+
+        int numValues = shape[0];
+        for ( int i = 1; i < shape.size(); i++ )
+            numValues *= shape[i];
+        vector<float> data( numValues, 0.0f );
+        for ( int i = 0; i < numValues; i++ )
+            data[i] = distribution(generator);
+
+        return new NArray( shape, data );
     }
 }
