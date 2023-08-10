@@ -118,14 +118,14 @@ void Flow::NArray::Backward()
         return;
     switch (Op)
     {
-        case Operation::NONE:                     break;
-        case Operation::ADD:   { BackwardAdd();   break; }
-        case Operation::SUB:   { BackwardSub();   break; }
-        case Operation::MULT:  { BackwardMult();  break; }
-        case Operation::MMULT: { BackwardMMult(); break; }
-        case Operation::POW:   { BackwardPow();   break; }
-        case Operation::TANH:  { BackwardTanh();  break; }
-        case Operation::EXP:   { BackwardExp();   break; }
+        case Operation::NONE:  break;
+        case Operation::ADD:   BackwardAdd(); break;
+        case Operation::SUB:   BackwardSub(); break;
+        case Operation::MULT:  BackwardMult(); break;
+        case Operation::MMULT: BackwardMMult(); break;
+        case Operation::POW:   BackwardPow(); break;
+        case Operation::TANH:  BackwardTanh(); break;
+        case Operation::EXP:   BackwardExp(); break;
     }
 }
 
@@ -274,11 +274,8 @@ int Flow::NArray::SizeFromShape( vector<int> shape )
 
 namespace Flow
 {
-    NArray* Add( NArray* arr1, NArray* arr2 )
+    NArray* ElementWise( NArray* arr1, NArray* arr2, NArray::Operation op )
     {
-        auto resultTorch = TorchAdd( { arr1->GetShape(), arr1->Get() }, { arr2->GetShape(), arr2->Get() } );
-        return new NArray( resultTorch.first, resultTorch.second, { arr1, arr2 }, NArray::Operation::ADD );
-
         if ( arr1->GetShape().size() > 2 ||  arr2->GetShape().size() > 2 )
         {
             Log("[Error] Only 1D and 2D arrays are supported for addition.");
@@ -292,9 +289,9 @@ namespace Flow
 
         // Add 1s if needed.
         if ( arr1->GetShape().size() == 2 && arr2->GetShape().size() == 1 )
-            arr2Copy->Reshape({ 1, arr2->GetShape()[1] });
+            arr2Copy->Reshape({ 1, arr2->GetShape()[0] });
         else if ( arr1->GetShape().size() == 1 && arr2->GetShape().size() == 2 )
-            arr1Copy->Reshape({ 1, arr1->GetShape()[1] });
+            arr1Copy->Reshape({ 1, arr1->GetShape()[0] });
 
         // Check if shapes are compatible.
         for ( int i = 0; i < arr1Copy->GetShape().size(); i++ )
@@ -319,7 +316,7 @@ namespace Flow
         for ( int i = 1; i < resultShape.size(); i++ )
             resultSize *= resultShape[i];
         vector<float> resultData( resultSize, 0.0f );
-        NArray* result = new NArray( resultShape, resultData, { arr1, arr2 }, NArray::Operation::ADD );
+        NArray* result = new NArray( resultShape, resultData, { arr1, arr2 }, op );
 
         // The two arrays have compatible shapes so we can add them.
         vector<int> coords1;
@@ -328,7 +325,23 @@ namespace Flow
         for ( int i = 0; i < resultShape[0]; i++ )
         {
             if ( arr1Copy->GetShape().size() == 1 )
-                result->Set( { i }, arr1Copy->Get({ i }) + arr2Copy->Get({ i }) );
+            {
+                switch (op)
+                {
+                    case NArray::Operation::ADD:
+                        result->Set( { i }, arr1Copy->Get({ i }) + arr2Copy->Get({ i }) );
+                        break;
+                    case NArray::Operation::SUB:
+                        result->Set( { i }, arr1Copy->Get({ i }) - arr2Copy->Get({ i }) );
+                        break;
+                    case NArray::Operation::MULT:
+                        result->Set( { i }, arr1Copy->Get({ i }) * arr2Copy->Get({ i }) );
+                        break;
+                    case NArray::Operation::DIV:
+                        result->Set( { i }, arr1Copy->Get({ i }) / arr2Copy->Get({ i }) );
+                        break;
+                }
+            }
             else
             {
                 // 2D
@@ -341,7 +354,23 @@ namespace Flow
                     if ( arr2Copy->GetShape()[0] == 1 ) coords2[0] = 0;
                     if ( arr2Copy->GetShape()[1] == 1 ) coords2[1] = 0;
                     if ( arr1Copy->GetShape().size() == 2 )
-                        result->Set( { i, j }, arr1Copy->Get(coords1) + arr2Copy->Get(coords2) );
+                    {
+                        switch (op)
+                        {
+                            case NArray::Operation::ADD:
+                                result->Set( { i, j }, arr1Copy->Get(coords1) + arr2Copy->Get(coords2) );
+                                break;
+                            case NArray::Operation::SUB:
+                                result->Set( { i, j }, arr1Copy->Get(coords1) - arr2Copy->Get(coords2) );
+                                break;
+                            case NArray::Operation::MULT:
+                                result->Set( { i, j }, arr1Copy->Get(coords1) * arr2Copy->Get(coords2) );
+                                break;
+                            case NArray::Operation::DIV:
+                                result->Set( { i, j }, arr1Copy->Get(coords1) / arr2Copy->Get(coords2) );
+                                break;
+                        }
+                    }
                     else
                     {
                         // 3D ...
@@ -352,11 +381,21 @@ namespace Flow
         return result;
     }
 
+    NArray* Add( NArray* arr1, NArray* arr2 )
+    {
+        return ElementWise( arr1, arr2, NArray::Operation::ADD );
+
+        //auto resultTorch = TorchAdd( { arr1->GetShape(), arr1->Get() }, { arr2->GetShape(), arr2->Get() } );
+        //return new NArray( resultTorch.first, resultTorch.second, { arr1, arr2 }, NArray::Operation::ADD );
+    }
+
     NArray* Sub( NArray* arr1, NArray* arr2 )
     {
-        auto result = TorchSub( { arr1->GetShape(), arr1->Get() }, { arr2->GetShape(), arr2->Get() } );
-        return new NArray( result.first, result.second, { arr1, arr2 }, NArray::Operation::SUB );
-        
+        return ElementWise( arr1, arr2, NArray::Operation::SUB );
+
+        //auto result = TorchSub( { arr1->GetShape(), arr1->Get() }, { arr2->GetShape(), arr2->Get() } );
+        //return new NArray( result.first, result.second, { arr1, arr2 }, NArray::Operation::SUB );
+
         //return Add( arr1, Neg(arr2) );
     }
     NArray* Neg( NArray* arr )

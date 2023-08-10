@@ -65,7 +65,7 @@ static void SimpleNN()
         Flow::Log( loss->Get()[0] + loss->Get()[2] + loss->Get()[2], 20 );
     }
 
-    Flow::NArray* test = new Flow::NArray( { 2, 2 }, { 0.6667, 1.0000, 0.3333, 0.5556 } );
+    Flow::NArray* test = new Flow::NArray( { 2, 2 }, { 0.6667, 1.0000, 1.0000, 0.6667 } );
     Flow::NArray* hTest = Add( ( MMult( test, w1 ) ), b1 );
     Flow::NArray* yPredTest = Tanh( Add( MMult( hTest, w2 ), b2 ) );
     Flow::Log(yPredTest);
