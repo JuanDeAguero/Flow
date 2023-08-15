@@ -35,5 +35,5 @@ void Flow::Log( vector<float> vec )
 void Flow::Log( NArray* arr )
 {
     for ( float value : arr->Get() )
-        Log(value, 20);
+        Log(value);
 }

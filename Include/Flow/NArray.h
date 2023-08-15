@@ -20,18 +20,7 @@ namespace Flow
 
         NArray( vector<int> shape, vector<float> data, bool constant );
 
-        enum Operation
-        {
-            NONE,
-            ADD,
-            SUB,
-            MULT,
-            DIV,
-            MMULT,
-            POW,
-            TANH,
-            EXP
-        };
+        enum Operation { NONE, ADD, SUB, MULT, DIV, MMULT, POW, EXP, TANH };
 
         NArray( vector<int> shape, vector<float> data, vector<NArray*> operands, Operation op );
 
@@ -55,6 +44,10 @@ namespace Flow
 
         string Trace();
 
+        static int SizeFromShape( vector<int> shape );
+
+        NArray* Copy();
+
     private:
 
         vector<float> Data;
@@ -69,8 +62,6 @@ namespace Flow
         
         Operation Op;
 
-        void SetStrides();
-
         void Backward();
 
         void BackwardAdd();
@@ -83,17 +74,15 @@ namespace Flow
 
         void BackwardPow();
 
-        void BackwardTanh();
-
         void BackwardExp();
+
+        void BackwardTanh();
 
         vector<NArray*> TopologicalSort();
 
         void BuildTopo( NArray* current, unordered_set<NArray*>& visited, vector<NArray*>& topo );
 
         void BuildGraph( NArray* current, set<NArray*>& nodes, set< pair< NArray*, NArray* > >& edges );
-
-        int SizeFromShape( vector<int> shape );
 
     };
 
@@ -115,11 +104,11 @@ namespace Flow
 
     NArray* Pow( NArray* arr, float exponent );
 
-    bool Less( NArray* arr1, NArray* arr2 );
+    NArray* Exp( NArray* arr );
 
     NArray* Tanh( NArray* arr );
 
-    NArray* Exp( NArray* arr );
+    bool Less( NArray* arr1, NArray* arr2 );
 
     string OperationString( NArray::Operation op );
 

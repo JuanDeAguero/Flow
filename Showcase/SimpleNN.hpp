@@ -47,20 +47,10 @@ static void SimpleNN()
 
         loss->Backpropagate();
 
-        Flow::NArray* w1Grad = new Flow::NArray( w1->GetGradient()->GetShape(), w1->GetGradient()->Get() );
-        Flow::NArray* b1Grad = new Flow::NArray( b1->GetGradient()->GetShape(), b1->GetGradient()->Get() );
-        Flow::NArray* w2Grad = new Flow::NArray( w2->GetGradient()->GetShape(), w2->GetGradient()->Get() );
-        Flow::NArray* b2Grad = new Flow::NArray( b2->GetGradient()->GetShape(), b2->GetGradient()->Get() );
-
-        w1 = Sub( w1, Mult( w1Grad, learningRate ) );
-        b1 = Sub( b1, Mult( b1Grad, learningRate ) );
-        w2 = Sub( w2, Mult( w2Grad, learningRate ) );
-        b2 = Sub( b2, Mult( b2Grad, learningRate ) );
-
-        w1 = new Flow::NArray( w1->GetShape(), w1->Get() );
-        b1 = new Flow::NArray( b1->GetShape(), b1->Get() );
-        w2 = new Flow::NArray( w2->GetShape(), w2->Get() );
-        b2 = new Flow::NArray( b2->GetShape(), b2->Get() );
+        w1 = Sub( w1, Mult( w1->GetGradient(), learningRate ) )->Copy();
+        b1 = Sub( b1, Mult( b1->GetGradient(), learningRate ) )->Copy();
+        w2 = Sub( w2, Mult( w2->GetGradient(), learningRate ) )->Copy();
+        b2 = Sub( b2, Mult( b2->GetGradient(), learningRate ) )->Copy();
 
         Flow::Log( loss->Get()[0] + loss->Get()[2] + loss->Get()[2], 20 );
     }
