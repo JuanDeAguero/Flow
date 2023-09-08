@@ -4,6 +4,8 @@
 
 #include <torch/torch.h>
 
+#pragma once
+
 using namespace std;
 
 static pair< vector<int>, vector<float> > TorchAdd( pair< vector<int>, vector<float> > arr1, pair< vector<int>, vector<float> > arr2 )

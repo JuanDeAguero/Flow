@@ -92,8 +92,6 @@ namespace Flow
 
     NArray* Sub( NArray* arr1, NArray* arr2 );
 
-    NArray* Neg( NArray* arr );
-
     NArray* Mult( NArray* arr1, NArray* arr2 );
 
     NArray* Mult( NArray* arr, float literal );
@@ -107,6 +105,8 @@ namespace Flow
     NArray* Exp( NArray* arr );
 
     NArray* Tanh( NArray* arr );
+
+    NArray* Neg( NArray* arr );
 
     bool Less( NArray* arr1, NArray* arr2 );
 

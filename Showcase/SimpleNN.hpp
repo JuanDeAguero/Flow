@@ -1,11 +1,8 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
-#include <vector>
+#include "Flow.h"
 
-#include "Flow/Log.h"
-#include "Flow/NArray.h"
-
-using namespace std;
+#pragma once
 
 static void SimpleNN()
 {
