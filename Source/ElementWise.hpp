@@ -7,7 +7,7 @@
 
 namespace Flow
 {
-    NArray* ElementWise( NArray* arr1, NArray* arr2, NArray::Operation op )
+    NArrayCore* ElementWise( NArrayCore* arr1, NArrayCore* arr2, NArrayCore::Operation op )
     {
         if ( arr1->GetShape().size() > 2 ||  arr2->GetShape().size() > 2 )
         {
@@ -17,8 +17,8 @@ namespace Flow
 
         // Create a copy of the two arrays.
         // They might need to be reshaped and we don't want to modify the input arrays.
-        NArray* arr1Copy = new NArray( arr1->GetShape(), arr1->Get(), true );
-        NArray* arr2Copy = new NArray( arr2->GetShape(), arr2->Get(), true );
+        NArrayCore* arr1Copy = new NArrayCore( arr1->GetShape(), arr1->Get() );
+        NArrayCore* arr2Copy = new NArrayCore( arr2->GetShape(), arr2->Get() );
 
         // Add 1s if needed.
         if ( arr1->GetShape().size() == 2 && arr2->GetShape().size() == 1 )
@@ -49,11 +49,11 @@ namespace Flow
         for ( int i = 1; i < resultShape.size(); i++ )
             resultSize *= resultShape[i];
         vector<float> resultData( resultSize, 0.0f );
-        NArray* result = new NArray( resultShape, resultData, { arr1, arr2 }, op );
-
-        // The two arrays have compatible shapes so we can add them.
+        NArrayCore* result = new NArrayCore( resultShape, resultData, { arr1, arr2 }, op );
+        
         vector<int> coords1;
         vector<int> coords2;
+
         // 1D
         for ( int i = 0; i < resultShape[0]; i++ )
         {
@@ -61,16 +61,16 @@ namespace Flow
             {
                 switch (op)
                 {
-                    case NArray::Operation::ADD:
+                    case NArrayCore::Operation::ADD:
                         result->Set( { i }, arr1Copy->Get({ i }) + arr2Copy->Get({ i }) );
                         break;
-                    case NArray::Operation::SUB:
+                    case NArrayCore::Operation::SUB:
                         result->Set( { i }, arr1Copy->Get({ i }) - arr2Copy->Get({ i }) );
                         break;
-                    case NArray::Operation::MULT:
+                    case NArrayCore::Operation::MULT:
                         result->Set( { i }, arr1Copy->Get({ i }) * arr2Copy->Get({ i }) );
                         break;
-                    case NArray::Operation::DIV:
+                    case NArrayCore::Operation::DIV:
                         result->Set( { i }, arr1Copy->Get({ i }) / arr2Copy->Get({ i }) );
                         break;
                 }
@@ -90,16 +90,16 @@ namespace Flow
                     {
                         switch (op)
                         {
-                            case NArray::Operation::ADD:
+                            case NArrayCore::Operation::ADD:
                                 result->Set( { i, j }, arr1Copy->Get(coords1) + arr2Copy->Get(coords2) );
                                 break;
-                            case NArray::Operation::SUB:
+                            case NArrayCore::Operation::SUB:
                                 result->Set( { i, j }, arr1Copy->Get(coords1) - arr2Copy->Get(coords2) );
                                 break;
-                            case NArray::Operation::MULT:
+                            case NArrayCore::Operation::MULT:
                                 result->Set( { i, j }, arr1Copy->Get(coords1) * arr2Copy->Get(coords2) );
                                 break;
-                            case NArray::Operation::DIV:
+                            case NArrayCore::Operation::DIV:
                                 result->Set( { i, j }, arr1Copy->Get(coords1) / arr2Copy->Get(coords2) );
                                 break;
                         }

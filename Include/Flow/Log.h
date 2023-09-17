@@ -15,6 +15,4 @@ namespace Flow
     void Log( float value, int precision );
 
     void Log( vector<float> vec );
-
-    void Log( class NArray* arr );
 }

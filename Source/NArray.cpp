@@ -18,41 +18,106 @@
 
 using namespace std;
 
-Flow::NArray::NArray( vector<int> shape, vector<float> data )
+Flow::NArray::NArray() {}
+
+Flow::NArray::NArray( NArrayCore* arr )
+{
+    Array = arr;
+}
+
+bool Flow::NArray::IsValid()
+{
+    if (Array) return true;
+    else return false;
+}
+
+float Flow::NArray::Get( vector<int> coordinates )
+{
+    return Array->Get(coordinates);
+}
+
+vector<float> Flow::NArray::Get()
+{
+    return Array->Get();
+}
+
+Flow::NArrayCore* Flow::NArray::GetCore()
+{
+    return Array;
+}
+
+vector<int> Flow::NArray::GetShape()
+{
+    return Array->GetShape();
+}
+
+int Flow::NArray::GetIndex( vector<int> coordinates )
+{
+    return Array->GetIndex(coordinates);
+}
+
+Flow::NArray Flow::NArray::GetGradient()
+{
+    return NArray(Array->GetGradient());
+}
+
+void Flow::NArray::Set( vector<int> coordinates, float value )
+{
+    Array->Set( coordinates, value );
+}
+
+void Flow::NArray::Reset( float value )
+{
+    Array->Reset(value);
+}
+
+void Flow::NArray::Reshape( vector<int> shape )
+{
+    Array->Reshape(shape);
+}
+
+void Flow::NArray::Backpropagate()
+{
+    Array->Backpropagate();
+}
+
+Flow::NArray Flow::NArray::Copy()
+{
+    return NArray(Array->Copy());
+}
+
+Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data )
 {
     Data = data;
     Shape = shape;
-    Constant = false;
     vector<float> gradientData( SizeFromShape(shape), 0.0f );
-    Gradient = new NArray( shape, gradientData, true );
+    Gradient = new NArrayCore( shape, gradientData, true );
     Op = Operation::NONE;
 }
 
-Flow::NArray::NArray( vector<int> shape, vector<float> data, bool constant )
+Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data, bool isGradient )
 {
     Data = data;
     Shape = shape;
-    Constant = constant;
-    if (!Constant)
+    if (!isGradient)
     {
         vector<float> gradientData( SizeFromShape(shape), 0.0f );
-        Gradient = new NArray( shape, gradientData, true );
+        Gradient = new NArrayCore( shape, gradientData, true );
     }
     Op = Operation::NONE;
 }
 
-Flow::NArray::NArray( vector<int> shape, vector<float> data, vector<NArray*> operands, Operation op )
+Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data, vector<NArrayCore*> operands, Operation op )
 {
     Data = data;
     Shape = shape;
-    Constant = false;
     vector<float> gradientData( SizeFromShape(shape), 0.0f );
-    Gradient = new NArray( shape, gradientData, true );
+    Gradient = new NArrayCore( shape, gradientData, true );
     Operands = operands;
     Op = op;
 }
 
-float Flow::NArray::Get( vector<int> coordinates )
+float Flow::NArrayCore::Get( vector<int> coordinates )
 {
     int index = GetIndex(coordinates);
     if ( index >= 0 && index < Data.size() )
@@ -60,17 +125,17 @@ float Flow::NArray::Get( vector<int> coordinates )
     return 0.0f;
 }
 
-vector<float> Flow::NArray::Get()
+vector<float> Flow::NArrayCore::Get()
 {
     return Data;
 }
 
-vector<int> Flow::NArray::GetShape()
+vector<int> Flow::NArrayCore::GetShape()
 {
     return Shape;
 }
 
-int Flow::NArray::GetIndex( vector<int> coordinates )
+int Flow::NArrayCore::GetIndex( vector<int> coordinates )
 {
     if ( coordinates.size() != Shape.size() )
         return -1;
@@ -86,55 +151,44 @@ int Flow::NArray::GetIndex( vector<int> coordinates )
     return index;
 }
 
-Flow::NArray* Flow::NArray::GetGradient()
+Flow::NArrayCore* Flow::NArrayCore::GetGradient()
 {
     return Gradient;
 }
 
-void Flow::NArray::Set( vector<int> coordinates, float value )
+void Flow::NArrayCore::Set( vector<int> coordinates, float value )
 {
     int index = GetIndex(coordinates);
     if ( index >= 0 && index < Data.size() )
         Data[index] = value;
 }
 
-void Flow::NArray::Reset( float value )
+void Flow::NArrayCore::Reset( float value )
 {
     for ( int i = 0; i < Data.size(); i++ )
         Data[i] = value;
 }
 
-void Flow::NArray::Reshape( vector<int> shape )
+void Flow::NArrayCore::Reshape( vector<int> shape )
 {
     Shape = shape;
 }
 
-void Flow::NArray::Backpropagate()
+void Flow::NArrayCore::Backpropagate()
 {
     Gradient->Reset(1.0f);
     TopologicalSort();
-    for ( Flow::NArray* arr : TopologicalSort() )
+    for ( Flow::NArrayCore* arr : TopologicalSort() )
         arr->Backward();
 }
 
-string Flow::NArray::Trace()
+Flow::NArrayCore* Flow::NArrayCore::Copy()
 {
-    set<NArray*> nodes;
-    set< pair< NArray*, NArray* > > edges;
-    BuildGraph( this, nodes, edges );
-    ostringstream trace;
-    for ( NArray* node : nodes )
-    {
-        //trace << ;
-        //trace << ;
-        trace << OperationString(node->Op) << endl;
-    }
-    for ( auto& edge : edges )
-        trace << edge.first << " -> " << edge.second << endl;
-    return trace.str();
+    NArrayCore* copy = new NArrayCore( Shape, Data );
+    return copy;
 }
 
-int Flow::NArray::SizeFromShape( vector<int> shape )
+int Flow::NArrayCore::SizeFromShape( vector<int> shape )
 {
     int size = shape[0];
     for ( int i = 1; i < shape.size(); i++ )
@@ -142,16 +196,9 @@ int Flow::NArray::SizeFromShape( vector<int> shape )
     return size;
 }
 
-Flow::NArray* Flow::NArray::Copy()
+void Flow::NArrayCore::Backward()
 {
-    NArray* copy = new NArray( Shape, Data );
-    copy->Constant = true;
-    return copy;
-}
-
-void Flow::NArray::Backward()
-{
-    if ( Operands.size() == 0 || Constant )
+    if ( Operands.size() == 0 )
         return;
     switch (Op)
     {
@@ -166,200 +213,254 @@ void Flow::NArray::Backward()
     }
 }
 
-void Flow::NArray::BackwardAdd()
+void Flow::NArrayCore::BackwardAdd()
 {
     #ifdef FLOW_TORCH_MODE
     auto gradients = TorchBackwardAdd(
         { Operands[0]->GetShape(), Operands[0]->Get() },
         { Operands[1]->GetShape(), Operands[1]->Get() },
         { Gradient->GetShape(), Gradient->Get() });
-    Operands[0]->Gradient->Data = gradients.first;
-    Operands[1]->Gradient->Data = gradients.second;
+    if (Operands[0]->Gradient)
+        Operands[0]->Gradient->Data = gradients.first;
+    if (Operands[1]->Gradient)
+        Operands[1]->Gradient->Data = gradients.second;
     #else
     #endif
 }
 
-void Flow::NArray::BackwardSub()
+void Flow::NArrayCore::BackwardSub()
 {
     #ifdef FLOW_TORCH_MODE
     auto gradients = TorchBackwardSub(
         { Operands[0]->GetShape(), Operands[0]->Get() },
         { Operands[1]->GetShape(), Operands[1]->Get() },
         { Gradient->GetShape(), Gradient->Get() });
-    Operands[0]->Gradient->Data = gradients.first;
-    Operands[1]->Gradient->Data = gradients.second;
+    if (Operands[0]->Gradient)
+        Operands[0]->Gradient->Data = gradients.first;
+    if (Operands[1]->Gradient)
+        Operands[1]->Gradient->Data = gradients.second;
     #else
     #endif
 }
 
-void Flow::NArray::BackwardMult()
+void Flow::NArrayCore::BackwardMult()
 {
     #ifdef FLOW_TORCH_MODE
     auto gradients = TorchBackwardMult(
         { Operands[0]->GetShape(), Operands[0]->Get() },
         { Operands[1]->GetShape(), Operands[1]->Get() },
         { Gradient->GetShape(), Gradient->Get() });
-    Operands[0]->Gradient->Data = gradients.first;
-    Operands[1]->Gradient->Data = gradients.second;
+    if (Operands[0]->Gradient)
+        Operands[0]->Gradient->Data = gradients.first;
+    if (Operands[1]->Gradient)
+        Operands[1]->Gradient->Data = gradients.second;
     #else
-    if ( Operands[1]->Constant )
-        Operands[0]->Gradient->Data = Gradient->Data;
-    else
-    {
-
-    }
     #endif
 }
 
-void Flow::NArray::BackwardMMult()
+void Flow::NArrayCore::BackwardMMult()
 {
     #ifdef FLOW_TORCH_MODE
     auto gradients = TorchBackwardMMult(
         { Operands[0]->GetShape(), Operands[0]->Get() },
         { Operands[1]->GetShape(), Operands[1]->Get() },
         { Gradient->GetShape(), Gradient->Get() });
-    Operands[0]->Gradient->Data = gradients.first;
-    Operands[1]->Gradient->Data = gradients.second;
+    if (Operands[0]->Gradient)
+        Operands[0]->Gradient->Data = gradients.first;
+    if (Operands[1]->Gradient)
+        Operands[1]->Gradient->Data = gradients.second;
     #else
     #endif
 }
 
-void Flow::NArray::BackwardPow()
+void Flow::NArrayCore::BackwardPow()
 {
     #ifdef FLOW_TORCH_MODE
     auto gradient = TorchBackwardPow(
         { Operands[0]->GetShape(), Operands[0]->Get() },
         2.0f,
         { Gradient->GetShape(), Gradient->Get() });
-    Operands[0]->Gradient->Data = gradient;
+    if (Operands[0]->Gradient)
+        Operands[0]->Gradient->Data = gradient;
     #else
     #endif
 }
 
-void Flow::NArray::BackwardExp()
+void Flow::NArrayCore::BackwardExp()
 {
     #ifdef FLOW_TORCH_MODE
     auto gradient = TorchBackwardExp(
         { Operands[0]->GetShape(), Operands[0]->Get() },
         { Gradient->GetShape(), Gradient->Get() });
-    Operands[0]->Gradient->Data = gradient;
+    if (Operands[0]->Gradient)
+        Operands[0]->Gradient->Data = gradient;
     #else
     #endif
 }
 
-void Flow::NArray::BackwardTanh()
+void Flow::NArrayCore::BackwardTanh()
 {
     #ifdef FLOW_TORCH_MODE
     vector<float> gradient = TorchBackwardTanh(
         { Operands[0]->GetShape(), Operands[0]->Get() },
         { Gradient->GetShape(), Gradient->Get() });
-    Operands[0]->Gradient->Data = gradient;
+    if (Operands[0]->Gradient)
+        Operands[0]->Gradient->Data = gradient;
     #else
     #endif
 }
 
-vector<Flow::NArray*> Flow::NArray::TopologicalSort()
+vector<Flow::NArrayCore*> Flow::NArrayCore::TopologicalSort()
 {
-    unordered_set<NArray*> visited;
-    vector<NArray*> topo;
+    unordered_set<NArrayCore*> visited;
+    vector<NArrayCore*> topo;
     BuildTopo( this, visited, topo );
     reverse( topo.begin(), topo.end() );
     return topo;
 }
 
-void Flow::NArray::BuildTopo( NArray* current, unordered_set<NArray*>& visited, vector<NArray*>& topo )
+void Flow::NArrayCore::BuildTopo( NArrayCore* current, unordered_set<NArrayCore*>& visited, vector<NArrayCore*>& topo )
 {
     if ( visited.find(current) != visited.end() || current->Operands.size() == 0 )
         return;
     visited.insert(current);
-    NArray* first = current->Operands[0];
-    if ( first && !first->Constant )
+    NArrayCore* first = current->Operands[0];
+    if (first)
         BuildTopo( first, visited, topo );
     if ( current->Operands.size() != 1 )
     {
-        NArray* second = current->Operands[1];
-        if ( second && !second->Constant )
+        NArrayCore* second = current->Operands[1];
+        if (second)
             BuildTopo( second, visited, topo );
     }
     topo.push_back(current);
 }
 
-void Flow::NArray::BuildGraph( NArray* current, set<NArray*>& nodes, set< pair< NArray*, NArray* > >& edges )
-{
-    if ( nodes.find(current) != nodes.end() || current->Operands.size() == 0 )
-        return;
-    nodes.insert(current);
-    NArray* first = current->Operands[0];
-    if ( first && !first->Constant )
-    {
-        edges.insert({ first, current });
-        BuildGraph( first, nodes, edges );
-    }
-    if ( current->Operands.size() != 1 )
-    {
-        NArray* second = current->Operands[1];
-        if ( second  && !second->Constant )
-        {
-            edges.insert({ second, current });
-            BuildGraph( second, nodes, edges );
-        }
-    }
-}
-
 namespace Flow
 {
-    // Defined in "ElementWise.hpp".
-    NArray* ElementWise( ... );
+    Flow::NArray Create( vector<int> shape, vector<float> data )
+    {
+        NArrayCore* arr = new NArrayCore( shape, data );
+        return NArray(arr);
+    }
 
-    NArray* Add( NArray* arr1, NArray* arr2 )
+    NArray Add( NArray arr1, NArray arr2 )
+    {
+        return NArray(Add( arr1.GetCore(), arr2.GetCore() ));
+    }
+
+    NArray Sub( NArray arr1, NArray arr2 )
+    {
+        return NArray(Sub( arr1.GetCore(), arr2.GetCore() ));
+    }
+
+    NArray Mult( NArray arr1, NArray arr2 )
+    {
+        return NArray(Mult( arr1.GetCore(), arr2.GetCore() ));
+    }
+
+    NArray Mult( NArray arr, float literal )
+    {
+        return NArray(Mult( arr.GetCore(), literal ));
+    }
+
+    NArray MMult( NArray arr1, NArray arr2 )
+    {
+        return NArray(MMult( arr1.GetCore(), arr2.GetCore() ));
+    }
+
+    NArray Div( NArray arr1, NArray arr2 )
+    {
+        return NArray(Div( arr1.GetCore(), arr2.GetCore() ));
+    }
+
+    NArray Pow( NArray arr, float exponent )
+    {
+        return NArray(Pow( arr.GetCore(), exponent ));
+    }
+
+    NArray Exp( NArray arr )
+    {
+        return NArray(Exp( arr.GetCore() ));
+    }
+
+    NArray Tanh( NArray arr )
+    {
+        return NArray(Tanh( arr.GetCore() ));
+    }
+
+    NArray Neg( NArray arr )
+    {
+        return NArray(Neg( arr.GetCore() ));
+    }
+
+    bool Less( NArray arr1, NArray arr2 )
+    {
+        return Less( arr1.GetCore(), arr2.GetCore() );
+    }
+
+    NArray Random( vector<int> shape )
+    {
+        return NArray(RandomCore(shape));
+    }
+
+    void Log( NArray arr )
+    {
+        Log(arr.GetCore());
+    }
+
+    // Defined in "ElementWise.hpp".
+    NArrayCore* ElementWise( ... );
+
+    NArrayCore* Add( NArrayCore* arr1, NArrayCore* arr2 )
     {
         #ifdef FLOW_TORCH_MODE
         auto resultTorch = TorchAdd( { arr1->GetShape(), arr1->Get() }, { arr2->GetShape(), arr2->Get() } );
-        return new NArray( resultTorch.first, resultTorch.second, { arr1, arr2 }, NArray::Operation::ADD );
+        return new NArrayCore( resultTorch.first, resultTorch.second, { arr1, arr2 }, NArrayCore::Operation::ADD );
         #else
-        return ElementWise( arr1, arr2, NArray::Operation::ADD );
+        return ElementWise( arr1, arr2, NArrayCore::Operation::ADD );
         #endif
     }
 
-    NArray* Sub( NArray* arr1, NArray* arr2 )
+    NArrayCore* Sub( NArrayCore* arr1, NArrayCore* arr2 )
     {
         #ifdef FLOW_TORCH_MODE
         auto result = TorchSub( { arr1->GetShape(), arr1->Get() }, { arr2->GetShape(), arr2->Get() } );
-        return new NArray( result.first, result.second, { arr1, arr2 }, NArray::Operation::SUB );
+        return new NArrayCore( result.first, result.second, { arr1, arr2 }, NArrayCore::Operation::SUB );
         #else
-        return ElementWise( arr1, arr2, NArray::Operation::SUB );
+        return ElementWise( arr1, arr2, NArrayCore::Operation::SUB );
         #endif
     }
 
-    NArray* Mult( NArray* arr1, NArray* arr2 )
+    NArrayCore* Mult( NArrayCore* arr1, NArrayCore* arr2 )
     {
         #ifdef FLOW_TORCH_MODE
         auto result = TorchMult( { arr1->GetShape(), arr1->Get() }, { arr2->GetShape(), arr2->Get() } );
-        return new NArray( result.first, result.second, { arr1, arr2 }, NArray::Operation::MULT );
+        return new NArrayCore( result.first, result.second, { arr1, arr2 }, NArrayCore::Operation::MULT );
         #else
         #endif
     }
 
-    NArray* Mult( NArray* arr, float literal )
+    NArrayCore* Mult( NArrayCore* arr, float literal )
     {
         #ifdef FLOW_TORCH_MODE
-        NArray* constant = new NArray( { 1 }, { literal }, true );
+        NArrayCore* constant = new NArrayCore( { 1 }, { literal } );
         auto result = TorchMult( { arr->GetShape(), arr->Get() }, { constant->GetShape(), constant->Get() } );
-        return new NArray( result.first, result.second, { arr, constant }, NArray::Operation::MULT );
+        return new NArrayCore( result.first, result.second, { arr, constant }, NArrayCore::Operation::MULT );
         #else
         #endif
     }
 
-    NArray* MMult( NArray* arr1, NArray* arr2 )
+    NArrayCore* MMult( NArrayCore* arr1, NArrayCore* arr2 )
     {
         #ifdef FLOW_TORCH_MODE
         auto result = TorchMMult( { arr1->GetShape(), arr1->Get() }, { arr2->GetShape(), arr2->Get() } );
-        return new NArray( result.first, result.second, { arr1, arr2 }, NArray::Operation::MMULT );
+        return new NArrayCore( result.first, result.second, { arr1, arr2 }, NArrayCore::Operation::MMULT );
         #else
         #endif
     }
 
-    NArray* Div( NArray* arr1, NArray* arr2 )
+    NArrayCore* Div( NArrayCore* arr1, NArrayCore* arr2 )
     {
         #ifdef FLOW_TORCH_MODE
         #else
@@ -367,41 +468,41 @@ namespace Flow
         return Mult( arr1, Pow( arr2, -1.0f ) );
     }
 
-    NArray* Pow( NArray* arr, float exponent )
+    NArrayCore* Pow( NArrayCore* arr, float exponent )
     {
         #ifdef FLOW_TORCH_MODE
-        NArray* constant = new NArray( { 1 }, { exponent }, true );
+        NArrayCore* constant = new NArrayCore( { 1 }, { exponent } );
         auto result = TorchPow( { arr->GetShape(), arr->Get() }, exponent );
-        return new NArray( result.first, result.second, { arr, constant }, NArray::Operation::POW );
+        return new NArrayCore( result.first, result.second, { arr, constant }, NArrayCore::Operation::POW );
         #else
         #endif
     }
 
-    NArray* Exp( NArray* arr )
+    NArrayCore* Exp( NArrayCore* arr )
     {
         #ifdef FLOW_TORCH_MODE
         auto result = TorchExp( { arr->GetShape(), arr->Get() } );
-        return new NArray( result.first, result.second, { arr }, NArray::Operation::EXP );
+        return new NArrayCore( result.first, result.second, { arr }, NArrayCore::Operation::EXP );
         #else
         #endif
     }
 
-    NArray* Tanh( NArray* arr )
+    NArrayCore* Tanh( NArrayCore* arr )
     {
         #ifdef FLOW_TORCH_MODE
         auto result = TorchTanh( { arr->GetShape(), arr->Get() } );
-        return new NArray( result.first, result.second, { arr }, NArray::Operation::TANH );
+        return new NArrayCore( result.first, result.second, { arr }, NArrayCore::Operation::TANH );
         #else
         #endif
     }
 
-    NArray* Neg( NArray* arr )
+    NArrayCore* Neg( NArrayCore* arr )
     {
         vector<float> data( arr->Get().size(), -1.0f );
-        return Mult( arr, new NArray( arr->GetShape(), data, true ) );
+        return Mult( arr, new NArrayCore( arr->GetShape(), data ) );
     }
 
-    bool Less( NArray* arr1, NArray* arr2 )
+    bool Less( NArrayCore* arr1, NArrayCore* arr2 )
     {
         #ifdef FLOW_TORCH_MODE
         #else
@@ -409,31 +510,37 @@ namespace Flow
         return false;
     }
 
-    string OperationString( NArray::Operation op )
+    string OperationString( NArrayCore::Operation op )
     {
         switch (op)
         {
-            case NArray::Operation::NONE:  return "";
-            case NArray::Operation::ADD:   return "+";
-            case NArray::Operation::SUB:   return "-";
-            case NArray::Operation::MULT:  return "*";
-            case NArray::Operation::MMULT: return "mm";
-            case NArray::Operation::POW:   return "^";
-            case NArray::Operation::TANH:  return "tanh";
-            case NArray::Operation::EXP:   return "exp";
+            case NArrayCore::Operation::NONE:  return "";
+            case NArrayCore::Operation::ADD:   return "+";
+            case NArrayCore::Operation::SUB:   return "-";
+            case NArrayCore::Operation::MULT:  return "*";
+            case NArrayCore::Operation::MMULT: return "mm";
+            case NArrayCore::Operation::POW:   return "^";
+            case NArrayCore::Operation::TANH:  return "tanh";
+            case NArrayCore::Operation::EXP:   return "exp";
         }
         return "";
     }
 
-    NArray* Random( vector<int> shape )
+    NArrayCore* RandomCore( vector<int> shape )
     {
         random_device randomDevice;
         mt19937 generator(randomDevice());
         uniform_real_distribution<float> distribution( -1.0f, 1.0f );
-        int size = NArray::SizeFromShape(shape);
+        int size = NArrayCore::SizeFromShape(shape);
         vector<float> data( size, 0.0f );
         for ( int i = 0; i < size; i++ )
             data[i] = distribution(generator);
-        return new NArray( shape, data );
+        return new NArrayCore( shape, data );
+    }
+
+    void Log( NArrayCore* arr )
+    {
+        for ( float value : arr->Get() )
+            Log(value);
     }
 }

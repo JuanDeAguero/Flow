@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include "Log.h"
-#include "NArray.h"
 
 using namespace std;
 
@@ -28,12 +27,5 @@ void Flow::Log( float value, int precision )
 void Flow::Log( vector<float> vec )
 {
     for ( float value : vec )
-        Log(value);
-}
-
-
-void Flow::Log( NArray* arr )
-{
-    for ( float value : arr->Get() )
         Log(value);
 }

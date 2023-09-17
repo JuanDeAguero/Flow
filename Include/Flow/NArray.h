@@ -11,28 +11,30 @@ namespace Flow
 {
     using namespace std;
 
+    class NArrayCore;
+
     class NArray
     {
 
     public:
 
-        NArray( vector<int> shape, vector<float> data );
+        NArray();
 
-        NArray( vector<int> shape, vector<float> data, bool constant );
+        NArray( NArrayCore* arr );
 
-        enum Operation { NONE, ADD, SUB, MULT, DIV, MMULT, POW, EXP, TANH };
-
-        NArray( vector<int> shape, vector<float> data, vector<NArray*> operands, Operation op );
+        bool IsValid();
 
         float Get( vector<int> coordinates );
 
         vector<float> Get();
 
+        NArrayCore* GetCore();
+
         vector<int> GetShape();
 
         int GetIndex( vector<int> coordinates );
 
-        NArray* GetGradient();
+        NArray GetGradient();
         
         void Set( vector<int> coordinates, float value );
 
@@ -42,11 +44,74 @@ namespace Flow
 
         void Backpropagate();
 
-        string Trace();
+        NArray Copy();
+
+    private:
+
+        NArrayCore* Array;
+
+    };
+
+    NArray Create( vector<int> shape, vector<float> data );
+
+    NArray Add( NArray arr1, NArray arr2 );
+
+    NArray Sub( NArray arr1, NArray arr2 );
+
+    NArray Mult( NArray arr1, NArray arr2 );
+
+    NArray Mult( NArray arr, float literal );
+
+    NArray MMult( NArray arr1, NArray arr2 );
+
+    NArray Div( NArray arr1, NArray arr2 );
+
+    NArray Pow( NArray arr, float exponent );
+
+    NArray Exp( NArray arr );
+
+    NArray Tanh( NArray arr );
+
+    NArray Neg( NArray arr );
+
+    bool Less( NArray arr1, NArray arr2 );
+
+    NArray Random( vector<int> shape );
+
+    void Log( NArray arr );
+
+    class NArrayCore
+    {
+
+    public:
+
+        NArrayCore( vector<int> shape, vector<float> data );
+
+        enum Operation { NONE, ADD, SUB, MULT, DIV, MMULT, POW, EXP, TANH };
+
+        NArrayCore( vector<int> shape, vector<float> data, vector<NArrayCore*> operands, Operation op );
+
+        float Get( vector<int> coordinates );
+
+        vector<float> Get();
+
+        vector<int> GetShape();
+
+        int GetIndex( vector<int> coordinates );
+
+        NArrayCore* GetGradient();
+        
+        void Set( vector<int> coordinates, float value );
+
+        void Reset( float value );
+
+        void Reshape( vector<int> shape );
+
+        void Backpropagate();
+
+        NArrayCore* Copy();
 
         static int SizeFromShape( vector<int> shape );
-
-        NArray* Copy();
 
     private:
 
@@ -54,13 +119,13 @@ namespace Flow
 
         vector<int> Shape;
 
-        bool Constant;
+        NArrayCore* Gradient;
 
-        NArray* Gradient;
-
-        vector<NArray*> Operands;
+        vector<NArrayCore*> Operands;
         
         Operation Op;
+
+        NArrayCore( vector<int> shape, vector<float> data, bool isGradient );
 
         void Backward();
 
@@ -78,39 +143,39 @@ namespace Flow
 
         void BackwardTanh();
 
-        vector<NArray*> TopologicalSort();
+        vector<NArrayCore*> TopologicalSort();
 
-        void BuildTopo( NArray* current, unordered_set<NArray*>& visited, vector<NArray*>& topo );
-
-        void BuildGraph( NArray* current, set<NArray*>& nodes, set< pair< NArray*, NArray* > >& edges );
+        void BuildTopo( NArrayCore* current, unordered_set<NArrayCore*>& visited, vector<NArrayCore*>& topo );
 
     };
 
-    NArray* ElementWise( NArray* arr1, NArray* arr2, NArray::Operation op );
+    NArrayCore* ElementWise( NArrayCore* arr1, NArrayCore* arr2, NArrayCore::Operation op );
 
-    NArray* Add( NArray* arr1, NArray* arr2 );
+    NArrayCore* Add( NArrayCore* arr1, NArrayCore* arr2 );
 
-    NArray* Sub( NArray* arr1, NArray* arr2 );
+    NArrayCore* Sub( NArrayCore* arr1, NArrayCore* arr2 );
 
-    NArray* Mult( NArray* arr1, NArray* arr2 );
+    NArrayCore* Mult( NArrayCore* arr1, NArrayCore* arr2 );
 
-    NArray* Mult( NArray* arr, float literal );
+    NArrayCore* Mult( NArrayCore* arr, float literal );
 
-    NArray* MMult( NArray* arr1, NArray* arr2 );
+    NArrayCore* MMult( NArrayCore* arr1, NArrayCore* arr2 );
 
-    NArray* Div( NArray* arr1, NArray* arr2 );
+    NArrayCore* Div( NArrayCore* arr1, NArrayCore* arr2 );
 
-    NArray* Pow( NArray* arr, float exponent );
+    NArrayCore* Pow( NArrayCore* arr, float exponent );
 
-    NArray* Exp( NArray* arr );
+    NArrayCore* Exp( NArrayCore* arr );
 
-    NArray* Tanh( NArray* arr );
+    NArrayCore* Tanh( NArrayCore* arr );
 
-    NArray* Neg( NArray* arr );
+    NArrayCore* Neg( NArrayCore* arr );
 
-    bool Less( NArray* arr1, NArray* arr2 );
+    bool Less( NArrayCore* arr1, NArrayCore* arr2 );
 
-    string OperationString( NArray::Operation op );
+    string OperationString( NArrayCore::Operation op );
 
-    NArray* Random( vector<int> shape );
+    NArrayCore* RandomCore( vector<int> shape );
+
+    void Log( NArrayCore* arr );
 }
