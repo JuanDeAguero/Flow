@@ -13,7 +13,7 @@ int main()
 {
     //Test_Add();
     //Test_Mult();
-    //SimpleNN();
+    SimpleNN();
     //MakeMore();
     MNIST();
 }
