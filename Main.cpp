@@ -2,18 +2,18 @@
 
 #include "Flow.h"
 
-#include "Showcase/MakeMore.hpp"
+#include "Showcase/MakeMore/MakeMore.hpp"
 #include "Showcase/SimpleNN.hpp"
+#include "Showcase/MNIST/MNIST.hpp"
 
 #include "Test/TestAdd.hpp"
 #include "Test/TestMult.hpp"
 
 int main()
 {
-    Test_Add();
-    Test_Mult();
-    
-    SimpleNN();
-
+    //Test_Add();
+    //Test_Mult();
+    //SimpleNN();
     //MakeMore();
+    MNIST();
 }
