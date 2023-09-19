@@ -3,29 +3,29 @@
 #include <iomanip>
 #include <iostream>
 
-#include "Log.h"
+#include "Print.h"
 
 using namespace std;
 
-void Flow::Log( string message )
+void Flow::Print( string message )
 {
     cout << message << endl;
 }
 
-void Flow::Log( float value )
+void Flow::Print( float value )
 {
-    Log( value, 4 );
+    Print( value, 4 );
 }
 
-void Flow::Log( float value, int precision )
+void Flow::Print( float value, int precision )
 {
     ios_base::fmtflags originalFlags = cout.flags();
     cout << fixed << setprecision(precision) << value << endl;
     cout.flags(originalFlags);
 }
 
-void Flow::Log( vector<float> vec )
+void Flow::Print( vector<float> vec )
 {
     for ( float value : vec )
-        Log(value);
+        Print(value);
 }

@@ -32,8 +32,8 @@ static void SimpleNN()
 
     for ( int epoch = 0; epoch < 10000; epoch++ )
     {
-        Flow::NArray h = Add( ( MMult( xsNorm, w1 ) ), b1 );
-        Flow::NArray yPred = Tanh( Add( MMult( h, w2 ), b2 ) );
+        Flow::NArray h = Add( ( MM( xsNorm, w1 ) ), b1 );
+        Flow::NArray yPred = Tanh( Add( MM( h, w2 ), b2 ) );
 
         Flow::NArray loss = Pow( Sub( yPred, ysNorm ), 2.0f );
 
@@ -44,16 +44,16 @@ static void SimpleNN()
 
         loss.Backpropagate();
 
-        w1 = Sub( w1.Copy(), Mult( w1.GetGradient(), learningRate ) );
-        b1 = Sub( b1.Copy(), Mult( b1.GetGradient(), learningRate ) );
-        w2 = Sub( w2.Copy(), Mult( w2.GetGradient(), learningRate ) );
-        b2 = Sub( b2.Copy(), Mult( b2.GetGradient(), learningRate ) );
+        w1 = Sub( w1.Copy(), Mul( w1.GetGradient(), learningRate ) );
+        b1 = Sub( b1.Copy(), Mul( b1.GetGradient(), learningRate ) );
+        w2 = Sub( w2.Copy(), Mul( w2.GetGradient(), learningRate ) );
+        b2 = Sub( b2.Copy(), Mul( b2.GetGradient(), learningRate ) );
 
-        Flow::Log( loss.Get()[0] + loss.Get()[2] + loss.Get()[2], 20 );
+        Flow::Print( loss.Get()[0] + loss.Get()[2] + loss.Get()[2], 20 );
     }
 
     Flow::NArray test = Flow::Create( { 2, 2 }, { 0.6667, 1.0000, 1.0000, 0.6667 } );
-    Flow::NArray hTest = Add( ( MMult( test, w1 ) ), b1 );
-    Flow::NArray yPredTest = Tanh( Add( MMult( hTest, w2 ), b2 ) );
-    Flow::Log(yPredTest);
+    Flow::NArray hTest = Add( ( MM( test, w1 ) ), b1 );
+    Flow::NArray yPredTest = Tanh( Add( MM( hTest, w2 ), b2 ) );
+    Flow::Print(yPredTest);
 }

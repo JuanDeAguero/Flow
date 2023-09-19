@@ -21,23 +21,19 @@ namespace Flow
 
         bool IsValid();
 
+        NArrayCore* GetCore();
+
         float Get( vector<int> coordinates );
 
         vector<float> Get();
 
-        NArrayCore* GetCore();
-
         vector<int> GetShape();
-
-        int GetIndex( vector<int> coordinates );
 
         NArray GetGradient();
         
         void Set( vector<int> coordinates, float value );
 
         void Reset( float value );
-
-        void Reshape( vector<int> shape );
 
         void Backpropagate();
 
@@ -55,11 +51,11 @@ namespace Flow
 
     NArray Sub( NArray arr1, NArray arr2 );
 
-    NArray Mult( NArray arr1, NArray arr2 );
+    NArray Mul( NArray arr1, NArray arr2 );
 
-    NArray Mult( NArray arr, float literal );
+    NArray Mul( NArray arr, float literal );
 
-    NArray MMult( NArray arr1, NArray arr2 );
+    NArray MM( NArray arr1, NArray arr2 );
 
     NArray Div( NArray arr1, NArray arr2 );
 
@@ -75,5 +71,5 @@ namespace Flow
 
     NArray Random( vector<int> shape );
 
-    void Log( NArray arr );
+    void Print( NArray arr );
 }

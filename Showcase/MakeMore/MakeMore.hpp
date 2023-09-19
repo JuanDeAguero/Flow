@@ -19,7 +19,7 @@ static void MakeMore()
     while (getline( file, line ))
         names.push_back(line);
     file.close();
-    Flow::Log(names.size());
+    Flow::Print(names.size());
     map< pair< char, char >, int > bigramFreq;
     for ( string& name : names )
     {
@@ -38,6 +38,6 @@ static void MakeMore()
     {
         string char1 = string( 1, entry.first.first );
         string char2 = string( 1, entry.first.second );
-        Flow::Log( char1 + " " + char2 + " " + to_string(entry.second) );
+        Flow::Print( char1 + " " + char2 + " " + to_string(entry.second) );
     }
 }

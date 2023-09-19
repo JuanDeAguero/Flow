@@ -17,6 +17,11 @@ bool Flow::NArray::IsValid()
     else return false;
 }
 
+Flow::NArrayCore* Flow::NArray::GetCore()
+{
+    return Array;
+}
+
 float Flow::NArray::Get( vector<int> coordinates )
 {
     return Array->Get(coordinates);
@@ -27,19 +32,9 @@ vector<float> Flow::NArray::Get()
     return Array->Get();
 }
 
-Flow::NArrayCore* Flow::NArray::GetCore()
-{
-    return Array;
-}
-
 vector<int> Flow::NArray::GetShape()
 {
     return Array->GetShape();
-}
-
-int Flow::NArray::GetIndex( vector<int> coordinates )
-{
-    return Array->GetIndex(coordinates);
 }
 
 Flow::NArray Flow::NArray::GetGradient()
@@ -55,11 +50,6 @@ void Flow::NArray::Set( vector<int> coordinates, float value )
 void Flow::NArray::Reset( float value )
 {
     Array->Reset(value);
-}
-
-void Flow::NArray::Reshape( vector<int> shape )
-{
-    Array->Reshape(shape);
 }
 
 void Flow::NArray::Backpropagate()
@@ -84,25 +74,25 @@ namespace Flow
     {
         return NArray(Add( arr1.GetCore(), arr2.GetCore() ));
     }
-
+    
     NArray Sub( NArray arr1, NArray arr2 )
     {
         return NArray(Sub( arr1.GetCore(), arr2.GetCore() ));
     }
 
-    NArray Mult( NArray arr1, NArray arr2 )
+    NArray Mul( NArray arr1, NArray arr2 )
     {
-        return NArray(Mult( arr1.GetCore(), arr2.GetCore() ));
+        return NArray(Mul( arr1.GetCore(), arr2.GetCore() ));
     }
 
-    NArray Mult( NArray arr, float literal )
+    NArray Mul( NArray arr, float literal )
     {
-        return NArray(Mult( arr.GetCore(), literal ));
+        return NArray(Mul( arr.GetCore(), literal ));
     }
 
-    NArray MMult( NArray arr1, NArray arr2 )
+    NArray MM( NArray arr1, NArray arr2 )
     {
-        return NArray(MMult( arr1.GetCore(), arr2.GetCore() ));
+        return NArray(MM( arr1.GetCore(), arr2.GetCore() ));
     }
 
     NArray Div( NArray arr1, NArray arr2 )
@@ -117,17 +107,17 @@ namespace Flow
 
     NArray Exp( NArray arr )
     {
-        return NArray(Exp( arr.GetCore() ));
+        return NArray(Exp(arr.GetCore()));
     }
 
     NArray Tanh( NArray arr )
     {
-        return NArray(Tanh( arr.GetCore() ));
+        return NArray(Tanh(arr.GetCore()));
     }
 
     NArray Neg( NArray arr )
     {
-        return NArray(Neg( arr.GetCore() ));
+        return NArray(Neg(arr.GetCore()));
     }
 
     bool Less( NArray arr1, NArray arr2 )
@@ -140,8 +130,8 @@ namespace Flow
         return NArray(RandomCore(shape));
     }
 
-    void Log( NArray arr )
+    void Print( NArray arr )
     {
-        Log(arr.GetCore());
+        Print(arr.GetCore());
     }
 }

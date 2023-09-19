@@ -7,13 +7,15 @@
 #include "Showcase/MNIST/MNIST.hpp"
 
 #include "Test/TestAdd.hpp"
-#include "Test/TestMult.hpp"
+#include "Test/TestMul.hpp"
+#include "Test/TestSum.hpp"
 
 int main()
 {
-    //Test_Add();
-    //Test_Mult();
-    SimpleNN();
+    Test_Add();
+    //Test_Mul();
+    //Test_Sum();
+    //SimpleNN();
     //MakeMore();
-    MNIST();
+    //MNIST();
 }

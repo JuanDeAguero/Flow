@@ -18,7 +18,16 @@ namespace Flow
 
         NArrayCore( vector<int> shape, vector<float> data );
 
-        enum Operation { NONE, ADD, SUB, MULT, DIV, MMULT, POW, EXP, TANH };
+        enum Operation
+        {
+            NONE,
+            ADD, MUL,
+            MM,
+            POW, EXP, TANH, RELU, LOG, RECIPROCAL,
+            SUM, MAX,
+            RESHAPE, TRANSPOSE, PERMUTE, EXPAND,
+            BROADCAST
+        };
 
         NArrayCore( vector<int> shape, vector<float> data, vector<NArrayCore*> operands, Operation op );
 
@@ -28,27 +37,23 @@ namespace Flow
 
         vector<int> GetShape();
 
-        int GetIndex( vector<int> coordinates );
-
         NArrayCore* GetGradient();
         
         void Set( vector<int> coordinates, float value );
 
         void Reset( float value );
 
-        void Reshape( vector<int> shape );
-
         void Backpropagate();
 
         NArrayCore* Copy();
-
-        static int SizeFromShape( vector<int> shape );
 
     private:
 
         vector<float> Data;
 
         vector<int> Shape;
+
+        vector<int> Stride;
 
         NArrayCore* Gradient;
 
@@ -58,15 +63,17 @@ namespace Flow
 
         NArrayCore( vector<int> shape, vector<float> data, bool isGradient );
 
+        int GetIndex( vector<int> coordinates );
+
+        void ComputeStride();
+
         void Backward();
 
         void BackwardAdd();
 
-        void BackwardSub();
+        void BackwardMul();
 
-        void BackwardMult();
-
-        void BackwardMMult();
+        void BackwardMM();
 
         void BackwardPow();
 
@@ -74,23 +81,24 @@ namespace Flow
 
         void BackwardTanh();
 
+        void BackwardReshape();
+
+        void BackwardBroadcast();
+
         vector<NArrayCore*> TopologicalSort();
 
         void BuildTopo( NArrayCore* current, unordered_set<NArrayCore*>& visited, vector<NArrayCore*>& topo );
-
     };
-
-    NArrayCore* ElementWise( NArrayCore* arr1, NArrayCore* arr2, NArrayCore::Operation op );
 
     NArrayCore* Add( NArrayCore* arr1, NArrayCore* arr2 );
 
     NArrayCore* Sub( NArrayCore* arr1, NArrayCore* arr2 );
 
-    NArrayCore* Mult( NArrayCore* arr1, NArrayCore* arr2 );
+    NArrayCore* Mul( NArrayCore* arr1, NArrayCore* arr2 );
 
-    NArrayCore* Mult( NArrayCore* arr, float literal );
+    NArrayCore* Mul( NArrayCore* arr, float literal );
 
-    NArrayCore* MMult( NArrayCore* arr1, NArrayCore* arr2 );
+    NArrayCore* MM( NArrayCore* arr1, NArrayCore* arr2 );
 
     NArrayCore* Div( NArrayCore* arr1, NArrayCore* arr2 );
 
@@ -100,13 +108,19 @@ namespace Flow
 
     NArrayCore* Tanh( NArrayCore* arr );
 
+    NArrayCore* Reshape( NArrayCore* arr, vector<int> shape );
+
+    NArrayCore* Transpose( NArrayCore* arr, int firstDim, int secondDim );
+
+    NArrayCore* Broadcast( NArrayCore* arr, vector<int> shape );
+
     NArrayCore* Neg( NArrayCore* arr );
 
     bool Less( NArrayCore* arr1, NArrayCore* arr2 );
 
-    string OperationString( NArrayCore::Operation op );
+    int SizeFromShape( vector<int> shape );
 
     NArrayCore* RandomCore( vector<int> shape );
 
-    void Log( NArrayCore* arr );
+    void Print( NArrayCore* arr );
 }

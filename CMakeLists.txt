@@ -6,9 +6,9 @@ project(Flow VERSION 1.0)
 
 add_executable(flow
     Main.cpp
-    Source/Log.cpp
     Source/NArray.cpp
     Source/NArrayCore.cpp
+    Source/Print.cpp
 )
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Include)
