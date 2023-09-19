@@ -207,45 +207,50 @@ void Flow::NArrayCore::BuildTopo( NArrayCore* current, unordered_set<NArrayCore*
 
 namespace Flow
 {
-    void AddRecursive(const std::vector<int>& index, NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result) {
-        if (index.size() == arr1->GetShape().size()) {
-            result->Set(index, arr1->Get(index) + arr2->Get(index));
+    vector<int> GetShapeForBroadcast( NArrayCore* arr1, NArrayCore* arr2 )
+    {
+        vector<int> shape1 = arr1->GetShape();
+        vector<int> shape2 = arr2->GetShape();
+        int maxDims = max( shape1.size(), shape2.size() );
+        while ( shape1.size() < maxDims ) shape1.insert( shape1.begin(), 1 );
+        while ( shape2.size() < maxDims ) shape2.insert( shape2.begin(), 1 );
+        vector<int> shape(maxDims);
+        for ( int i = 0; i < maxDims; i++ )
+        {
+            if ( shape1[i] == shape2[i] ) shape[i] = shape1[i];
+            else if ( shape1[i] == 1 ) shape[i] = shape2[i];
+            else if ( shape2[i] == 1 ) shape[i] = shape1[i];
+            else
+            {
+                Print("[Error] The arrays are not compatible for broadcast.");
+                return {};
+            }
+        }
+        return shape;
+    }
+
+    void ElementWise( vector<int> index, NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result )
+    {
+        if ( index.size() == arr1->GetShape().size() )
+        {
+            result->Set( index, arr1->Get(index) + arr2->Get(index) );
             return;
         }
-        for (int i = 0; i < arr1->GetShape()[index.size()]; i++) {
+        for ( int i = 0; i < arr1->GetShape()[index.size()]; i++ )
+        {
             std::vector<int> newIndex = index;
             newIndex.push_back(i);
-            AddRecursive(newIndex, arr1, arr2, result);
+            ElementWise( newIndex, arr1, arr2, result );
         }
     }
 
     NArrayCore* Add( NArrayCore* arr1, NArrayCore* arr2 )
     {
-        vector<int> shape1 = arr1->GetShape();
-        vector<int> shape2 = arr2->GetShape();
-        int maxDims = max(shape1.size(), shape2.size());
-        while (shape1.size() < maxDims) shape1.insert(shape1.begin(), 1);
-        while (shape2.size() < maxDims) shape2.insert(shape2.begin(), 1);
-        vector<int> resultShape(maxDims);
-        for (int i = 0; i < maxDims; i++)
-        {
-            if (shape1[i] == shape2[i]) resultShape[i] = shape1[i];
-            else if (shape1[i] == 1) resultShape[i] = shape2[i];
-            else if (shape2[i] == 1) resultShape[i] = shape1[i];
-            else
-            {
-                Print("[Error] The shapes are not compatible for broadcast.");
-                return nullptr;
-            }
-        }
-
-        Flow::NArrayCore* arr1B = Flow::Broadcast( arr1, resultShape );
-        Flow::NArrayCore* arr2B = Flow::Broadcast( arr2, resultShape );
-
+        auto shape = GetShapeForBroadcast( arr1, arr2 );
+        Flow::NArrayCore* arr1B = Flow::Broadcast( arr1, shape );
+        Flow::NArrayCore* arr2B = Flow::Broadcast( arr2, shape );
         NArrayCore* result = new NArrayCore( arr1B->GetShape(), arr1B->Get(), { arr1B, arr2B }, NArrayCore::Operation::ADD );
-        
-        AddRecursive({}, arr1B, arr2B, result);
-
+        ElementWise( {}, arr1B, arr2B, result );
         return result;
     }
 
@@ -262,7 +267,7 @@ namespace Flow
     NArrayCore* Mul( NArrayCore* arr, float literal )
     {
         NArrayCore* arrLiteral = new NArrayCore( { 1 }, { literal } );
-        return nullptr;
+        return Mul( arr, arrLiteral );
     }
 
     NArrayCore* MM( NArrayCore* arr1, NArrayCore* arr2 )
@@ -302,38 +307,44 @@ namespace Flow
 
     NArrayCore* Flow::Broadcast( NArrayCore* arr, vector<int> shape )
     {
-        if (shape.size() < arr->GetShape().size()) {
-            Print("[Error] The desired broadcast shape is incompatible.");
+        if ( shape.size() < arr->GetShape().size() )
+        {
+            Print("[Error] Incompatible shape for broadcast.");
             return nullptr;
         }
-        for (int i = 1; i <= arr->GetShape().size(); ++i) {
-            if (shape[shape.size() - i] != arr->GetShape()[arr->GetShape().size() - i] &&
-                arr->GetShape()[arr->GetShape().size() - i] != 1 &&
-                shape[shape.size() - i] != 1) {
-                Print("[Error] The desired broadcast shape is incompatible.");
+        for (int i = 1; i <= arr->GetShape().size(); i++)
+        {
+            if ( shape[ shape.size() - i ] != arr->GetShape()[ arr->GetShape().size() - i ] &&
+                arr->GetShape()[ arr->GetShape().size() - i ] != 1 &&
+                shape[ shape.size() - i ] != 1 )
+            {
+                Print("[Error] Incompatible shape for broadcast.");
                 return nullptr;
             }
         }
-        vector<float> newData(SizeFromShape(shape), 0.0f);
-        vector<int> position(shape.size(), 0);
-        for (int i = 0; i < SizeFromShape(shape); ++i) {
-            vector<int> originalCoordinates;
-            for (int j = 0; j < arr->GetShape().size(); ++j) {
-                int coord = position[shape.size() - arr->GetShape().size() + j];
-                if (arr->GetShape()[j] == 1) {
+
+        vector<float> data( SizeFromShape(shape), 0.0f );
+        vector<int> position( shape.size(), 0 );
+        for ( int i = 0; i < SizeFromShape(shape); i++ )
+        {
+            vector<int> originalCoords;
+            for ( int j = 0; j < arr->GetShape().size(); j++ )
+            {
+                int coord = position[ shape.size() - arr->GetShape().size() + j ];
+                if ( arr->GetShape()[j] == 1 )
                     coord = 0;
-                }
-                originalCoordinates.push_back(coord);
+                originalCoords.push_back(coord);
             }
-            newData[i] = arr->Get(originalCoordinates);
-            for (int j = shape.size() - 1; j >= 0; --j) {
-                if (++position[j] < shape[j]) {
-                    break;
-                }
-                position[j] = 0;
+            data[i] = arr->Get(originalCoords);
+            for (int j = shape.size() - 1; j >= 0; j-- )
+            {
+                position[j]++;
+                if (position[j] < shape[j]) break;
+                else position[j] = 0;
             }
         }
-        return new NArrayCore(shape, newData, { arr }, NArrayCore::Operation::BROADCAST );
+
+        return new NArrayCore( shape, data, { arr }, NArrayCore::Operation::BROADCAST );
     }
 
     NArrayCore* Neg( NArrayCore* arr )
