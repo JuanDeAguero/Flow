@@ -141,7 +141,24 @@ void Flow::NArrayCore::Backward()
 
 void Flow::NArrayCore::BackwardAdd()
 {
-
+    if ( Operands.size() != 2 )
+    {
+        Print("[Error] Invalid number of operands in BackwardAdd.");
+        return;
+    }
+    NArrayCore* operand1 = Operands[0];
+    NArrayCore* operand2 = Operands[1];
+    if ( Gradient->Data.size() != operand1->Gradient->Data.size() || 
+        Gradient->Data.size() != operand2->Gradient->Data.size() )
+    {
+        Print("[Error] Invalid operand gradient in BackwardAdd.");
+        return;
+    }
+    for ( int i = 0; i < Gradient->Data.size(); i++ )
+    {
+        operand1->Gradient->Data[i] += Gradient->Data[i];
+        operand2->Gradient->Data[i] += Gradient->Data[i];
+    }
 }
 
 void Flow::NArrayCore::BackwardMul()
@@ -176,7 +193,36 @@ void Flow::NArrayCore::BackwardReshape()
 
 void Flow::NArrayCore::BackwardBroadcast()
 {
-
+    if ( Operands.size() != 1 )
+    {
+        Print("[Error] Invalid number of operands in BackwardBroadcast.");
+        return;
+    }
+    NArrayCore* operand = Operands[0];
+    vector<float> operandGradient( operand->Data.size(), 0.0f );
+    vector<int> operandShape = operand->Shape;
+    vector<int> shape = this->Shape;
+    vector<int> position( shape.size(), 0 );
+    for ( int i = 0; i < Gradient->Data.size(); i++ )
+    {
+        int index = 0;
+        for ( int j = 0; j < operandShape.size(); j++ )
+        {
+            int coord = position[ shape.size() - operandShape.size() + j ];
+            if ( operandShape[j] == 1 )
+                coord = 0;
+            index += coord * operand->Stride[j];
+        }
+        operandGradient[index] += Gradient->Data[i];
+        for ( int j = shape.size() - 1; j >= 0; j-- )
+        {
+            position[j]++;
+            if ( position[j] < shape[j] ) break;
+            else position[j] = 0;
+        }
+    }
+    for ( int i = 0; i < operand->Gradient->Data.size(); i++ )
+        operand->Gradient->Data[i] += operandGradient[i];
 }
 
 vector<Flow::NArrayCore*> Flow::NArrayCore::TopologicalSort()
@@ -229,18 +275,26 @@ namespace Flow
         return shape;
     }
 
-    void ElementWise( vector<int> index, NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result )
+    void ElementWise( vector<int> index, NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op )
     {
         if ( index.size() == arr1->GetShape().size() )
         {
-            result->Set( index, arr1->Get(index) + arr2->Get(index) );
+            switch (op)
+            {
+                case NArrayCore::Operation::ADD:
+                    result->Set( index, arr1->Get(index) + arr2->Get(index) );
+                    break;
+                case NArrayCore::Operation::MUL:
+                    result->Set( index, arr1->Get(index) * arr2->Get(index) );
+                    break;
+            }
             return;
         }
         for ( int i = 0; i < arr1->GetShape()[index.size()]; i++ )
         {
             std::vector<int> newIndex = index;
             newIndex.push_back(i);
-            ElementWise( newIndex, arr1, arr2, result );
+            ElementWise( newIndex, arr1, arr2, result, op );
         }
     }
 
@@ -249,8 +303,9 @@ namespace Flow
         auto shape = GetShapeForBroadcast( arr1, arr2 );
         Flow::NArrayCore* arr1B = Flow::Broadcast( arr1, shape );
         Flow::NArrayCore* arr2B = Flow::Broadcast( arr2, shape );
-        NArrayCore* result = new NArrayCore( arr1B->GetShape(), arr1B->Get(), { arr1B, arr2B }, NArrayCore::Operation::ADD );
-        ElementWise( {}, arr1B, arr2B, result );
+        auto op = NArrayCore::Operation::ADD;
+        NArrayCore* result = new NArrayCore( arr1B->GetShape(), arr1B->Get(), { arr1B, arr2B }, op );
+        ElementWise( {}, arr1B, arr2B, result, op );
         return result;
     }
 
@@ -261,7 +316,13 @@ namespace Flow
 
     NArrayCore* Mul( NArrayCore* arr1, NArrayCore* arr2 )
     {
-        return nullptr;
+        auto shape = GetShapeForBroadcast( arr1, arr2 );
+        Flow::NArrayCore* arr1B = Flow::Broadcast( arr1, shape );
+        Flow::NArrayCore* arr2B = Flow::Broadcast( arr2, shape );
+        auto op = NArrayCore::Operation::MUL;
+        NArrayCore* result = new NArrayCore( arr1B->GetShape(), arr1B->Get(), { arr1B, arr2B }, op );
+        ElementWise( {}, arr1B, arr2B, result, op );
+        return result;
     }
 
     NArrayCore* Mul( NArrayCore* arr, float literal )
