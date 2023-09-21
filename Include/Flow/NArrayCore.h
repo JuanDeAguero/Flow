@@ -16,6 +16,10 @@ namespace Flow
 
     public:
 
+        float Exponent;
+
+        int TransposedFirstDim, TransposedSecondDim;
+
         NArrayCore( vector<int> shape, vector<float> data );
 
         enum Operation
@@ -36,6 +40,8 @@ namespace Flow
         vector<float> Get();
 
         vector<int> GetShape();
+
+        vector<int> GetStride();
 
         NArrayCore* GetGradient();
         
@@ -83,6 +89,8 @@ namespace Flow
 
         void BackwardReshape();
 
+        void BackwardTranspose();
+
         void BackwardBroadcast();
 
         vector<NArrayCore*> TopologicalSort();
@@ -119,6 +127,8 @@ namespace Flow
     bool Less( NArrayCore* arr1, NArrayCore* arr2 );
 
     int SizeFromShape( vector<int> shape );
+
+    vector<int> GetShapeForBroadcast( NArrayCore* arr1, NArrayCore* arr2 );
 
     NArrayCore* RandomCore( vector<int> shape );
 

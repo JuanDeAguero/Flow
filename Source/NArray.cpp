@@ -1,6 +1,6 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
-#include "NArray.h"
+#include "Flow/NArray.h"
 
 using namespace std;
 
@@ -113,6 +113,11 @@ namespace Flow
     NArray Tanh( NArray arr )
     {
         return NArray(Tanh(arr.GetCore()));
+    }
+
+    NArray Transpose( NArray arr, int firstDim, int secondDim )
+    {
+        return NArray(Transpose( arr.GetCore(), firstDim, secondDim ));
     }
 
     NArray Neg( NArray arr )

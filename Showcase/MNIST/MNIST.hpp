@@ -18,24 +18,30 @@ static void MNIST()
 {
     vector<float> trainImages = ReadImagesMNIST("../Showcase/MNIST/train-images-idx3-ubyte");
     vector<float> trainLabels = ReadLabelsMNIST("../Showcase/MNIST/train-labels-idx1-ubyte");
-    vector<float> testImages  = ReadImagesMNIST("../Showcase/MNIST/t10k-images-idx3-ubyte");
-    vector<float> testLabels  = ReadLabelsMNIST("../Showcase/MNIST/t10k-labels-idx1-ubyte");
+    vector<float> testImages = ReadImagesMNIST("../Showcase/MNIST/t10k-images-idx3-ubyte");
+    vector<float> testLabels = ReadLabelsMNIST("../Showcase/MNIST/t10k-labels-idx1-ubyte");
 
-    Flow::NArray xTrain = Flow::Create( { 60000, 784 }, trainImages );
-    Flow::NArray yTrain = Flow::Create( { 60000 },      trainLabels );
-    Flow::NArray xTest  = Flow::Create( { 10000, 784 }, testImages );
-    Flow::NArray yTest  = Flow::Create( { 10000 },      trainLabels );
+    trainImages.resize( 784 * 100 );
+    trainLabels.resize( 100 );
+    testImages.resize( 784 * 100 );
+    testLabels.resize( 100 );
 
-    // xTrain.Transpose( 0, 1 );
-    // xTest .Transpose( 0, 1 );
+    Flow::NArray xTrain = Flow::Create( { 100, 784 }, trainImages );
+    Flow::NArray yTrain = Flow::Create( { 100 },      trainLabels );
+    Flow::NArray xTest  = Flow::Create( { 100, 784 }, testImages );
+    Flow::NArray yTest  = Flow::Create( { 100 },      trainLabels );
+
+    xTrain = Flow::Transpose( xTrain.Copy(), 0, 1 );
+    xTest = Flow::Transpose( xTest.Copy(), 0, 1 );
 
     for ( int i = 0; i < 28; i++ )
     {
         for ( int j = 0; j < 28; j++ )
-            cout << setw(3) << right << xTrain.Get({ i * 28 + j, 7 }) << " ";
+            cout << setw(3) << right << xTrain.Get({ i * 28 + j, 73 }) << " ";
         cout << endl;
     }
-    cout << "Label: " << trainLabels[7] << endl;
+    cout << "Label: " << trainLabels[73] << endl;
+    
 }
 
 vector<float> ReadImagesMNIST( string filePath )

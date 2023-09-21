@@ -5,6 +5,8 @@
 #include "Flow/NArray.h"
 #include "Flow/Print.h"
 
+#pragma once
+
 using namespace std;
 
 static void Test_Mul()

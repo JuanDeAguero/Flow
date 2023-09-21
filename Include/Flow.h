@@ -2,3 +2,4 @@
 
 #include "Flow/NArray.h"
 #include "Flow/Print.h"
+#include "Flow/Vector.h"

@@ -8,7 +8,17 @@ add_executable(flow
     Main.cpp
     Source/NArray.cpp
     Source/NArrayCore.cpp
+    Source/Operations/Add.cpp
+    Source/Operations/Broadcast.cpp
+    Source/Operations/Exp.cpp
+    Source/Operations/MM.cpp
+    Source/Operations/Mul.cpp
+    Source/Operations/Pow.cpp
+    Source/Operations/Reshape.cpp
+    Source/Operations/Tanh.cpp
+    Source/Operations/Transpose.cpp
     Source/Print.cpp
+    Source/Vector.cpp
 )
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Include)

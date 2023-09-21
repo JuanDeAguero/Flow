@@ -1,23 +1,20 @@
 // Copyright (c) Juan M. G. de Agüero 2023
 
 #include "Flow.h"
-
 #include "Showcase/MakeMore/MakeMore.hpp"
-#include "Showcase/SimpleNN.hpp"
 #include "Showcase/MNIST/MNIST.hpp"
-
-#include "Test/TestAdd.hpp"
-#include "Test/TestBackward.hpp"
-#include "Test/TestMul.hpp"
-#include "Test/TestSum.hpp"
+#include "Showcase/SimpleNN.hpp"
+#include "Test/Test.h"
 
 int main()
 {
-    Test_Backward();
-    Test_Add();
-    Test_Mul();
-    //Test_Sum();
+    //Test_Add();
+    //Test_Backward();
+    //Test_Exp();
+    //Test_MM();
+    //Test_Mul();
+
     //SimpleNN();
     //MakeMore();
-    //MNIST();
+    MNIST();
 }

@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "NArrayCore.h"
+#include "Flow/NArrayCore.h"
 
 #pragma once
 
@@ -64,6 +64,8 @@ namespace Flow
     NArray Exp( NArray arr );
 
     NArray Tanh( NArray arr );
+
+    NArray Transpose( NArray arr, int firstDim, int secondDim );
 
     NArray Neg( NArray arr );
 
