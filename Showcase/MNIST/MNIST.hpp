@@ -31,17 +31,44 @@ static void MNIST()
     Flow::NArray xTest  = Flow::Create( { 100, 784 }, testImages );
     Flow::NArray yTest  = Flow::Create( { 100 },      trainLabels );
 
-    xTrain = Flow::Transpose( xTrain.Copy(), 0, 1 );
-    xTest = Flow::Transpose( xTest.Copy(), 0, 1 );
+    //xTrain = Flow::Transpose( xTrain.Copy(), 0, 1 );
+    //xTest = Flow::Transpose( xTest.Copy(), 0, 1 );
 
     for ( int i = 0; i < 28; i++ )
     {
         for ( int j = 0; j < 28; j++ )
-            cout << setw(3) << right << xTrain.Get({ i * 28 + j, 73 }) << " ";
+            cout << setw(3) << right << xTrain.Get({ 73, i * 28 + j }) << " ";
         cout << endl;
     }
     cout << "Label: " << trainLabels[73] << endl;
+
+    Flow::NArray w1 = Flow::Random({ 784, 128 });
+    Flow::NArray b1 = Flow::Random({ 128 });
+    Flow::NArray w2 = Flow::Random({ 128, 10 });
+    Flow::NArray b2 = Flow::Random({ 10 });
     
+    float learningRate = 0.1f;
+
+    for ( int epoch = 0; epoch < 100; epoch++ )
+    {
+        Flow::NArray a = ReLU( Add( MM( xTrain, w1 ), b1 ) );
+        Flow::NArray yPred = Add( MM( a, w2 ), b2 );
+        Flow::NArray loss = Flow::CrossEntropy( yPred, yTrain );
+
+        w1.GetGradient().Reset(0);
+        b1.GetGradient().Reset(0);
+        w2.GetGradient().Reset(0);
+        b2.GetGradient().Reset(0);
+
+        loss.Backpropagate();
+
+        w1 = Sub( w1.Copy(), Mul( w1.GetGradient(), learningRate ) );
+        b1 = Sub( b1.Copy(), Mul( b1.GetGradient(), learningRate ) );
+        w2 = Sub( w2.Copy(), Mul( w2.GetGradient(), learningRate ) );
+        b2 = Sub( b2.Copy(), Mul( b2.GetGradient(), learningRate ) );
+
+        Flow::Print(loss);
+    }
 }
 
 vector<float> ReadImagesMNIST( string filePath )

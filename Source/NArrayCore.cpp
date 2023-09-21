@@ -125,25 +125,6 @@ void Flow::NArrayCore::ComputeStride()
     }
 }
 
-void Flow::NArrayCore::Backward()
-{
-    if ( Operands.size() == 0 )
-        return;
-    switch (Op)
-    {
-        case Operation::NONE:                           break;
-        case Operation::ADD:       BackwardAdd();       break;
-        case Operation::MUL:       BackwardMul();       break;
-        case Operation::MM:        BackwardMM();        break;
-        case Operation::POW:       BackwardPow();       break;
-        case Operation::EXP:       BackwardExp();       break;
-        case Operation::TANH:      BackwardTanh();      break;
-        case Operation::RESHAPE:   BackwardReshape();   break;
-        case Operation::TRANSPOSE: BackwardTranspose(); break;
-        case Operation::BROADCAST: BackwardBroadcast(); break;
-    }
-}
-
 vector<Flow::NArrayCore*> Flow::NArrayCore::TopologicalSort()
 {
     unordered_set<NArrayCore*> visited;
@@ -170,8 +151,37 @@ void Flow::NArrayCore::BuildTopo( NArrayCore* current, unordered_set<NArrayCore*
     topo.push_back(current);
 }
 
+void Flow::NArrayCore::Backward()
+{
+    if ( Operands.size() == 0 )
+        return;
+    switch (Op)
+    {
+        case Operation::NONE:                           break;
+        case Operation::ADD:       BackwardAdd();       break;
+        case Operation::MUL:       BackwardMul();       break;
+        case Operation::MM:        BackwardMM();        break;
+        case Operation::POW:       BackwardPow();       break;
+        case Operation::EXP:       BackwardExp();       break;
+        case Operation::TANH:      BackwardTanh();      break;
+        case Operation::RELU:      BackwardReLU();      break;
+        case Operation::LOG:       BackwardLog();       break;
+        case Operation::SUM:       BackwardSum();       break;
+        case Operation::MAX:       BackwardMax();       break;
+        case Operation::RESHAPE:   BackwardReshape();   break;
+        case Operation::TRANSPOSE: BackwardTranspose(); break;
+        case Operation::BROADCAST: BackwardBroadcast(); break;
+        case Operation::GATHER:    BackwardGather();    break;
+    }
+}
+
 namespace Flow
 {
+    NArrayCore* Neg( NArrayCore* arr )
+    {
+        return Mul( arr, -1.0f );
+    }
+
     NArrayCore* Sub( NArrayCore* arr1, NArrayCore* arr2 )
     {
         return Add( arr1, Neg(arr2) );
@@ -182,14 +192,22 @@ namespace Flow
         return Mul( arr1, Pow( arr2, -1.0f ) );
     }
 
-    NArrayCore* Neg( NArrayCore* arr )
+    NArrayCore* Mean( NArrayCore* arr )
     {
-        return Mul( arr, -1.0f );
+        NArrayCore* sum = Sum( arr, -1, false );
+        float numElements = static_cast<float>(SizeFromShape(arr->GetShape()));
+        NArrayCore* n = new NArrayCore( { 1 }, { numElements } );
+        return Div( sum, n );
     }
 
-    bool Less( NArrayCore* arr1, NArrayCore* arr2 )
+    NArrayCore* Softmax( NArrayCore* arr )
     {
-        return false;
+        return nullptr;
+    }
+
+    NArrayCore* CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 )
+    {
+        return nullptr;
     }
 
     int SizeFromShape( vector<int> shape )

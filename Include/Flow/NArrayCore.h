@@ -20,17 +20,31 @@ namespace Flow
 
         int TransposedFirstDim, TransposedSecondDim;
 
+        int Dim;
+        
+        bool KeepDim;
+
         NArrayCore( vector<int> shape, vector<float> data );
 
         enum Operation
         {
             NONE,
-            ADD, MUL,
+            ADD,
+            MUL,
             MM,
-            POW, EXP, TANH, RELU, LOG, RECIPROCAL,
-            SUM, MAX,
-            RESHAPE, TRANSPOSE, PERMUTE, EXPAND,
-            BROADCAST
+            POW,
+            EXP,
+            TANH,
+            RELU,
+            LOG,
+            SUM,
+            MAX,
+            RESHAPE,
+            TRANSPOSE,
+            BROADCAST,
+            GATHER,
+            SQUEEZE,
+            UNSQUEEZE
         };
 
         NArrayCore( vector<int> shape, vector<float> data, vector<NArrayCore*> operands, Operation op );
@@ -73,6 +87,10 @@ namespace Flow
 
         void ComputeStride();
 
+        vector<NArrayCore*> TopologicalSort();
+
+        void BuildTopo( NArrayCore* current, unordered_set<NArrayCore*>& visited, vector<NArrayCore*>& topo );
+
         void Backward();
 
         void BackwardAdd();
@@ -87,20 +105,24 @@ namespace Flow
 
         void BackwardTanh();
 
+        void BackwardReLU();
+
+        void BackwardLog();
+
+        void BackwardSum();
+
+        void BackwardMax();
+
         void BackwardReshape();
 
         void BackwardTranspose();
 
         void BackwardBroadcast();
 
-        vector<NArrayCore*> TopologicalSort();
-
-        void BuildTopo( NArrayCore* current, unordered_set<NArrayCore*>& visited, vector<NArrayCore*>& topo );
+        void BackwardGather();
     };
 
     NArrayCore* Add( NArrayCore* arr1, NArrayCore* arr2 );
-
-    NArrayCore* Sub( NArrayCore* arr1, NArrayCore* arr2 );
 
     NArrayCore* Mul( NArrayCore* arr1, NArrayCore* arr2 );
 
@@ -108,13 +130,19 @@ namespace Flow
 
     NArrayCore* MM( NArrayCore* arr1, NArrayCore* arr2 );
 
-    NArrayCore* Div( NArrayCore* arr1, NArrayCore* arr2 );
-
     NArrayCore* Pow( NArrayCore* arr, float exponent );
 
     NArrayCore* Exp( NArrayCore* arr );
 
     NArrayCore* Tanh( NArrayCore* arr );
+
+    NArrayCore* ReLU( NArrayCore* arr );
+
+    NArrayCore* Log( NArrayCore* arr );
+
+    NArrayCore* Sum( NArrayCore* arr, int dim, bool keepDim );
+
+    NArrayCore* Max( NArrayCore* arr, int dim, bool keepDim );
 
     NArrayCore* Reshape( NArrayCore* arr, vector<int> shape );
 
@@ -122,9 +150,19 @@ namespace Flow
 
     NArrayCore* Broadcast( NArrayCore* arr, vector<int> shape );
 
+    NArrayCore* Gather( NArrayCore* arr1, NArrayCore* arr2 );
+
     NArrayCore* Neg( NArrayCore* arr );
 
-    bool Less( NArrayCore* arr1, NArrayCore* arr2 );
+    NArrayCore* Sub( NArrayCore* arr1, NArrayCore* arr2 );
+
+    NArrayCore* Div( NArrayCore* arr1, NArrayCore* arr2 );
+
+    NArrayCore* Mean( NArrayCore* arr );
+
+    NArrayCore* Softmax( NArrayCore* arr );
+
+    NArrayCore* CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 );
 
     int SizeFromShape( vector<int> shape );
 

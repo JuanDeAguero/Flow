@@ -65,11 +65,25 @@ namespace Flow
 
     NArray Tanh( NArray arr );
 
+    NArray ReLU( NArray arr );
+
+    NArray Log( NArray arr );
+
+    NArray Sum( NArray arr, int dim, bool keepDim );
+
+    NArray Max( NArray arr, int dim, bool keepDim );
+
+    NArray Mean( NArray arr );
+
     NArray Transpose( NArray arr, int firstDim, int secondDim );
 
     NArray Neg( NArray arr );
 
     bool Less( NArray arr1, NArray arr2 );
+
+    NArray Softmax( NArray arr );
+
+    NArray CrossEntropy( NArray arr1, NArray arr2 );
 
     NArray Random( vector<int> shape );
 

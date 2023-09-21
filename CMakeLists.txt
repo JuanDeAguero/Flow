@@ -11,10 +11,15 @@ add_executable(flow
     Source/Operations/Add.cpp
     Source/Operations/Broadcast.cpp
     Source/Operations/Exp.cpp
+    Source/Operations/Gather.cpp
+    Source/Operations/Log.cpp
+    Source/Operations/Max.cpp
     Source/Operations/MM.cpp
     Source/Operations/Mul.cpp
     Source/Operations/Pow.cpp
+    Source/Operations/ReLU.cpp
     Source/Operations/Reshape.cpp
+    Source/Operations/Sum.cpp
     Source/Operations/Tanh.cpp
     Source/Operations/Transpose.cpp
     Source/Print.cpp
