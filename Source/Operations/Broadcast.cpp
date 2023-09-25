@@ -44,7 +44,6 @@ namespace Flow
                 return nullptr;
             }
         }
-        
         vector<float> data( SizeFromShape(shape), 0.0f );
         vector<int> position( shape.size(), 0 );
         for ( int i = 0; i < SizeFromShape(shape); i++ )
@@ -65,7 +64,6 @@ namespace Flow
                 else position[j] = 0;
             }
         }
-
         return new NArrayCore( shape, data, { arr }, NArrayCore::Operation::BROADCAST );
     }
 }

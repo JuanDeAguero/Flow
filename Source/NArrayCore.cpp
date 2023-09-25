@@ -45,6 +45,20 @@ vector<float> Flow::NArrayCore::Get()
     return Data;
 }
 
+int Flow::NArrayCore::GetIndex( vector<int> coordinates )
+{
+    if ( coordinates.size() != Shape.size() )
+        return -1;
+    int index = 0;
+    for ( int i = 0; i < coordinates.size(); i++ )
+    {
+        if ( coordinates[i] >= Shape[i] || coordinates[i] < 0 )
+            return -1;
+        index += coordinates[i] * Stride[i];
+    }
+    return index;
+}
+
 vector<int> Flow::NArrayCore::GetShape()
 {
     return Shape;
@@ -98,20 +112,6 @@ Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data, bool isGrad
         Gradient = new NArrayCore( shape, gradientData, true );
     }
     Op = Operation::NONE;
-}
-
-int Flow::NArrayCore::GetIndex( vector<int> coordinates )
-{
-    if ( coordinates.size() != Shape.size() )
-        return -1;
-    int index = 0;
-    for ( int i = 0; i < coordinates.size(); i++ )
-    {
-        if ( coordinates[i] >= Shape[i] || coordinates[i] < 0 )
-            return -1;
-        index += coordinates[i] * Stride[i];
-    }
-    return index;
 }
 
 void Flow::NArrayCore::ComputeStride()
@@ -172,6 +172,7 @@ void Flow::NArrayCore::Backward()
         case Operation::TRANSPOSE: BackwardTranspose(); break;
         case Operation::BROADCAST: BackwardBroadcast(); break;
         case Operation::GATHER:    BackwardGather();    break;
+        case Operation::UNSQUEEZE: BackwardUnsqueeze(); break;
     }
 }
 
@@ -200,14 +201,22 @@ namespace Flow
         return Div( sum, n );
     }
 
+    NArrayCore* IndexSelect( NArrayCore* arr, int dim, NArrayCore* index )
+    {
+        return nullptr;
+    }
+
     NArrayCore* Softmax( NArrayCore* arr )
     {
+        //NArrayCore* index = new NArrayCore( { 1 }, { 0 } );
+        //NArrayCore* max = IndexSelect( Max( arr, 1, true ), 1, index );
+        //return Sub( arr, Sub( max, Log( Sum( Exp( Sub( arr, max ) ), 1, true ) ) ) );
         return nullptr;
     }
 
     NArrayCore* CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 )
     {
-        return nullptr;
+        return Neg( Mean( Gather( Softmax(arr1), 1, Unsqueeze( arr2, -1 ) ) ) );
     }
 
     int SizeFromShape( vector<int> shape )

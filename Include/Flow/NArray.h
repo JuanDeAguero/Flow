@@ -27,7 +27,11 @@ namespace Flow
 
         vector<float> Get();
 
+        int GetIndex( vector<int> coordinates );
+
         vector<int> GetShape();
+
+        vector<int> GetStride();
 
         NArray GetGradient();
         
@@ -49,15 +53,11 @@ namespace Flow
 
     NArray Add( NArray arr1, NArray arr2 );
 
-    NArray Sub( NArray arr1, NArray arr2 );
-
     NArray Mul( NArray arr1, NArray arr2 );
 
     NArray Mul( NArray arr, float literal );
 
     NArray MM( NArray arr1, NArray arr2 );
-
-    NArray Div( NArray arr1, NArray arr2 );
 
     NArray Pow( NArray arr, float exponent );
 
@@ -73,13 +73,17 @@ namespace Flow
 
     NArray Max( NArray arr, int dim, bool keepDim );
 
-    NArray Mean( NArray arr );
-
     NArray Transpose( NArray arr, int firstDim, int secondDim );
+
+    NArray Unsqueeze( NArray arr, int dim );
 
     NArray Neg( NArray arr );
 
-    bool Less( NArray arr1, NArray arr2 );
+    NArray Sub( NArray arr1, NArray arr2 );
+
+    NArray Div( NArray arr1, NArray arr2 );
+
+    NArray Mean( NArray arr );
 
     NArray Softmax( NArray arr );
 

@@ -43,8 +43,8 @@ namespace Flow
             transposedData[newIndex] = originalData[i];
         }
         NArrayCore* result = new NArrayCore(originalShape, transposedData, { arr }, NArrayCore::Operation::TRANSPOSE);
-        result->TransposedFirstDim = firstDim;
-        result->TransposedSecondDim = secondDim;
+        result->TransposeFirstDim = firstDim;
+        result->TransposeSecondDim = secondDim;
         return result;
     }
 }
@@ -52,8 +52,8 @@ namespace Flow
 void Flow::NArrayCore::BackwardTranspose()
 {
     NArrayCore* operand = Operands[0];
-    int firstDim = TransposedFirstDim;
-    int secondDim = TransposedSecondDim;
+    int firstDim = TransposeFirstDim;
+    int secondDim = TransposeSecondDim;
     int totalDims = Shape.size();
     vector<int> operandShape = operand->GetShape();
     vector<int> operandStride = TransposeStride(operandShape);

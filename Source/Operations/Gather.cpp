@@ -1,52 +1,77 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
 #include "Flow/NArrayCore.h"
+#include "Flow/Print.h"
+
+#include <vector>
 
 namespace Flow
 {
-    NArrayCore* Gather( NArrayCore* arr1, NArrayCore* arr2 )
+    vector<int> FlatToMultiIndex(int flatIndex, const vector<int>& shape)
     {
-        // Check dimensions and ensure compatibility
-        // Assuming arr1 is the tensor from which values are picked and arr2 contains the indices
-
-        vector<int> inputShape = arr1->GetShape();
-        vector<int> indexShape = arr2->GetShape();
-        if (inputShape.size() < 1 || indexShape.size() < 1)
-            return nullptr; // Invalid tensors
-        
-        vector<float> inputData = arr1->Get();
-        vector<float> indexData = arr2->Get(); // Assuming indices are also stored as floats (not ideal, but for demonstration purposes)
-
-        vector<float> outputData(indexShape[0]); // Assuming 1D indexing for simplicity
-
-        for (int i = 0; i < indexShape[0]; i++) {
-            int index = static_cast<int>(indexData[i]);
-            if (index < 0 || index >= inputShape[0])
-                return nullptr; // Invalid index
-            outputData[i] = inputData[index];
+        vector<int> multiIndex(shape.size());
+        for (int i = shape.size() - 1; i >= 0; --i)
+        {
+            multiIndex[i] = flatIndex % shape[i];
+            flatIndex /= shape[i];
         }
+        return multiIndex;
+    }
 
-        return new NArrayCore(indexShape, outputData, {arr1, arr2}, NArrayCore::Operation::GATHER);
+    int MultiToFlatIndex(const vector<int>& multiIndex, const vector<int>& shape)
+    {
+        int flatIndex = 0;
+        int stride = 1;
+        for (int i = shape.size() - 1; i >= 0; --i)
+        {
+            flatIndex += multiIndex[i] * stride;
+            stride *= shape[i];
+        }
+        return flatIndex;
+    }
+
+    NArrayCore* Gather( NArrayCore* arr, int dim, NArrayCore* index )
+    {
+        if (arr->GetShape().size() != index->GetShape().size())
+            return nullptr;
+        if (dim < 0 || dim >= arr->GetShape().size())
+            return nullptr;
+        for (int d = 0; d < arr->GetShape().size(); d++)
+        {
+            if (d != dim && index->GetShape()[d] > arr->GetShape()[d])
+                return nullptr;
+        }
+        vector<float> resultData;
+        vector<int> shape = index->GetShape();
+        const vector<float>& arrData = arr->Get();
+        const vector<float>& indexData = index->Get();
+        for (int flat_idx = 0; flat_idx < indexData.size(); ++flat_idx)
+        {
+            vector<int> multiIndex = FlatToMultiIndex(flat_idx, shape);
+            int idx = static_cast<int>(indexData[flat_idx]);
+            if (idx >= arr->GetShape()[dim])
+                return nullptr;
+            multiIndex[dim] = idx;
+            int dataIdx = MultiToFlatIndex(multiIndex, arr->GetShape());
+            resultData.push_back(arrData[dataIdx]);
+        }
+        NArrayCore* result = new NArrayCore(shape, resultData, { arr }, NArrayCore::Operation::GATHER);
+        result->GatherDim = dim;
+        result->GatherIndex = index;
+        return result;
     }
 }
 
 void Flow::NArrayCore::BackwardGather()
 {
-    NArrayCore* inputTensor = Operands[0];
-    NArrayCore* indexTensor = Operands[1];
+    NArrayCore* operand = Operands[0];
 
-    vector<float> inputGradient(inputTensor->Data.size(), 0.0f);
-    vector<float> indexData = indexTensor->Get();
-
-    for (int i = 0; i < Data.size(); i++) {
-        int index = static_cast<int>(indexData[i]);
-        inputGradient[index] += Gradient->Data[i]; // Add gradient to the appropriate location
+    for (int flat_idx = 0; flat_idx < GatherIndex->Data.size(); ++flat_idx)
+    {
+        vector<int> multiIndex = FlatToMultiIndex(flat_idx, GatherIndex->Shape);
+        int gather_idx = static_cast<int>(GatherIndex->Data[flat_idx]);
+        multiIndex[GatherDim] = gather_idx;
+        int dataIdx = MultiToFlatIndex(multiIndex, operand->Shape);
+        operand->Gradient->Data[dataIdx] += Gradient->Data[flat_idx];
     }
-
-    for (int i = 0; i < inputGradient.size(); i++) {
-        inputTensor->Gradient->Data[i] += inputGradient[i];
-    }
-
-    // Note: Gradient with respect to indices (arr2) is not well-defined for gather operation
-    // Hence, we don't update arr2's gradient
 }

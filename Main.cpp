@@ -11,6 +11,7 @@ int main()
     //Test_Add();
     //Test_Backward();
     //Test_Exp();
+    //Test_Gather();
     //Test_MM();
     //Test_Mul();
 

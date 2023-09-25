@@ -22,6 +22,7 @@ add_executable(flow
     Source/Operations/Sum.cpp
     Source/Operations/Tanh.cpp
     Source/Operations/Transpose.cpp
+    Source/Operations/Unsqueeze.cpp
     Source/Print.cpp
     Source/Vector.cpp
 )

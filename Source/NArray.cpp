@@ -32,9 +32,19 @@ vector<float> Flow::NArray::Get()
     return Array->Get();
 }
 
+int Flow::NArray::GetIndex( vector<int> coordinates )
+{
+    return Array->GetIndex(coordinates);
+}
+
 vector<int> Flow::NArray::GetShape()
 {
     return Array->GetShape();
+}
+
+vector<int> Flow::NArray::GetStride()
+{
+    return Array->GetStride();
 }
 
 Flow::NArray Flow::NArray::GetGradient()
@@ -74,11 +84,6 @@ namespace Flow
     {
         return NArray( Add( arr1.GetCore(), arr2.GetCore() ) );
     }
-    
-    NArray Sub( NArray arr1, NArray arr2 )
-    {
-        return NArray( Sub( arr1.GetCore(), arr2.GetCore() ) );
-    }
 
     NArray Mul( NArray arr1, NArray arr2 )
     {
@@ -93,11 +98,6 @@ namespace Flow
     NArray MM( NArray arr1, NArray arr2 )
     {
         return NArray( MM( arr1.GetCore(), arr2.GetCore() ) );
-    }
-
-    NArray Div( NArray arr1, NArray arr2 )
-    {
-        return NArray( Div( arr1.GetCore(), arr2.GetCore() ) );
     }
 
     NArray Pow( NArray arr, float exponent )
@@ -135,14 +135,14 @@ namespace Flow
         return NArray(Max( arr.GetCore(), dim, keepDim ));
     }
 
-    NArray Mean( NArray arr )
-    {
-        return NArray(Mean(arr.GetCore()));
-    }
-
     NArray Transpose( NArray arr, int firstDim, int secondDim )
     {
         return NArray( Transpose( arr.GetCore(), firstDim, secondDim ) );
+    }
+
+    NArray Unsqueeze( NArray arr, int dim )
+    {
+        return NArray( Unsqueeze( arr.GetCore(), dim ) );
     }
 
     NArray Neg( NArray arr )
@@ -150,9 +150,19 @@ namespace Flow
         return NArray(Neg(arr.GetCore()));
     }
 
-    bool Less( NArray arr1, NArray arr2 )
+    NArray Sub( NArray arr1, NArray arr2 )
     {
-        return Less( arr1.GetCore(), arr2.GetCore() );
+        return NArray( Sub( arr1.GetCore(), arr2.GetCore() ) );
+    }
+
+    NArray Div( NArray arr1, NArray arr2 )
+    {
+        return NArray( Div( arr1.GetCore(), arr2.GetCore() ) );
+    }
+
+    NArray Mean( NArray arr )
+    {
+        return NArray(Mean(arr.GetCore()));
     }
 
     NArray Softmax( NArray arr )

@@ -16,7 +16,7 @@ static void MakeMore()
     ifstream file("../Showcase/names.txt");
     vector<string> names;
     string line;
-    while (getline( file, line ))
+    while ( getline( file, line ) )
         names.push_back(line);
     file.close();
     Flow::Print(names.size());

@@ -18,33 +18,34 @@ namespace Flow
 
         float Exponent;
 
-        int TransposedFirstDim, TransposedSecondDim;
+        int SumDim;
 
-        int Dim;
+        bool SumKeepDim;
         
-        bool KeepDim;
+        int MaxDim;
+        
+        bool MaxKeepDim;
+
+        int TransposeFirstDim, TransposeSecondDim;
+
+        int GatherDim;
+
+        int UnsqueezeDim;
+        
+        NArrayCore* GatherIndex;
 
         NArrayCore( vector<int> shape, vector<float> data );
 
         enum Operation
         {
             NONE,
-            ADD,
-            MUL,
+            ADD, MUL,
             MM,
-            POW,
-            EXP,
-            TANH,
-            RELU,
-            LOG,
-            SUM,
-            MAX,
-            RESHAPE,
-            TRANSPOSE,
-            BROADCAST,
-            GATHER,
-            SQUEEZE,
-            UNSQUEEZE
+            POW, EXP,
+            TANH, RELU, LOG,
+            SUM, MAX,
+            RESHAPE, TRANSPOSE, BROADCAST,
+            GATHER, SQUEEZE, UNSQUEEZE
         };
 
         NArrayCore( vector<int> shape, vector<float> data, vector<NArrayCore*> operands, Operation op );
@@ -52,6 +53,8 @@ namespace Flow
         float Get( vector<int> coordinates );
 
         vector<float> Get();
+
+        int GetIndex( vector<int> coordinates );
 
         vector<int> GetShape();
 
@@ -82,8 +85,6 @@ namespace Flow
         Operation Op;
 
         NArrayCore( vector<int> shape, vector<float> data, bool isGradient );
-
-        int GetIndex( vector<int> coordinates );
 
         void ComputeStride();
 
@@ -120,6 +121,8 @@ namespace Flow
         void BackwardBroadcast();
 
         void BackwardGather();
+
+        void BackwardUnsqueeze();
     };
 
     NArrayCore* Add( NArrayCore* arr1, NArrayCore* arr2 );
@@ -150,7 +153,9 @@ namespace Flow
 
     NArrayCore* Broadcast( NArrayCore* arr, vector<int> shape );
 
-    NArrayCore* Gather( NArrayCore* arr1, NArrayCore* arr2 );
+    NArrayCore* Gather( NArrayCore* arr, int dim, NArrayCore* index );
+
+    NArrayCore* Unsqueeze( NArrayCore* arr, int dim );
 
     NArrayCore* Neg( NArrayCore* arr );
 
@@ -159,6 +164,8 @@ namespace Flow
     NArrayCore* Div( NArrayCore* arr1, NArrayCore* arr2 );
 
     NArrayCore* Mean( NArrayCore* arr );
+
+    NArrayCore* IndexSelect( NArrayCore* arr, int dim, NArrayCore* index );
 
     NArrayCore* Softmax( NArrayCore* arr );
 

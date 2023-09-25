@@ -31,9 +31,6 @@ static void MNIST()
     Flow::NArray xTest  = Flow::Create( { 100, 784 }, testImages );
     Flow::NArray yTest  = Flow::Create( { 100 },      trainLabels );
 
-    //xTrain = Flow::Transpose( xTrain.Copy(), 0, 1 );
-    //xTest = Flow::Transpose( xTest.Copy(), 0, 1 );
-
     for ( int i = 0; i < 28; i++ )
     {
         for ( int j = 0; j < 28; j++ )
@@ -73,7 +70,7 @@ static void MNIST()
 
 vector<float> ReadImagesMNIST( string filePath )
 {
-    vector<vector< unsigned char >> images;
+    vector< vector< unsigned char > > images;
     ifstream file( filePath, ios::binary );
     if (!file.is_open())
         Flow::Print("[Error] Cannot open MNIST image file.");
