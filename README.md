@@ -1,18 +1,43 @@
 # Flow
 Machine Learning Library in C++
 
-Features:
+## Features
 - N dimentional array operations
   - Addition, subtraction, multiplication, matrix multiplication, ...
 - Autograd system
 - Deep neural networks
 - GPU acceleration
 
-Example:
+## MNIST classifier
+Load the data.
 ```bash
-Flow::NArray arr1 = Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } );
-Flow::NArray arr2 = Flow::Create( { 3 }, { 1, 10, 100 } );
-Flow::NArray arr3 = Flow::Add( arr1, arr2 );
+vector<float> trainImages = ReadImagesMNIST("...");
+vector<float> trainLabels = ReadLabelsMNIST("...");
+vector<float> testImages = ReadImagesMNIST("...");
+vector<float> testLabels = ReadLabelsMNIST("...");
+
+trainImages.resize( 784 * 100 );
+trainLabels.resize( 100 );
+testImages.resize( 784 * 100 );
+testLabels.resize( 100 );
+
+```
+Create the train and test narrays.
+```bash
+Flow::NArray xTrain = Flow::Create( { 100, 784 }, trainImages );
+Flow::NArray yTrain = Flow::Create( { 100 }, trainLabels );
+Flow::NArray xTest = Flow::Create( { 100, 784 }, testImages );
+Flow::NArray yTest = Flow::Create( { 100 }, trainLabels );
+```
+Print one the train narrays.
+```bash
+for ( int i = 0; i < 28; i++ )
+{
+  for ( int j = 0; j < 28; j++ )
+    cout << setw(3) << right << xTrain.Get({ 76, i * 28 + j }) << " ";
+  cout << endl;
+}
+cout << "Label: " << trainLabels[76] << endl;
 ```
 
 ```bash
@@ -44,4 +69,34 @@ Flow::NArray arr3 = Flow::Add( arr1, arr2 );
   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0 
   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0 
   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0 
+```
+
+```bash
+Flow::NArray w1 = Flow::Random({ 784, 128 });
+Flow::NArray b1 = Flow::Random({ 128 });
+Flow::NArray w2 = Flow::Random({ 128, 10 });
+Flow::NArray b2 = Flow::Random({ 10 });
+    
+float learningRate = 0.1f;
+
+for ( int epoch = 0; epoch < 100; epoch++ )
+{
+  Flow::NArray a = ReLU( Add( MM( xTrain, w1 ), b1 ) );
+  Flow::NArray yPred = Add( MM( a, w2 ), b2 );
+  Flow::NArray loss = CrossEntropy( yPred, yTrain );
+
+  w1.GetGradient().Reset(0);
+  b1.GetGradient().Reset(0);
+  w2.GetGradient().Reset(0);
+  b2.GetGradient().Reset(0);
+
+  loss.Backpropagate();
+
+  w1 = Sub( w1.Copy(), Mul( w1.GetGradient(), learningRate ) );
+  b1 = Sub( b1.Copy(), Mul( b1.GetGradient(), learningRate ) );
+  w2 = Sub( w2.Copy(), Mul( w2.GetGradient(), learningRate ) );
+  b2 = Sub( b2.Copy(), Mul( b2.GetGradient(), learningRate ) );
+
+  Flow::Print(loss);
+}
 ```
