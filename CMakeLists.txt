@@ -12,6 +12,7 @@ add_executable(flow
     Source/Operations/Broadcast.cpp
     Source/Operations/Exp.cpp
     Source/Operations/Gather.cpp
+    Source/Operations/Index.cpp
     Source/Operations/Log.cpp
     Source/Operations/Max.cpp
     Source/Operations/MM.cpp

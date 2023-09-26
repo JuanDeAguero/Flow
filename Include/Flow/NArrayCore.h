@@ -16,24 +16,6 @@ namespace Flow
 
     public:
 
-        float Exponent;
-
-        int SumDim;
-
-        bool SumKeepDim;
-        
-        int MaxDim;
-        
-        bool MaxKeepDim;
-
-        int TransposeFirstDim, TransposeSecondDim;
-
-        int GatherDim;
-
-        int UnsqueezeDim;
-        
-        NArrayCore* GatherIndex;
-
         NArrayCore( vector<int> shape, vector<float> data );
 
         enum Operation
@@ -45,7 +27,8 @@ namespace Flow
             TANH, RELU, LOG,
             SUM, MAX,
             RESHAPE, TRANSPOSE, BROADCAST,
-            GATHER, SQUEEZE, UNSQUEEZE
+            GATHER, SQUEEZE, UNSQUEEZE,
+            INDEX
         };
 
         NArrayCore( vector<int> shape, vector<float> data, vector<NArrayCore*> operands, Operation op );
@@ -123,6 +106,32 @@ namespace Flow
         void BackwardGather();
 
         void BackwardUnsqueeze();
+
+        void BackwardIndex();
+
+    public:
+
+        float Exponent;
+
+        int SumDim;
+
+        bool SumKeepDim;
+        
+        int MaxDim;
+        
+        bool MaxKeepDim;
+
+        int TransposeFirstDim, TransposeSecondDim;
+
+        int GatherDim;
+
+        NArrayCore* GatherIndex;
+
+        int UnsqueezeDim;
+
+        int IndexDim;
+
+        NArrayCore* Index;
     };
 
     NArrayCore* Add( NArrayCore* arr1, NArrayCore* arr2 );
@@ -157,6 +166,8 @@ namespace Flow
 
     NArrayCore* Unsqueeze( NArrayCore* arr, int dim );
 
+    NArrayCore* Index( NArrayCore* arr, int dim, NArrayCore* index );
+
     NArrayCore* Neg( NArrayCore* arr );
 
     NArrayCore* Sub( NArrayCore* arr1, NArrayCore* arr2 );
@@ -164,8 +175,6 @@ namespace Flow
     NArrayCore* Div( NArrayCore* arr1, NArrayCore* arr2 );
 
     NArrayCore* Mean( NArrayCore* arr );
-
-    NArrayCore* IndexSelect( NArrayCore* arr, int dim, NArrayCore* index );
 
     NArrayCore* Softmax( NArrayCore* arr );
 

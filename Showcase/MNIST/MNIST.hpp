@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 #include "Flow.h"
@@ -27,17 +28,17 @@ static void MNIST()
     testLabels.resize( 100 );
 
     Flow::NArray xTrain = Flow::Create( { 100, 784 }, trainImages );
-    Flow::NArray yTrain = Flow::Create( { 100 },      trainLabels );
-    Flow::NArray xTest  = Flow::Create( { 100, 784 }, testImages );
-    Flow::NArray yTest  = Flow::Create( { 100 },      trainLabels );
+    Flow::NArray yTrain = Flow::Create( { 100 }, trainLabels );
+    Flow::NArray xTest = Flow::Create( { 100, 784 }, testImages );
+    Flow::NArray yTest = Flow::Create( { 100 }, trainLabels );
 
     for ( int i = 0; i < 28; i++ )
     {
         for ( int j = 0; j < 28; j++ )
-            cout << setw(3) << right << xTrain.Get({ 73, i * 28 + j }) << " ";
+            cout << setw(3) << right << xTrain.Get({ 76, i * 28 + j }) << " ";
         cout << endl;
     }
-    cout << "Label: " << trainLabels[73] << endl;
+    cout << "Label: " << trainLabels[76] << endl;
 
     Flow::NArray w1 = Flow::Random({ 784, 128 });
     Flow::NArray b1 = Flow::Random({ 128 });
@@ -50,7 +51,7 @@ static void MNIST()
     {
         Flow::NArray a = ReLU( Add( MM( xTrain, w1 ), b1 ) );
         Flow::NArray yPred = Add( MM( a, w2 ), b2 );
-        Flow::NArray loss = Flow::CrossEntropy( yPred, yTrain );
+        Flow::NArray loss = CrossEntropy( yPred, yTrain );
 
         w1.GetGradient().Reset(0);
         b1.GetGradient().Reset(0);
@@ -73,12 +74,12 @@ vector<float> ReadImagesMNIST( string filePath )
     vector< vector< unsigned char > > images;
     ifstream file( filePath, ios::binary );
     if (!file.is_open())
-        Flow::Print("[Error] Cannot open MNIST image file.");
+        throw runtime_error("Cannot open MNIST image file.");
     int magicNumber = 0, numImages = 0, rows = 0, cols = 0;
     file.read( (char*)&magicNumber, 4 );
     magicNumber = __builtin_bswap32(magicNumber);
     if( magicNumber != 2051 )
-        Flow::Print("[Error] Invalid MNIST image file.");
+        throw runtime_error("Invalid MNIST image file.");
     file.read( (char*)&numImages, 4 );
     numImages = __builtin_bswap32(numImages);
     file.read( (char*)&rows, 4 );
@@ -93,10 +94,10 @@ vector<float> ReadImagesMNIST( string filePath )
     }
     file.close();
     vector<float> imagesData;
-    for ( auto v : images )
+    for ( auto image : images )
     {
-        for ( auto c : v )
-            imagesData.push_back(static_cast<float>(c));
+        for ( auto imageChar : image )
+            imagesData.push_back(static_cast<float>(imageChar));
     }
     return imagesData;
 }
@@ -106,19 +107,19 @@ vector<float> ReadLabelsMNIST( string filePath )
     vector< unsigned char > labels;
     ifstream file( filePath, ios::binary );
     if (!file.is_open())
-        Flow::Print("[Error] Cannot open MNIST label file.");
+        throw runtime_error("Cannot open MNIST label file.");
     int magicNumber = 0, numLabels = 0;
     file.read( (char*)&magicNumber, 4 );
     magicNumber = __builtin_bswap32(magicNumber);
     if ( magicNumber != 2049 )
-        Flow::Print("[Error] Invalid MNIST label file.");
+        throw runtime_error("Invalid MNIST label file.");
     file.read( (char*)&numLabels, 4 );
     numLabels = __builtin_bswap32(numLabels);
     labels.resize(numLabels);
     file.read( (char*)labels.data(), numLabels );
     file.close();
     vector<float> labelsData;
-    for ( auto c : labels )
-        labelsData.push_back(static_cast<float>(c));
+    for ( auto label : labels )
+        labelsData.push_back(static_cast<float>(label));
     return labelsData;
 }

@@ -75,6 +75,8 @@ namespace Flow
 
     NArray Transpose( NArray arr, int firstDim, int secondDim );
 
+    NArray Broadcast( NArray arr, vector<int> shape );
+
     NArray Unsqueeze( NArray arr, int dim );
 
     NArray Neg( NArray arr );

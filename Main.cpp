@@ -10,6 +10,7 @@ int main()
 {
     //Test_Add();
     //Test_Backward();
+    //Test_Broadcast();
     //Test_Exp();
     //Test_Gather();
     //Test_MM();
@@ -17,5 +18,5 @@ int main()
 
     //SimpleNN();
     //MakeMore();
-    MNIST();
+    //MNIST();
 }

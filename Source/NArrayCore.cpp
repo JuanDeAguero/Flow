@@ -140,13 +140,11 @@ void Flow::NArrayCore::BuildTopo( NArrayCore* current, unordered_set<NArrayCore*
         return;
     visited.insert(current);
     NArrayCore* first = current->Operands[0];
-    if (first)
-        BuildTopo( first, visited, topo );
+    if (first) BuildTopo( first, visited, topo );
     if ( current->Operands.size() != 1 )
     {
         NArrayCore* second = current->Operands[1];
-        if (second)
-            BuildTopo( second, visited, topo );
+        if (second) BuildTopo( second, visited, topo );
     }
     topo.push_back(current);
 }
@@ -173,6 +171,7 @@ void Flow::NArrayCore::Backward()
         case Operation::BROADCAST: BackwardBroadcast(); break;
         case Operation::GATHER:    BackwardGather();    break;
         case Operation::UNSQUEEZE: BackwardUnsqueeze(); break;
+        case Operation::INDEX:     BackwardIndex();     break;
     }
 }
 
@@ -201,16 +200,11 @@ namespace Flow
         return Div( sum, n );
     }
 
-    NArrayCore* IndexSelect( NArrayCore* arr, int dim, NArrayCore* index )
-    {
-        return nullptr;
-    }
-
     NArrayCore* Softmax( NArrayCore* arr )
     {
-        //NArrayCore* index = new NArrayCore( { 1 }, { 0 } );
-        //NArrayCore* max = IndexSelect( Max( arr, 1, true ), 1, index );
-        //return Sub( arr, Sub( max, Log( Sum( Exp( Sub( arr, max ) ), 1, true ) ) ) );
+        NArrayCore* index = new NArrayCore( { 1 }, { 0 } );
+        NArrayCore* max = Index( Max( arr, 1, true ), 1, index );
+        return Sub( arr, Sub( max, Log( Sum( Exp( Sub( arr, max ) ), 1, true ) ) ) );
         return nullptr;
     }
 

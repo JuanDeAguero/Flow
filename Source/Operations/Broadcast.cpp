@@ -1,5 +1,7 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#include <stdexcept>
+
 #include "Flow/NArrayCore.h"
 #include "Flow/Print.h"
 
@@ -18,11 +20,7 @@ namespace Flow
             if ( shape1[i] == shape2[i] ) shape[i] = shape1[i];
             else if ( shape1[i] == 1 ) shape[i] = shape2[i];
             else if ( shape2[i] == 1 ) shape[i] = shape1[i];
-            else
-            {
-                Print("[Error] The arrays are not compatible for broadcast.");
-                return {};
-            }
+            else throw runtime_error("The arrays are not compatible for broadcast.");
         }
         return shape;
     }
@@ -30,19 +28,13 @@ namespace Flow
     NArrayCore* Flow::Broadcast( NArrayCore* arr, vector<int> shape )
     {
         if ( shape.size() < arr->GetShape().size() )
-        {
-            Print("[Error] Incompatible shape for broadcast.");
-            return nullptr;
-        }
-        for (int i = 1; i <= arr->GetShape().size(); i++)
+            throw runtime_error("Incompatible shape for broadcast.");
+        for ( int i = 1; i <= arr->GetShape().size(); i++ )
         {
             if ( shape[ shape.size() - i ] != arr->GetShape()[ arr->GetShape().size() - i ] &&
                 arr->GetShape()[ arr->GetShape().size() - i ] != 1 &&
                 shape[ shape.size() - i ] != 1 )
-            {
-                Print("[Error] Incompatible shape for broadcast.");
-                return nullptr;
-            }
+                throw runtime_error("Incompatible shape for broadcast.");
         }
         vector<float> data( SizeFromShape(shape), 0.0f );
         vector<int> position( shape.size(), 0 );
@@ -52,8 +44,7 @@ namespace Flow
             for ( int j = 0; j < arr->GetShape().size(); j++ )
             {
                 int coord = position[ shape.size() - arr->GetShape().size() + j ];
-                if ( arr->GetShape()[j] == 1 )
-                    coord = 0;
+                if ( arr->GetShape()[j] == 1 ) coord = 0;
                 originalCoords.push_back(coord);
             }
             data[i] = arr->Get(originalCoords);
@@ -71,30 +62,25 @@ namespace Flow
 void Flow::NArrayCore::BackwardBroadcast()
 {
     if ( Operands.size() != 1 )
-    {
-        Print("[Error] Invalid number of operands in BackwardBroadcast.");
-        return;
-    }
+        throw runtime_error("Invalid number of operands in BackwardBroadcast.");
     NArrayCore* operand = Operands[0];
     vector<float> operandGradient( operand->Data.size(), 0.0f );
     vector<int> operandShape = operand->Shape;
-    vector<int> shape = this->Shape;
-    vector<int> position( shape.size(), 0 );
+    vector<int> position( Shape.size(), 0 );
     for ( int i = 0; i < Gradient->Data.size(); i++ )
     {
         int index = 0;
         for ( int j = 0; j < operandShape.size(); j++ )
         {
-            int coord = position[ shape.size() - operandShape.size() + j ];
-            if ( operandShape[j] == 1 )
-                coord = 0;
+            int coord = position[ Shape.size() - operandShape.size() + j ];
+            if ( operandShape[j] == 1 ) coord = 0;
             index += coord * operand->Stride[j];
         }
         operandGradient[index] += Gradient->Data[i];
-        for ( int j = shape.size() - 1; j >= 0; j-- )
+        for ( int j = Shape.size() - 1; j >= 0; j-- )
         {
             position[j]++;
-            if ( position[j] < shape[j] ) break;
+            if ( position[j] < Shape[j] ) break;
             else position[j] = 0;
         }
     }

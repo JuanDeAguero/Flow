@@ -80,8 +80,7 @@ static bool Test_Add()
     arr2 = Flow::Create( { 1, 4 }, { 1, 2, 3, 4 } );
     arr3 = Flow::Add( arr1, arr2 );
     expected = { 2, 3, 4, 5, 3, 4, 5, 6, 4, 5, 6, 7 };
-    if ( expected == arr3.Get() && arr3.GetShape()[0] == 3 && arr3.GetShape()[1] == 4 && !arr3.GetShape()[2] )
-         { Flow::Print("Test_Add_10 PASSED"); numPassed++; }
+    if ( expected == arr3.Get() && arr3.GetShape()[0] == 3 && arr3.GetShape()[1] == 4 && !arr3.GetShape()[2] ) { Flow::Print("Test_Add_10 PASSED"); numPassed++; }
     else Flow::Print("Test_Add_10 FAILED");
 
     arr1 = Flow::Create( { 2, 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8,  8, 7, 6, 5, 4, 3, 2, 1, 0 } );
@@ -134,6 +133,6 @@ static bool Test_Add()
     else Flow::Print("Test_Add_17 FAILED");
 
     int numTests = 17;
-    Flow::Print("Test_Gather " + to_string(numPassed) + "/" + to_string(numTests));
+    Flow::Print("Test_Add " + to_string(numPassed) + "/" + to_string(numTests));
     if ( numPassed == numTests ) return true;
 }

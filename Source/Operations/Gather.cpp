@@ -1,9 +1,9 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#include <vector>
+
 #include "Flow/NArrayCore.h"
 #include "Flow/Print.h"
-
-#include <vector>
 
 namespace Flow
 {

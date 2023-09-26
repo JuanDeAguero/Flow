@@ -2,6 +2,7 @@
 
 #include "Test/TestAdd.hpp"
 #include "Test/TestBackward.hpp"
+#include "Test/TestBroadcast.hpp"
 #include "Test/TestExp.hpp"
 #include "Test/TestGather.hpp"
 #include "Test/TestMM.hpp"

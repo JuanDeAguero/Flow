@@ -107,22 +107,22 @@ namespace Flow
 
     NArray Exp( NArray arr )
     {
-        return NArray(Exp(arr.GetCore()));
+        return NArray( Exp(arr.GetCore()) );
     }
 
     NArray Tanh( NArray arr )
     {
-        return NArray(Tanh(arr.GetCore()));
+        return NArray( Tanh(arr.GetCore()) );
     }
 
     NArray ReLU( NArray arr )
     {
-        return NArray(ReLU(arr.GetCore()));
+        return NArray( ReLU(arr.GetCore()) );
     }
 
     NArray Log( NArray arr )
     {
-        return NArray(Log(arr.GetCore()));
+        return NArray( Log(arr.GetCore()) );
     }
 
     NArray Sum( NArray arr, int dim, bool keepDim )
@@ -132,12 +132,17 @@ namespace Flow
 
     NArray Max( NArray arr, int dim, bool keepDim )
     {
-        return NArray(Max( arr.GetCore(), dim, keepDim ));
+        return NArray( Max( arr.GetCore(), dim, keepDim ) );
     }
 
     NArray Transpose( NArray arr, int firstDim, int secondDim )
     {
         return NArray( Transpose( arr.GetCore(), firstDim, secondDim ) );
+    }
+
+    NArray Broadcast( NArray arr, vector<int> shape )
+    {
+        return NArray( Broadcast( arr.GetCore(), shape ) );
     }
 
     NArray Unsqueeze( NArray arr, int dim )
@@ -147,7 +152,7 @@ namespace Flow
 
     NArray Neg( NArray arr )
     {
-        return NArray(Neg(arr.GetCore()));
+        return NArray( Neg(arr.GetCore()) );
     }
 
     NArray Sub( NArray arr1, NArray arr2 )
@@ -162,7 +167,7 @@ namespace Flow
 
     NArray Mean( NArray arr )
     {
-        return NArray(Mean(arr.GetCore()));
+        return NArray( Mean(arr.GetCore()) );
     }
 
     NArray Softmax( NArray arr )
