@@ -87,13 +87,16 @@ float learningRate = 0.1f;
 for ( int epoch = 0; epoch < 100; epoch++ )
 {
 ```
-Simple two layered network with cross entropy loss function.
+Simple two layered network. 784 -> 128 -> 10<br>
+ReLU is the activation function.<br>
+Cross entropy is the loss function.
 ```bash
     Flow::NArray a = ReLU( Add( MM( xTrain, w1 ), b1 ) );
     Flow::NArray yPred = Add( MM( a, w2 ), b2 );
     Flow::NArray loss = CrossEntropy( yPred, yTrain );
 ```
-Reset the gradients and backpropagate the loss.
+Reset the gradients and backpropagate the loss.<br>
+The autograd will do its magic.
 ```bash
     w1.GetGradient().Reset(0);
     b1.GetGradient().Reset(0);
@@ -102,6 +105,7 @@ Reset the gradients and backpropagate the loss.
 
     loss.Backpropagate();
 ```
+Gradient descent.<br>
 Modify the weights and biases using their gradients and the learning rate.
 ```bash
     w1 = Sub( w1.Copy(), Mul( w1.GetGradient(), learningRate ) );
