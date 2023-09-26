@@ -33,9 +33,9 @@ Print one the train narrays.
 ```bash
 for ( int i = 0; i < 28; i++ )
 {
-  for ( int j = 0; j < 28; j++ )
-    cout << setw(3) << right << xTrain.Get({ 76, i * 28 + j }) << " ";
-  cout << endl;
+    for ( int j = 0; j < 28; j++ )
+        cout << setw(3) << right << xTrain.Get({ 76, i * 28 + j }) << " ";
+    cout << endl;
 }
 cout << "Label: " << trainLabels[76] << endl;
 ```
@@ -68,35 +68,49 @@ cout << "Label: " << trainLabels[76] << endl;
   0   0   0   0 136 253 253 253 212 135 132  16   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0 
   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0 
   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0 
-  0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0 
+  0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+Label: 5
 ```
-
+Create random weights and biases.
 ```bash
 Flow::NArray w1 = Flow::Random({ 784, 128 });
 Flow::NArray b1 = Flow::Random({ 128 });
 Flow::NArray w2 = Flow::Random({ 128, 10 });
 Flow::NArray b2 = Flow::Random({ 10 });
-    
+```
+Set a learing rate of 0.1.
+```bash
 float learningRate = 0.1f;
-
+```
+100 iterations.
+```bash
 for ( int epoch = 0; epoch < 100; epoch++ )
 {
-  Flow::NArray a = ReLU( Add( MM( xTrain, w1 ), b1 ) );
-  Flow::NArray yPred = Add( MM( a, w2 ), b2 );
-  Flow::NArray loss = CrossEntropy( yPred, yTrain );
+```
+Simple two layered network with cross entropy loss function.
+```bash
+    Flow::NArray a = ReLU( Add( MM( xTrain, w1 ), b1 ) );
+    Flow::NArray yPred = Add( MM( a, w2 ), b2 );
+    Flow::NArray loss = CrossEntropy( yPred, yTrain );
+```
+Reset the gradients and backpropagate the loss.
+```bash
+    w1.GetGradient().Reset(0);
+    b1.GetGradient().Reset(0);
+    w2.GetGradient().Reset(0);
+    b2.GetGradient().Reset(0);
 
-  w1.GetGradient().Reset(0);
-  b1.GetGradient().Reset(0);
-  w2.GetGradient().Reset(0);
-  b2.GetGradient().Reset(0);
-
-  loss.Backpropagate();
-
-  w1 = Sub( w1.Copy(), Mul( w1.GetGradient(), learningRate ) );
-  b1 = Sub( b1.Copy(), Mul( b1.GetGradient(), learningRate ) );
-  w2 = Sub( w2.Copy(), Mul( w2.GetGradient(), learningRate ) );
-  b2 = Sub( b2.Copy(), Mul( b2.GetGradient(), learningRate ) );
-
-  Flow::Print(loss);
+    loss.Backpropagate();
+```
+Modify the weights and biases using their gradients and the learning rate.
+```bash
+    w1 = Sub( w1.Copy(), Mul( w1.GetGradient(), learningRate ) );
+    b1 = Sub( b1.Copy(), Mul( b1.GetGradient(), learningRate ) );
+    w2 = Sub( w2.Copy(), Mul( w2.GetGradient(), learningRate ) );
+    b2 = Sub( b2.Copy(), Mul( b2.GetGradient(), learningRate ) );
+```
+Print the loss in every epoch.
+```bash
+    Flow::Print(loss);
 }
 ```
