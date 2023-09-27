@@ -1,5 +1,7 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#include <stdexcept>
+
 #include "ElementWise.hpp"
 #include "Flow/NArrayCore.h"
 
@@ -12,7 +14,8 @@ namespace Flow
         Flow::NArrayCore* arr2B = Flow::Broadcast( arr2, shape );
         auto op = NArrayCore::Operation::MUL;
         NArrayCore* result = new NArrayCore( arr1B->GetShape(), arr1B->Get(), { arr1B, arr2B }, op );
-        ElementWise( {}, arr1B, arr2B, result, op );
+        vector<int> index = {};
+        ElementWise( index, arr1B, arr2B, result, op );
         return result;
     }
 
@@ -25,8 +28,8 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardMul()
 {
-    if (Operands.size() != 2)
-        return;
+    if ( Operands.size() != 2 )
+        throw runtime_error("Invalid number of operands in BackwardMul.");
     NArrayCore* operand1 = Operands[0];
     NArrayCore* operand2 = Operands[1];
     for ( int i = 0; i < Data.size(); i++ )

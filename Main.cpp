@@ -16,7 +16,7 @@ int main()
     //Test_MM();
     //Test_Mul();
 
-    //SimpleNN();
+    SimpleNN();
     //MakeMore();
     //MNIST();
 }

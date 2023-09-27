@@ -7,24 +7,24 @@
 
 namespace Flow
 {
-    vector<int> FlatToMultiIndex(int flatIndex, const vector<int>& shape)
+    static vector<int> FlatToMultiIndex( int index, vector<int> shape )
     {
         vector<int> multiIndex(shape.size());
-        for (int i = shape.size() - 1; i >= 0; --i)
+        for ( int i = shape.size() - 1; i >= 0; i-- )
         {
-            multiIndex[i] = flatIndex % shape[i];
-            flatIndex /= shape[i];
+            multiIndex[i] = index % shape[i];
+            index /= shape[i];
         }
         return multiIndex;
     }
 
-    int MultiToFlatIndex(const vector<int>& multiIndex, const vector<int>& shape)
+    static int MultiToFlatIndex( vector<int> index, vector<int> shape )
     {
         int flatIndex = 0;
         int stride = 1;
-        for (int i = shape.size() - 1; i >= 0; --i)
+        for ( int i = shape.size() - 1; i >= 0; i-- )
         {
-            flatIndex += multiIndex[i] * stride;
+            flatIndex += index[i] * stride;
             stride *= shape[i];
         }
         return flatIndex;
@@ -32,30 +32,30 @@ namespace Flow
 
     NArrayCore* Gather( NArrayCore* arr, int dim, NArrayCore* index )
     {
-        if (arr->GetShape().size() != index->GetShape().size())
+        if ( arr->GetShape().size() != index->GetShape().size() )
             return nullptr;
-        if (dim < 0 || dim >= arr->GetShape().size())
+        if ( dim < 0 || dim >= arr->GetShape().size() )
             return nullptr;
-        for (int d = 0; d < arr->GetShape().size(); d++)
+        for ( int i = 0; i < arr->GetShape().size(); i++ )
         {
-            if (d != dim && index->GetShape()[d] > arr->GetShape()[d])
+            if ( i != dim && index->GetShape()[i] > arr->GetShape()[i] )
                 return nullptr;
         }
-        vector<float> resultData;
+        vector<float> data;
         vector<int> shape = index->GetShape();
-        const vector<float>& arrData = arr->Get();
-        const vector<float>& indexData = index->Get();
-        for (int flat_idx = 0; flat_idx < indexData.size(); ++flat_idx)
+        vector<float> arrData = arr->Get();
+        vector<float> indexData = index->Get();
+        for ( int i = 0; i < indexData.size(); i++ )
         {
-            vector<int> multiIndex = FlatToMultiIndex(flat_idx, shape);
-            int idx = static_cast<int>(indexData[flat_idx]);
-            if (idx >= arr->GetShape()[dim])
+            vector<int> multiIndex = FlatToMultiIndex( i, shape );
+            int indexElement = static_cast<int>(indexData[i]);
+            if ( indexElement >= arr->GetShape()[dim] )
                 return nullptr;
-            multiIndex[dim] = idx;
-            int dataIdx = MultiToFlatIndex(multiIndex, arr->GetShape());
-            resultData.push_back(arrData[dataIdx]);
+            multiIndex[dim] = indexElement;
+            int flatIndex = MultiToFlatIndex( multiIndex, arr->GetShape() );
+            data.push_back(arrData[flatIndex]);
         }
-        NArrayCore* result = new NArrayCore(shape, resultData, { arr }, NArrayCore::Operation::GATHER);
+        NArrayCore* result = new NArrayCore( shape, data, { arr }, NArrayCore::Operation::GATHER );
         result->GatherDim = dim;
         result->GatherIndex = index;
         return result;
@@ -65,13 +65,12 @@ namespace Flow
 void Flow::NArrayCore::BackwardGather()
 {
     NArrayCore* operand = Operands[0];
-
-    for (int flat_idx = 0; flat_idx < GatherIndex->Data.size(); ++flat_idx)
+    for ( int i = 0; i < GatherIndex->Data.size(); i++ )
     {
-        vector<int> multiIndex = FlatToMultiIndex(flat_idx, GatherIndex->Shape);
-        int gather_idx = static_cast<int>(GatherIndex->Data[flat_idx]);
-        multiIndex[GatherDim] = gather_idx;
-        int dataIdx = MultiToFlatIndex(multiIndex, operand->Shape);
-        operand->Gradient->Data[dataIdx] += Gradient->Data[flat_idx];
+        vector<int> multiIndex = FlatToMultiIndex( i, GatherIndex->Shape );
+        int indexElement = static_cast<int>(GatherIndex->Data[i]);
+        multiIndex[GatherDim] = indexElement;
+        int flatIndex = MultiToFlatIndex( multiIndex, operand->Shape );
+        operand->Gradient->Data[flatIndex] += Gradient->Data[i];
     }
 }

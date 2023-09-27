@@ -71,6 +71,6 @@ static bool Test_Broadcast()
     else Flow::Print("Test_Broadcast_9 FAILED");
 
     int numTests = 9;
-    Flow::Print("Test_Broadcast " + to_string(numPassed) + "/" + to_string(numTests));
+    Flow::Print( "Test_Broadcast " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
 }

@@ -133,6 +133,6 @@ static bool Test_Add()
     else Flow::Print("Test_Add_17 FAILED");
 
     int numTests = 17;
-    Flow::Print("Test_Add " + to_string(numPassed) + "/" + to_string(numTests));
+    Flow::Print( "Test_Add " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
 }

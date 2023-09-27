@@ -81,6 +81,6 @@ static bool Test_Gather()
     else Flow::Print("Test_Gather_10 FAILED");
 
     int numTests = 10;
-    Flow::Print("Test_Gather " + to_string(numPassed) + "/" + to_string(numTests));
+    Flow::Print( "Test_Gather " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
 }

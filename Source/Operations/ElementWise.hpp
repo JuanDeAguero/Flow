@@ -6,7 +6,7 @@
 
 namespace Flow
 {
-    static void ElementWise( vector<int> index, NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op )
+    static void ElementWise( vector<int>& index, NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op )
     {
         if ( index.size() == arr1->GetShape().size() )
         {
@@ -23,7 +23,7 @@ namespace Flow
         }
         for ( int i = 0; i < arr1->GetShape()[index.size()]; i++ )
         {
-            std::vector<int> newIndex = index;
+            vector<int> newIndex = index;
             newIndex.push_back(i);
             ElementWise( newIndex, arr1, arr2, result, op );
         }
