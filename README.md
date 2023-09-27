@@ -22,14 +22,14 @@ testImages.resize( 784 * 100 );
 testLabels.resize( 100 );
 
 ```
-Create the train and test narrays.
+Create the train and test NArrays.
 ```bash
 Flow::NArray xTrain = Flow::Create( { 100, 784 }, trainImages );
 Flow::NArray yTrain = Flow::Create( { 100 }, trainLabels );
 Flow::NArray xTest = Flow::Create( { 100, 784 }, testImages );
 Flow::NArray yTest = Flow::Create( { 100 }, trainLabels );
 ```
-Print one the train narrays.
+Print one the train NArrays and its label.
 ```bash
 for ( int i = 0; i < 28; i++ )
 {
