@@ -13,8 +13,10 @@ int main()
     //Test_Broadcast();
     //Test_Exp();
     //Test_Gather();
+    Test_Index();
     //Test_MM();
     //Test_Mul();
+    //Test_ReLU();
 
     //SimpleNN();
     //MakeMore();

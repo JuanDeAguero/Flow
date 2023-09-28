@@ -7,29 +7,6 @@
 
 namespace Flow
 {
-    static vector<int> FlatToMultiIndex( int index, vector<int> shape )
-    {
-        vector<int> multiIndex(shape.size());
-        for ( int i = shape.size() - 1; i >= 0; i-- )
-        {
-            multiIndex[i] = index % shape[i];
-            index /= shape[i];
-        }
-        return multiIndex;
-    }
-
-    static int MultiToFlatIndex( vector<int> index, vector<int> shape )
-    {
-        int flatIndex = 0;
-        int stride = 1;
-        for ( int i = shape.size() - 1; i >= 0; i-- )
-        {
-            flatIndex += index[i] * stride;
-            stride *= shape[i];
-        }
-        return flatIndex;
-    }
-
     NArrayCore* Gather( NArrayCore* arr, int dim, NArrayCore* index )
     {
         if ( arr->GetShape().size() != index->GetShape().size() )
@@ -41,21 +18,21 @@ namespace Flow
             if ( i != dim && index->GetShape()[i] > arr->GetShape()[i] )
                 return nullptr;
         }
-        vector<float> data;
-        vector<int> shape = index->GetShape();
+        vector<float> resultData;
+        vector<int> resultShape = index->GetShape();
         vector<float> arrData = arr->Get();
         vector<float> indexData = index->Get();
         for ( int i = 0; i < indexData.size(); i++ )
         {
-            vector<int> multiIndex = FlatToMultiIndex( i, shape );
+            vector<int> multiIndex = FlatToMultiIndex( i, resultShape );
             int indexElement = static_cast<int>(indexData[i]);
             if ( indexElement >= arr->GetShape()[dim] )
                 return nullptr;
             multiIndex[dim] = indexElement;
             int flatIndex = MultiToFlatIndex( multiIndex, arr->GetShape() );
-            data.push_back(arrData[flatIndex]);
+            resultData.push_back(arrData[flatIndex]);
         }
-        NArrayCore* result = new NArrayCore( shape, data, { arr }, NArrayCore::Operation::GATHER );
+        NArrayCore* result = new NArrayCore( resultShape, resultData, { arr }, NArrayCore::Operation::GATHER );
         result->GatherDim = dim;
         result->GatherIndex = index;
         return result;
@@ -64,6 +41,7 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardGather()
 {
+    throw runtime_error("Not implemented.");
     NArrayCore* operand = Operands[0];
     for ( int i = 0; i < GatherIndex->Data.size(); i++ )
     {

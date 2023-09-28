@@ -6,7 +6,7 @@
 
 namespace Flow
 {
-    NArrayCore* Unsqueeze(NArrayCore* arr, int dim)
+    NArrayCore* Unsqueeze( NArrayCore* arr, int dim )
     {
         throw runtime_error("Not implemented.");
     }

@@ -27,7 +27,7 @@ static bool Test_MM()
     if ( expected == result.Get() ) { Flow::Print("Test_MM_2 PASSED"); numPassed++; }
     else Flow::Print("Test_MM_2 FAILED");
 
-    int numTests = 1;
+    int numTests = 2;
     Flow::Print( "Test_MM " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
 }

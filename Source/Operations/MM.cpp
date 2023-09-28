@@ -16,7 +16,7 @@ namespace Flow
         int m = arr1->GetShape()[0];
         int n = arr1->GetShape()[1];
         int p = arr2->GetShape()[1];
-        vector<float> data( m * p, 0.0f );
+        vector<float> resultData( m * p, 0.0f );
         for ( int i = 0; i < m; i++ )
         {
             for ( int j = 0; j < p; j++ )
@@ -24,15 +24,16 @@ namespace Flow
                 float sum = 0.0f;
                 for ( int k = 0; k < n; k++ )
                     sum += arr1->Get({ i, k }) * arr2->Get({ k, j });
-                data[ i * p + j ] = sum;
+                resultData[ i * p + j ] = sum;
             }
         }
-        return new NArrayCore( { m, p }, data, { arr1, arr2 }, NArrayCore::Operation::MM );
+        return new NArrayCore( { m, p }, resultData, { arr1, arr2 }, NArrayCore::Operation::MM );
     }
 }
 
 void Flow::NArrayCore::BackwardMM()
 {
+    throw runtime_error("Not implemented.");
     NArrayCore* operand1 = Operands[0];
     NArrayCore* operand2 = Operands[1];
     int m = operand1->GetShape()[0];

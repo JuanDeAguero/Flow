@@ -242,4 +242,27 @@ namespace Flow
         for ( float value : arr->Get() )
             Print(value);
     }
+
+    vector<int> FlatToMultiIndex( int index, vector<int> shape )
+    {
+        vector<int> multiIndex(shape.size());
+        for ( int i = shape.size() - 1; i >= 0; i-- )
+        {
+            multiIndex[i] = index % shape[i];
+            index /= shape[i];
+        }
+        return multiIndex;
+    }
+
+    int MultiToFlatIndex( vector<int> index, vector<int> shape )
+    {
+        int flatIndex = 0;
+        int stride = 1;
+        for ( int i = shape.size() - 1; i >= 0; i-- )
+        {
+            flatIndex += index[i] * stride;
+            stride *= shape[i];
+        }
+        return flatIndex;
+    }
 }

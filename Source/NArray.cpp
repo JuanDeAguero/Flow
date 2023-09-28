@@ -150,6 +150,11 @@ namespace Flow
         return NArray( Unsqueeze( arr.GetCore(), dim ) );
     }
 
+    NArray Index( NArray arr, int dim, NArray index )
+    {
+        return NArray( Index( arr.GetCore(), dim, index.GetCore() ) );
+    }
+
     NArray Neg( NArray arr )
     {
         return NArray( Neg(arr.GetCore()) );

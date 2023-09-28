@@ -25,7 +25,7 @@ namespace Flow
         return shape;
     }
 
-    NArrayCore* Flow::Broadcast( NArrayCore* arr, vector<int> shape )
+    NArrayCore* Flow::Broadcast(NArrayCore* arr, vector<int> shape)
     {
         if ( shape.size() < arr->GetShape().size() )
             throw runtime_error("Incompatible shape for broadcast.");
@@ -36,10 +36,10 @@ namespace Flow
                 shape[ shape.size() - i ] != 1 )
                 throw runtime_error("Incompatible shape for broadcast.");
         }
-        vector<float> data( SizeFromShape(shape), 0.0f );
-        vector<int> position( shape.size(), 0 );
+        vector<float> resultData( SizeFromShape(shape), 0.0f );
         for ( int i = 0; i < SizeFromShape(shape); i++ )
         {
+            vector<int> position = FlatToMultiIndex( i, shape );
             vector<int> originalCoords;
             for ( int j = 0; j < arr->GetShape().size(); j++ )
             {
@@ -47,42 +47,33 @@ namespace Flow
                 if ( arr->GetShape()[j] == 1 ) coord = 0;
                 originalCoords.push_back(coord);
             }
-            data[i] = arr->Get(originalCoords);
-            for (int j = shape.size() - 1; j >= 0; j-- )
-            {
-                position[j]++;
-                if (position[j] < shape[j]) break;
-                else position[j] = 0;
-            }
+            int flatIndex = MultiToFlatIndex( originalCoords, arr->GetShape() );
+            resultData[i] = arr->Get()[flatIndex];
         }
-        return new NArrayCore( shape, data, { arr }, NArrayCore::Operation::BROADCAST );
+        return new NArrayCore( shape, resultData, { arr }, NArrayCore::Operation::BROADCAST );
     }
 }
 
 void Flow::NArrayCore::BackwardBroadcast()
 {
+    throw runtime_error("Not implemented.");
     if ( Operands.size() != 1 )
         throw runtime_error("Invalid number of operands in BackwardBroadcast.");
     NArrayCore* operand = Operands[0];
     vector<float> operandGradient( operand->Data.size(), 0.0f );
     vector<int> operandShape = operand->Shape;
-    vector<int> position( Shape.size(), 0 );
     for ( int i = 0; i < Gradient->Data.size(); i++ )
     {
-        int index = 0;
+        vector<int> position = FlatToMultiIndex( i, Shape );
+        vector<int> operandCoords;
         for ( int j = 0; j < operandShape.size(); j++ )
         {
             int coord = position[ Shape.size() - operandShape.size() + j ];
             if ( operandShape[j] == 1 ) coord = 0;
-            index += coord * operand->Stride[j];
+            operandCoords.push_back(coord);
         }
-        operandGradient[index] += Gradient->Data[i];
-        for ( int j = Shape.size() - 1; j >= 0; j-- )
-        {
-            position[j]++;
-            if ( position[j] < Shape[j] ) break;
-            else position[j] = 0;
-        }
+        int operandIndex = MultiToFlatIndex( operandCoords, operandShape );
+        operandGradient[operandIndex] += Gradient->Data[i];
     }
     for ( int i = 0; i < operand->Gradient->Data.size(); i++ )
         operand->Gradient->Data[i] += operandGradient[i];

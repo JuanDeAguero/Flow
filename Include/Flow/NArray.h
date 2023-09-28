@@ -79,6 +79,8 @@ namespace Flow
 
     NArray Unsqueeze( NArray arr, int dim );
 
+    NArray Index( NArray arr, int dim, NArray index );
+
     NArray Neg( NArray arr );
 
     NArray Sub( NArray arr1, NArray arr2 );

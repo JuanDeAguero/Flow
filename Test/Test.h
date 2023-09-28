@@ -5,6 +5,8 @@
 #include "Test/TestBroadcast.hpp"
 #include "Test/TestExp.hpp"
 #include "Test/TestGather.hpp"
+#include "Test/TestIndex.hpp"
 #include "Test/TestMM.hpp"
 #include "Test/TestMul.hpp"
+#include "Test/TestReLU.hpp"
 #include "Test/TestSum.hpp"

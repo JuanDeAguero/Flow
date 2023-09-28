@@ -187,4 +187,8 @@ namespace Flow
     NArrayCore* RandomCore( vector<int> shape );
 
     void Print( NArrayCore* arr );
+
+    vector<int> FlatToMultiIndex( int index, vector<int> shape );
+    
+    int MultiToFlatIndex( vector<int> index, vector<int> shape );
 }
