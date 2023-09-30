@@ -21,7 +21,7 @@ static bool Test_Add()
     vector<float> data = { 1, 11, 102, 4, 14, 105, 7, 17, 108 };
     vector<int> shape = { 3, 3 };
     vector<float> dataGrad1 = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-    vector<float> dataGrad2 = { 3, 3, 3};
+    vector<float> dataGrad2 = { 3, 3, 3 };
     vector<int> shapeGrad1 = { 3, 3 };
     vector<int> shapeGrad2 = { 3 };
     if ( Flow::Equals( data, result.Get(), 0.01f ) && shape == result.GetShape() && 

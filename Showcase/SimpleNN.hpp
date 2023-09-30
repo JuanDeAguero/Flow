@@ -34,7 +34,6 @@ static void SimpleNN()
     {
         Flow::NArray a = Tanh( Add( MM( xNorm, w1 ), b1 ) );
         Flow::NArray yPred = Add( MM( a, w2 ), b2 );
-
         Flow::NArray loss = Pow( Sub( yPred, yNorm ), 2.0f );
 
         w1.GetGradient().Reset(0);

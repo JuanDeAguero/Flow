@@ -196,6 +196,11 @@ namespace Flow
         return NArray(RandomCore(shape));
     }
 
+    NArray Ones( vector<int> shape )
+    {
+        return NArray(OnesCore(shape));
+    }
+
     void Print( NArray arr )
     {
         Print(arr.GetCore());

@@ -32,6 +32,9 @@ static void MNIST()
     Flow::NArray xTest = Flow::Create( { 100, 784 }, testImages );
     Flow::NArray yTest = Flow::Create( { 100 }, trainLabels );
 
+    xTrain = Flow::Div( xTrain.Copy(), Flow::Create( { 1 }, { 255 } ) );
+    xTest = Flow::Div( xTest.Copy(), Flow::Create( { 1 }, { 255 } ) );
+
     for ( int i = 0; i < 28; i++ )
     {
         for ( int j = 0; j < 28; j++ )

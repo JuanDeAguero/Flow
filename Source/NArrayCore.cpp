@@ -233,6 +233,13 @@ namespace Flow
         return new NArrayCore( shape, data );
     }
 
+    NArrayCore* OnesCore( vector<int> shape )
+    {
+        int size = SizeFromShape(shape);
+        vector<float> data( size, 1.0f );
+        return new NArrayCore( shape, data );
+    }
+
     void Print( NArrayCore* arr )
     {
         for ( float value : arr->Get() )

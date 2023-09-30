@@ -19,12 +19,7 @@ namespace Flow
                 throw invalid_argument("All indices must be integers.");
             indices[i] = static_cast<int>(indexData[i]);
             if ( indices[i] < 0 || indices[i] >= arr->GetShape()[dim] )
-            {
-                Print(arr->GetShape().size());
-                Print(static_cast<float>(dim));
-                Print(index->GetShape().size());
                 throw out_of_range("Index out of bounds for dimension specified.");
-            }
         }
         vector<int> resultShape = arr->GetShape();
         resultShape[dim] = indices.size();

@@ -97,5 +97,7 @@ namespace Flow
 
     NArray Random( vector<int> shape );
 
+    NArray Ones( vector<int> shape );
+
     void Print( NArray arr );
 }

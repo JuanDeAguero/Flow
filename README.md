@@ -87,7 +87,7 @@ float learningRate = 0.1f;
 for ( int epoch = 0; epoch < 100; epoch++ )
 {
 ```
-Simple two layered network. 784 -> 128 -> 10<br>
+Simple two-layer network. 784 -> 128 -> 10<br>
 ReLU is the activation function.<br>
 Cross entropy is the loss function.
 ```bash

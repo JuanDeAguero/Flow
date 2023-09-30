@@ -8,18 +8,18 @@
 
 int main()
 {
-    Test_Add();
-    Test_Broadcast();
-    Test_CrossEntropy();
-    Test_Exp();
-    Test_Gather();
-    Test_Index();
-    Test_Max();
-    Test_MM();
-    Test_Mul();
-    Test_ReLU();
-    Test_Sum();
-    Test_Unsqueeze();
+    //Test_Add();
+    //Test_Broadcast();
+    //Test_CrossEntropy();
+    //Test_Exp();
+    //Test_Gather();
+    //Test_Index();
+    //Test_Max();
+    //Test_MM();
+    //Test_Mul();
+    //Test_ReLU();
+    //Test_Sum();
+    //Test_Unsqueeze();
 
     //SimpleNN();
     //MakeMore();
