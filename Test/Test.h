@@ -1,7 +1,6 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
 #include "Test/TestAdd.hpp"
-#include "Test/TestBackward.hpp"
 #include "Test/TestBroadcast.hpp"
 #include "Test/TestCrossEntropy.hpp"
 #include "Test/TestExp.hpp"

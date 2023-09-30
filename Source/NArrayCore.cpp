@@ -206,7 +206,6 @@ namespace Flow
         NArrayCore* index = new NArrayCore( { 1 }, { 0 } );
         NArrayCore* max = Index( Max( arr, 1 ), 1, index );
         return Sub( arr, Sub( max, Log( Sum( Exp( Sub( arr, max ) ), 1 ) ) ) );
-        return nullptr;
     }
 
     NArrayCore* CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 )

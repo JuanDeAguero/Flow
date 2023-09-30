@@ -8,12 +8,12 @@ namespace Flow
 {
     NArrayCore* Unsqueeze( NArrayCore* arr, int dim )
     {
-        vector<int> inputShape = arr->GetShape();
-        if (dim < 0 || dim > inputShape.size())
+        vector<int> arrShape = arr->GetShape();
+        if ( dim < 0 || dim > arrShape.size() )
             throw out_of_range("Invalid dimension for Unsqueeze operation.");
-        inputShape.insert(inputShape.begin() + dim, 1);
+        arrShape.insert( arrShape.begin() + dim, 1 );
         vector<float> arrData = arr->Get();
-        NArrayCore* result = new NArrayCore(inputShape, arrData, { arr }, NArrayCore::Operation::UNSQUEEZE);
+        NArrayCore* result = new NArrayCore( arrShape, arrData, { arr }, NArrayCore::Operation::UNSQUEEZE );
         result->UnsqueezeDim = dim;
         return result;
     }
@@ -22,7 +22,6 @@ namespace Flow
 void Flow::NArrayCore::BackwardUnsqueeze()
 {
     NArrayCore* operand = Operands[0];
-    vector<int> reshapeGradientShape = operand->GetShape();
-    for (int i = 0; i < Gradient->Data.size(); i++)
+    for ( int i = 0; i < Gradient->Data.size(); i++ )
         operand->Gradient->Data[i] += Gradient->Data[i];
 }

@@ -26,7 +26,6 @@ add_executable(flow
     Source/Operations/Unsqueeze.cpp
     Source/Print.cpp
     Source/Vector.cpp
-    Test/Torch.cpp
 )
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Include)
