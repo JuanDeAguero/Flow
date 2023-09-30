@@ -41,7 +41,6 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardGather()
 {
-    throw runtime_error("Not implemented.");
     NArrayCore* operand = Operands[0];
     for ( int i = 0; i < GatherIndex->Data.size(); i++ )
     {

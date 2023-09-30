@@ -25,7 +25,7 @@ namespace Flow
         return shape;
     }
 
-    NArrayCore* Flow::Broadcast(NArrayCore* arr, vector<int> shape)
+    NArrayCore* Flow::Broadcast( NArrayCore* arr, vector<int> shape )
     {
         if ( shape.size() < arr->GetShape().size() )
             throw runtime_error("Incompatible shape for broadcast.");
@@ -56,7 +56,6 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardBroadcast()
 {
-    throw runtime_error("Not implemented.");
     if ( Operands.size() != 1 )
         throw runtime_error("Invalid number of operands in BackwardBroadcast.");
     NArrayCore* operand = Operands[0];

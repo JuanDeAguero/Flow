@@ -17,7 +17,6 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardExp()
 {
-    throw runtime_error("Not implemented.");
     NArrayCore* operand = Operands[0];
     for ( int i = 0; i < Data.size(); i++ )
     {

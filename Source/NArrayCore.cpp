@@ -195,26 +195,23 @@ namespace Flow
 
     NArrayCore* Mean( NArrayCore* arr )
     {
-        throw runtime_error("Not implemented.");
-        /*NArrayCore* sum = Sum( arr, -1, false );
+        NArrayCore* sum = Sum( arr, 0 );
         float numElements = static_cast<float>( SizeFromShape(arr->GetShape()) );
         NArrayCore* n = new NArrayCore( { 1 }, { numElements } );
-        return Div( sum, n );*/
+        return Div( sum, n );
     }
 
     NArrayCore* Softmax( NArrayCore* arr )
     {
-        throw runtime_error("Not implemented.");
-        /*NArrayCore* index = new NArrayCore( { 1 }, { 0 } );
-        NArrayCore* max = Index( Max( arr, 1, true ), 1, index );
-        return Sub( arr, Sub( max, Log( Sum( Exp( Sub( arr, max ) ), 1, true ) ) ) );
-        return nullptr;*/
+        NArrayCore* index = new NArrayCore( { 1 }, { 0 } );
+        NArrayCore* max = Index( Max( arr, 1 ), 1, index );
+        return Sub( arr, Sub( max, Log( Sum( Exp( Sub( arr, max ) ), 1 ) ) ) );
+        return nullptr;
     }
 
     NArrayCore* CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 )
     {
-        throw runtime_error("Not implemented.");
-        //return Neg( Mean( Gather( Softmax(arr1), 1, Unsqueeze( arr2, -1 ) ) ) );
+        return Neg( Mean( Gather( Softmax(arr1), 1, Unsqueeze( arr2, 1 ) ) ) );
     }
 
     int SizeFromShape( vector<int> shape )

@@ -33,7 +33,6 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardMM()
 {
-    throw runtime_error("Not implemented.");
     NArrayCore* operand1 = Operands[0];
     NArrayCore* operand2 = Operands[1];
     int m = operand1->GetShape()[0];

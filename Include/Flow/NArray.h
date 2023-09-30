@@ -69,13 +69,15 @@ namespace Flow
 
     NArray Log( NArray arr );
 
-    NArray Sum( NArray arr, int dim, bool keepDim );
+    NArray Sum( NArray arr, int dim );
 
-    NArray Max( NArray arr, int dim, bool keepDim );
+    NArray Max( NArray arr, int dim );
 
     NArray Transpose( NArray arr, int firstDim, int secondDim );
 
     NArray Broadcast( NArray arr, vector<int> shape );
+
+    NArray Gather( NArray arr, int dim, NArray index );
 
     NArray Unsqueeze( NArray arr, int dim );
 

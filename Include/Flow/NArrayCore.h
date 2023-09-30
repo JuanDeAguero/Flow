@@ -114,12 +114,8 @@ namespace Flow
         float Exponent;
 
         int SumDim;
-
-        bool SumKeepDim;
         
         int MaxDim;
-        
-        bool MaxKeepDim;
 
         int TransposeFirstDim, TransposeSecondDim;
 
@@ -152,9 +148,9 @@ namespace Flow
 
     NArrayCore* Log( NArrayCore* arr );
 
-    NArrayCore* Sum( NArrayCore* arr, int dim, bool keepDim );
+    NArrayCore* Sum( NArrayCore* arr, int dim );
 
-    NArrayCore* Max( NArrayCore* arr, int dim, bool keepDim );
+    NArrayCore* Max( NArrayCore* arr, int dim );
 
     NArrayCore* Reshape( NArrayCore* arr, vector<int> shape );
 

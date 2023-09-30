@@ -8,7 +8,6 @@ namespace Flow
 {
     NArrayCore* Log( NArrayCore* arr )
     {
-        throw runtime_error("Not implemented.");
         vector<float> resultData = arr->Get();
         for ( float& value : resultData )
         {
@@ -21,7 +20,6 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardLog()
 {
-    throw runtime_error("Not implemented.");
     NArrayCore* operand = Operands[0];
     for ( int i = 0; i < Data.size(); i++ )
     {

@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "Flow/NArrayCore.h"
+#include "Flow/Print.h"
 
 namespace Flow
 {
@@ -18,7 +19,12 @@ namespace Flow
                 throw invalid_argument("All indices must be integers.");
             indices[i] = static_cast<int>(indexData[i]);
             if ( indices[i] < 0 || indices[i] >= arr->GetShape()[dim] )
+            {
+                Print(arr->GetShape().size());
+                Print(static_cast<float>(dim));
+                Print(index->GetShape().size());
                 throw out_of_range("Index out of bounds for dimension specified.");
+            }
         }
         vector<int> resultShape = arr->GetShape();
         resultShape[dim] = indices.size();
@@ -32,11 +38,25 @@ namespace Flow
             int flatIndex = MultiToFlatIndex( multiIndex, arr->GetShape() );
             resultData[i] = arr->Get()[flatIndex];
         }
-        return new NArrayCore( resultShape, resultData, { arr, index }, NArrayCore::Operation::INDEX );
+        NArrayCore* result = new NArrayCore( resultShape, resultData, { arr, index }, NArrayCore::Operation::INDEX );
+        result->IndexDim = dim;
+        result->Index = index;
+        return result;
     }
 }
 
 void Flow::NArrayCore::BackwardIndex()
 {
-    throw runtime_error("Not implemented.");
+    NArrayCore* operand = Operands[0];
+    vector<float> indexData = Index->Get();
+    vector<int> indices(indexData.size());
+    for ( int i = 0; i < indexData.size(); i++ )
+        indices[i] = static_cast<int>(indexData[i]);
+    for ( int i = 0; i < Gradient->Data.size(); i++ )
+    {
+        vector<int> multiIndex = FlatToMultiIndex( i, GetShape() );
+        multiIndex[IndexDim] = indices[multiIndex[IndexDim]];
+        int flatIndex = MultiToFlatIndex( multiIndex, operand->GetShape() );
+        operand->Gradient->Data[flatIndex] += Gradient->Data[i];
+    }
 }

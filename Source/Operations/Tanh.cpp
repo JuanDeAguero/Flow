@@ -8,7 +8,6 @@ namespace Flow
 {
     NArrayCore* Tanh( NArrayCore* arr )
     {
-        throw runtime_error("Not implemented.");
         vector<float> resultData = arr->Get();
         for ( float& value : resultData )
             value = tanh(value);
@@ -18,7 +17,6 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardTanh()
 {
-    throw runtime_error("Not implemented.");
     NArrayCore* operand = Operands[0];
     for ( int i = 0; i < Data.size(); i++ )
     {

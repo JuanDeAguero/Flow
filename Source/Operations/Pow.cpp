@@ -8,7 +8,6 @@ namespace Flow
 {
     NArrayCore* Pow( NArrayCore* arr, float exponent )
     {
-        throw runtime_error("Not implemented.");
         vector<float> resultData = arr->Get();
         for ( float& value : resultData )
             value = pow( value, exponent );
@@ -20,7 +19,6 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardPow()
 {
-    throw runtime_error("Not implemented.");
     NArrayCore* operand = Operands[0];
     for ( int i = 0; i < Data.size(); i++ )
     {
