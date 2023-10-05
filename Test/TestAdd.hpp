@@ -17,8 +17,7 @@ static bool Test_Add()
 
     Test( 1, numPassed,
         Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ),
-        Flow::Create( { 3 }, { 1, 10, 100 } ),
-        {}, {},
+        Flow::Create( { 3 }, { 1, 10, 100 } ), {}, {},
         Flow::NArrayCore::Operation::ADD,
         { 1, 11, 102, 4, 14, 105, 7, 17, 108 },
         { 3, 3 },
@@ -29,8 +28,7 @@ static bool Test_Add()
 
     Test( 2, numPassed,
         Flow::Create( { 3, 1 }, { 0, 1, 2 } ),
-        Flow::Create( { 1, 3 }, { 3, 4, 5 } ),
-        {}, {},
+        Flow::Create( { 1, 3 }, { 3, 4, 5 } ), {}, {},
         Flow::NArrayCore::Operation::ADD,
         { 3, 4, 5, 4, 5, 6, 5, 6, 7 },
         { 3, 3 },

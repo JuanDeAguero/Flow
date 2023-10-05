@@ -4,8 +4,6 @@
 
 #include "Flow/NArrayCore.h"
 
-#ifndef FLOW_CUDA
-
 namespace Flow
 {
     static void ElementWise( vector<int>& index, NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op )
@@ -31,15 +29,3 @@ namespace Flow
         }
     }
 }
-
-#else
-
-namespace Flow
-{
-    static void ElementWise( vector<int>& index, NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op )
-    {
-        
-    }
-}
-
-#endif
