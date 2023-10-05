@@ -1,11 +1,11 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#pragma once
+
 #include <set>
 #include <string>
 #include <unordered_set>
 #include <vector>
-
-#pragma once
 
 namespace Flow
 {

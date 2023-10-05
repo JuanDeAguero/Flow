@@ -1,14 +1,16 @@
 // Copyright (c) Juan M. G. de Agüero 2023
 
 #include "Flow.h"
+
 #include "Showcase/MakeMore/MakeMore.hpp"
 #include "Showcase/MNIST/MNIST.hpp"
 #include "Showcase/SimpleNN.hpp"
-#include "Test/Test.h"
+
+#include "Test/TestAdd.hpp"
 
 int main()
 {
-    //Test_Add();
+    Test_Add();
     //Test_Broadcast();
     //Test_CrossEntropy();
     //Test_Exp();
@@ -23,5 +25,5 @@ int main()
 
     //SimpleNN();
     //MakeMore();
-    MNIST();
+    //MNIST();
 }

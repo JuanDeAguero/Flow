@@ -1,13 +1,13 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#pragma once
+
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
 
 #include "Flow.h"
-
-#pragma once
 
 using namespace std;
 

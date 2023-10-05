@@ -1,12 +1,13 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#pragma once
+
 #include <random>
 #include <vector>
 
 #include "Flow/NArray.h"
 #include "Flow/Print.h"
-
-#pragma once
+#include "Test.hpp"
 
 using namespace std;
 
@@ -14,32 +15,35 @@ static bool Test_Add()
 {
     int numPassed = 0;
 
-    Flow::NArray arr1 = Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } );
-    Flow::NArray arr2 = Flow::Create( { 3 }, { 1, 10, 100 } );
-    Flow::NArray result = Flow::Add( arr1, arr2 );
-    result.Backpropagate();
-    vector<float> data = { 1, 11, 102, 4, 14, 105, 7, 17, 108 };
-    vector<int> shape = { 3, 3 };
-    vector<float> dataGrad1 = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-    vector<float> dataGrad2 = { 3, 3, 3 };
-    vector<int> shapeGrad1 = { 3, 3 };
-    vector<int> shapeGrad2 = { 3 };
-    if ( Flow::Equals( data, result.Get(), 0.01f ) && shape == result.GetShape() && 
-        Flow::Equals( dataGrad1, arr1.GetGradient().Get(), 0.01f ) && Flow::Equals( dataGrad2, arr2.GetGradient().Get(), 0.01f ) &&
-        shapeGrad1 == arr1.GetGradient().GetShape() && shapeGrad2 == arr2.GetGradient().GetShape() )
-    {
-        Flow::Print("Test_Add_1 PASSED");
-        numPassed++;
-    }
-    else Flow::Print("Test_Add_1 FAILED");
+    Test( 1, numPassed,
+        Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ),
+        Flow::Create( { 3 }, { 1, 10, 100 } ),
+        {}, {},
+        Flow::NArrayCore::Operation::ADD,
+        { 1, 11, 102, 4, 14, 105, 7, 17, 108 },
+        { 3, 3 },
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        { 3, 3 },
+        { 3, 3, 3 },
+        { 3 } );
 
-    arr1 = Flow::Create( { 3, 1 }, { 0, 1, 2 } );
-    arr2 = Flow::Create( { 1, 3 }, { 3, 4, 5 } );
-    result = Flow::Add( arr1, arr2 );
-    data = { 3, 4, 5, 4, 5, 6, 5, 6, 7 };
-    shape = { 3, 3 };
-    if ( data == result.Get() && shape == result.GetShape() ) { Flow::Print("Test_Add_2 PASSED"); numPassed++; }
-    else Flow::Print("Test_Add_2 FAILED");
+    Test( 2, numPassed,
+        Flow::Create( { 3, 1 }, { 0, 1, 2 } ),
+        Flow::Create( { 1, 3 }, { 3, 4, 5 } ),
+        {}, {},
+        Flow::NArrayCore::Operation::ADD,
+        { 3, 4, 5, 4, 5, 6, 5, 6, 7 },
+        { 3, 3 },
+        { 3, 3, 3 },
+        { 3, 1 },
+        { 3, 3, 3 },
+        { 1, 3 } );
+
+    Flow::NArray arr1;
+    Flow::NArray arr2;
+    Flow::NArray result;
+    vector<float> data;
+    vector<int> shape;
 
     arr1 = Flow::Create( { 2, 2 }, { 4, 1, 2, 3 } );
     arr2 = Flow::Create( { 2, 2 }, { 3, 6, 2, 5 } );

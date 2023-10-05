@@ -1,8 +1,10 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#pragma once
+
 #include "Flow/NArrayCore.h"
 
-#pragma once
+#ifndef FLOW_CUDA
 
 namespace Flow
 {
@@ -29,3 +31,15 @@ namespace Flow
         }
     }
 }
+
+#else
+
+namespace Flow
+{
+    static void ElementWise( vector<int>& index, NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op )
+    {
+        
+    }
+}
+
+#endif

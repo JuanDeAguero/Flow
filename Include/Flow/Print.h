@@ -1,8 +1,8 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
-#include <string>
-
 #pragma once
+
+#include <string>
 
 namespace Flow
 {

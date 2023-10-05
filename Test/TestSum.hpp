@@ -1,12 +1,12 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#pragma once
+
 #include <vector>
 
 #include "Flow/NArray.h"
 #include "Flow/Print.h"
 #include "Flow/Vector.h"
-
-#pragma once
 
 using namespace std;
 

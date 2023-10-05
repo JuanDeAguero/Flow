@@ -1,10 +1,10 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#pragma once
+
 #include <vector>
 
 #include "Flow/NArrayCore.h"
-
-#pragma once
 
 namespace Flow
 {

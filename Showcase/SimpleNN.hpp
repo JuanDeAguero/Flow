@@ -1,8 +1,8 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
-#include "Flow.h"
-
 #pragma once
+
+#include "Flow.h"
 
 static void SimpleNN()
 {
