@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.12)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+project(SimpleNN VERSION 1.0)
+add_executable(simplenn SimpleNN.cpp)
+target_include_directories(simplenn PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../Include)
+target_link_libraries(simplenn ${CMAKE_SOURCE_DIR}/../../build/libflow.a)

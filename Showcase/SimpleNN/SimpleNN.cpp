@@ -4,7 +4,7 @@
 
 #include "Flow.h"
 
-static void SimpleNN()
+int main()
 {
     Flow::NArray x = Flow::Create( { 3, 2 },
     {

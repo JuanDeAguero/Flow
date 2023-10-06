@@ -11,9 +11,9 @@
 
 using namespace std;
 
-static void MakeMore()
+int main()
 {
-    ifstream file("../Showcase/names.txt");
+    ifstream file("../names.txt");
     vector<string> names;
     string line;
     while ( getline( file, line ) )

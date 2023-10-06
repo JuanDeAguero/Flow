@@ -15,12 +15,12 @@ static vector<float> ReadImagesMNIST( string filePath );
 
 static vector<float> ReadLabelsMNIST( string filePath );
 
-static void MNIST()
+int main()
 {
-    vector<float> trainImages = ReadImagesMNIST("../Showcase/MNIST/train-images-idx3-ubyte");
-    vector<float> trainLabels = ReadLabelsMNIST("../Showcase/MNIST/train-labels-idx1-ubyte");
-    vector<float> testImages = ReadImagesMNIST("../Showcase/MNIST/t10k-images-idx3-ubyte");
-    vector<float> testLabels = ReadLabelsMNIST("../Showcase/MNIST/t10k-labels-idx1-ubyte");
+    vector<float> trainImages = ReadImagesMNIST("../train-images-idx3-ubyte");
+    vector<float> trainLabels = ReadLabelsMNIST("../train-labels-idx1-ubyte");
+    vector<float> testImages = ReadImagesMNIST("../t10k-images-idx3-ubyte");
+    vector<float> testLabels = ReadLabelsMNIST("../t10k-labels-idx1-ubyte");
 
     trainImages.resize( 784 * 100 );
     trainLabels.resize( 100 );
