@@ -17,7 +17,7 @@ namespace Flow
         {
             if ( i != dim && index->GetShape()[i] > arr->GetShape()[i] )
                 return nullptr;
-        }
+        } 
         vector<float> resultData;
         vector<int> resultShape = index->GetShape();
         vector<float> arrData = arr->Get();
