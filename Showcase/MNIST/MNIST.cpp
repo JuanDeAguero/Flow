@@ -32,6 +32,10 @@ int main()
     Flow::NArray xTest = Flow::Create( { 100, 784 }, testImages );
     Flow::NArray yTest = Flow::Create( { 100 }, trainLabels );
 
+    Flow::Print("add started");
+    Flow::NArray a = Add( xTrain.Copy(), xTrain.Copy() );
+    Flow::Print("add finished");
+
     xTrain = Flow::Div( xTrain.Copy(), Flow::Create( { 1 }, { 255 } ) );
     xTest = Flow::Div( xTest.Copy(), Flow::Create( { 1 }, { 255 } ) );
 

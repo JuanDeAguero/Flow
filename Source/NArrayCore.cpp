@@ -38,7 +38,7 @@ float Flow::NArrayCore::Get( vector<int> coordinates )
     int index = GetIndex(coordinates);
     if ( index >= 0 && index < Data.size() )
         return Data[index];
-    return 0.0f;
+    throw runtime_error("[Get] Index out of bounds.");
 }
 
 vector<float> Flow::NArrayCore::Get()
@@ -49,12 +49,12 @@ vector<float> Flow::NArrayCore::Get()
 int Flow::NArrayCore::GetIndex( vector<int> coordinates )
 {
     if ( coordinates.size() != Shape.size() )
-        return -1;
+        throw runtime_error("[GetIndex] Mismatched dimensions between coordinates and shape.");
     int index = 0;
     for ( int i = 0; i < coordinates.size(); i++ )
     {
         if ( coordinates[i] >= Shape[i] || coordinates[i] < 0 )
-            return -1;
+            throw runtime_error("[GetIndex] Coordinates out of bounds.");
         index += coordinates[i] * Stride[i];
     }
     return index;
@@ -80,6 +80,7 @@ void Flow::NArrayCore::Set( vector<int> coordinates, float value )
     int index = GetIndex(coordinates);
     if ( index >= 0 && index < Data.size() )
         Data[index] = value;
+    throw runtime_error("[Set] Index out of bounds.");
 }
 
 void Flow::NArrayCore::Reset( float value )
