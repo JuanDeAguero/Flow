@@ -1,13 +1,11 @@
 # Flow
 Machine Learning Library in C++
-
 ## Features
 - N dimentional array operations
   - Addition, subtraction, multiplication, matrix multiplication, ...
 - Autograd system
 - Deep neural networks (WIP)
 - GPU acceleration (WIP)
-
 ## MNIST classifier
 Load the data.
 ```bash
@@ -20,7 +18,6 @@ trainImages.resize( 784 * 100 );
 trainLabels.resize( 100 );
 testImages.resize( 784 * 100 );
 testLabels.resize( 100 );
-
 ```
 Create the train and test NArrays.
 ```bash
@@ -39,7 +36,6 @@ for ( int i = 0; i < 28; i++ )
 }
 cout << "Label: " << trainLabels[76] << endl;
 ```
-
 ```bash
   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0 
   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0 
@@ -90,6 +86,13 @@ for ( int epoch = 0; epoch < 100; epoch++ )
 Simple two-layer network. 784 -> 128 -> 10<br>
 ReLU is the activation function.<br>
 Cross entropy is the loss function.
+```math
+\begin{align*}
+a &= \text{ReLU}(\text{xTrain} \cdot w1 + b1) \\
+\text{yPred} &= a \cdot w2 + b2 \\
+\text{loss} &= - \sum_{i} \text{yTrain}_i \log(\text{yPred}_i)
+\end{align*}
+```
 ```bash
     Flow::NArray a = ReLU( Add( MM( xTrain, w1 ), b1 ) );
     Flow::NArray yPred = Add( MM( a, w2 ), b2 );
