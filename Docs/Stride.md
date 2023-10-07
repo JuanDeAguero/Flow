@@ -1,8 +1,8 @@
 ## The Concept of Stride
-Stride, $s$, for an $N$-dimensional tensor helps to map its multi-dimensional index to a single dimensional index in memory. For an $N$-dimensional tensor with shape $\left(d_1, d_2, \ldots, d_N\right)$, stride is defined for each dimension.
+Stride $s$ for an $N$-dimensional tensor helps to map its multi-dimensional index to a single dimensional index in memory. For an $N$-dimensional tensor with shape $\left(d_1, d_2, \ldots, d_N\right)$, stride is defined for each dimension.
 
 ## Computation of Stride
-The stride of a tensor is computed based on its shape. We calculate the stride in reverse order, from the last dimension to the first. For the last dimension (the innermost), the stride is always 1 . As we move to outer dimensions, we multiply the current stride by the size of the current dimension.
+The stride of a tensor is computed based on its shape. We calculate the stride in reverse order, from the last dimension to the first. For the last dimension (the innermost), the stride is always 1. As we move to outer dimensions, we multiply the current stride by the size of the current dimension.
 
 Given a tensor shape $\left(d_1, d_2, \ldots, d_N\right)$, the stride $s$ for each dimension is calculated as:
 ```math
