@@ -186,7 +186,7 @@ namespace Flow
 
     void Print( NArrayCore* arr );
 
-    vector<int> FlatToMultiIndex( int index, vector<int> shape );
-    
     int MultiToFlatIndex( vector<int> index, vector<int> shape );
+
+    vector<int> FlatToMultiIndex( int index, vector<int> shape );
 }

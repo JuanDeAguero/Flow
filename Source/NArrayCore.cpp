@@ -247,17 +247,6 @@ namespace Flow
             Print(value);
     }
 
-    vector<int> FlatToMultiIndex( int index, vector<int> shape )
-    {
-        vector<int> multiIndex(shape.size());
-        for ( int i = shape.size() - 1; i >= 0; i-- )
-        {
-            multiIndex[i] = index % shape[i];
-            index /= shape[i];
-        }
-        return multiIndex;
-    }
-
     int MultiToFlatIndex( vector<int> index, vector<int> shape )
     {
         int flatIndex = 0;
@@ -268,5 +257,16 @@ namespace Flow
             stride *= shape[i];
         }
         return flatIndex;
+    }
+
+    vector<int> FlatToMultiIndex( int index, vector<int> shape )
+    {
+        vector<int> multiIndex(shape.size());
+        for ( int i = shape.size() - 1; i >= 0; i-- )
+        {
+            multiIndex[i] = index % shape[i];
+            index /= shape[i];
+        }
+        return multiIndex;
     }
 }
