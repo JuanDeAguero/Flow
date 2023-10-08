@@ -27,13 +27,13 @@ static bool Test( int num, int& numPassed,
         Flow::Equals( expectedGradData1, arr1.GetGradient().Get(), 0.01f ) && expectedGradShape1 == arr1.GetGradient().GetShape() &&
         Flow::Equals( expectedGradData2, arr2.GetGradient().Get(), 0.01f ) && expectedGradShape2 == arr2.GetGradient().GetShape() )
     {
-        Flow::Print("Test_" + name + "_" + to_string(num) + " PASSED");
+        Flow::Print( "Test_" + name + "_" + to_string(num) + " PASSED" );
         numPassed++;
         return true;
     }
     else
     {
-        Flow::Print("Test_" + name + "_" + to_string(num) + " FAILED");
+        Flow::Print( "Test_" + name + "_" + to_string(num) + " FAILED" );
         return false;
     }
 }
