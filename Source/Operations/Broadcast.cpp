@@ -20,7 +20,7 @@ namespace Flow
             if ( shape1[i] == shape2[i] ) shape[i] = shape1[i];
             else if ( shape1[i] == 1 ) shape[i] = shape2[i];
             else if ( shape2[i] == 1 ) shape[i] = shape1[i];
-            else throw runtime_error("[GetShapeForBroadcast] The arrays are not compatible for broadcast.");
+            else throw runtime_error("[GetShapeForBroadcast] The arrays are not compatible.");
         }
         return shape;
     }
@@ -28,13 +28,13 @@ namespace Flow
     NArrayCore* Flow::Broadcast( NArrayCore* arr, vector<int> shape )
     {
         if ( shape.size() < arr->GetShape().size() )
-            throw runtime_error("[Broadcast] Incompatible shape for broadcast.");
+            throw runtime_error("[Broadcast] Incompatible shape.");
         for ( int i = 1; i <= arr->GetShape().size(); i++ )
         {
             if ( shape[ shape.size() - i ] != arr->GetShape()[ arr->GetShape().size() - i ] &&
                 arr->GetShape()[ arr->GetShape().size() - i ] != 1 &&
                 shape[ shape.size() - i ] != 1 )
-                throw runtime_error("[Broadcast] Incompatible shape for broadcast.");
+                throw runtime_error("[Broadcast] Incompatible shape.");
         }
         vector<float> resultData( SizeFromShape(shape), 0.0f );
         for ( int i = 0; i < SizeFromShape(shape); i++ )
