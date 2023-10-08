@@ -29,7 +29,7 @@ namespace Flow
 void Flow::NArrayCore::BackwardMul()
 {
     if ( Operands.size() != 2 )
-        throw runtime_error("Invalid number of operands in BackwardMul.");
+        throw runtime_error("[BackwardMul] Invalid number of operands.");
     NArrayCore* operand1 = Operands[0];
     NArrayCore* operand2 = Operands[1];
     for ( int i = 0; i < Data.size(); i++ )

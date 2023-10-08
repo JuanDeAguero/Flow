@@ -81,12 +81,12 @@ vector<float> ReadImagesMNIST( string filePath )
     vector< vector< unsigned char > > images;
     ifstream file( filePath, ios::binary );
     if (!file.is_open())
-        throw runtime_error("Cannot open MNIST image file.");
+        throw runtime_error("[ReadImagesMNIST] Cannot open MNIST image file.");
     int magicNumber = 0, numImages = 0, rows = 0, cols = 0;
     file.read( (char*)&magicNumber, 4 );
     magicNumber = __builtin_bswap32(magicNumber);
     if( magicNumber != 2051 )
-        throw runtime_error("Invalid MNIST image file.");
+        throw runtime_error("[ReadImagesMNIST] Invalid MNIST image file.");
     file.read( (char*)&numImages, 4 );
     numImages = __builtin_bswap32(numImages);
     file.read( (char*)&rows, 4 );
@@ -114,12 +114,12 @@ vector<float> ReadLabelsMNIST( string filePath )
     vector< unsigned char > labels;
     ifstream file( filePath, ios::binary );
     if (!file.is_open())
-        throw runtime_error("Cannot open MNIST label file.");
+        throw runtime_error("[ReadLabelsMNIST] Cannot open MNIST label file.");
     int magicNumber = 0, numLabels = 0;
     file.read( (char*)&magicNumber, 4 );
     magicNumber = __builtin_bswap32(magicNumber);
     if ( magicNumber != 2049 )
-        throw runtime_error("Invalid MNIST label file.");
+        throw runtime_error("[ReadLabelsMNIST] Invalid MNIST label file.");
     file.read( (char*)&numLabels, 4 );
     numLabels = __builtin_bswap32(numLabels);
     labels.resize(numLabels);

@@ -10,16 +10,16 @@ namespace Flow
     NArrayCore* Index( NArrayCore* arr, int dim, NArrayCore* index )
     {
         if ( index->GetShape().size() != 1 )
-            throw invalid_argument("The index must be 1D.");
+            throw runtime_error("[Index] The index must be 1D.");
         vector<float> indexData = index->Get();
         vector<int> indices(indexData.size());
         for ( int i = 0; i < indexData.size(); i++ )
         {
             if ( indexData[i] != static_cast<int>(indexData[i]) )
-                throw invalid_argument("All indices must be integers.");
+                throw runtime_error("[Index] All indices must be integers.");
             indices[i] = static_cast<int>(indexData[i]);
             if ( indices[i] < 0 || indices[i] >= arr->GetShape()[dim] )
-                throw out_of_range("Index out of bounds for dimension specified.");
+                throw runtime_error("[Index] Index out of bounds for dimension specified.");
         }
         vector<int> resultShape = arr->GetShape();
         resultShape[dim] = indices.size();

@@ -10,11 +10,11 @@ namespace Flow
     {
         vector<int> arrShape = arr->GetShape();
         if ( dim < 0 || dim >= arrShape.size() )
-            throw out_of_range("Invalid dimension for Sum operation.");
+            throw runtime_error("[Sum] Invalid dimension.");
         vector<int> resultShape = arrShape;
         resultShape[dim] = 1;
-        vector<float> resultData( SizeFromShape(resultShape), 0.0f );
         vector<float> arrData = arr->Get();
+        vector<float> resultData( SizeFromShape(resultShape), 0.0f );
         for ( int i = 0; i < arrData.size(); i++ )
         {
             vector<int> multiIndex = FlatToMultiIndex( i, arrShape );

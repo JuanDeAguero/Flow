@@ -10,9 +10,9 @@ namespace Flow
     NArrayCore* MM( NArrayCore* arr1, NArrayCore* arr2 )
     {
         if ( arr1->GetShape().size() != 2 || arr2->GetShape().size() != 2 )
-            throw runtime_error("Both arrays must be 2D for matrix multiplication.");
+            throw runtime_error("[MM] Both arrays must be 2D.");
         if ( arr1->GetShape()[1] != arr2->GetShape()[0] )
-            throw runtime_error("Inner dimensions do not match. Matrix multiplication is not possible.");
+            throw runtime_error("[MM] Inner dimensions do not match.");
         int m = arr1->GetShape()[0];
         int n = arr1->GetShape()[1];
         int p = arr2->GetShape()[1];

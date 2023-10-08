@@ -8,11 +8,11 @@ namespace Flow
 {
     NArrayCore* Transpose( NArrayCore* arr, int firstDim, int secondDim )
     {
-        throw runtime_error("Not implemented.");
+        throw runtime_error("[Transpose] Not implemented.");
     }
 }
 
 void Flow::NArrayCore::BackwardTranspose()
 {
-    throw runtime_error("Not implemented.");
+    throw runtime_error("[Transpose] Not implemented.");
 }

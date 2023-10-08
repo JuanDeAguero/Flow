@@ -8,11 +8,11 @@ namespace Flow
 {
     NArrayCore* Reshape( NArrayCore* arr, vector<int> shape )
     {
-        throw runtime_error("Not implemented.");
+        throw runtime_error("[Reshape] Not implemented.");
     }
 }
 
 void Flow::NArrayCore::BackwardReshape()
 {
-    throw runtime_error("Not implemented.");
+    throw runtime_error("[Reshape] Not implemented.");
 }

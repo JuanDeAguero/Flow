@@ -8,12 +8,11 @@ namespace Flow
 {
     NArrayCore* Unsqueeze( NArrayCore* arr, int dim )
     {
-        vector<int> arrShape = arr->GetShape();
-        if ( dim < 0 || dim > arrShape.size() )
-            throw out_of_range("Invalid dimension for Unsqueeze operation.");
-        arrShape.insert( arrShape.begin() + dim, 1 );
-        vector<float> arrData = arr->Get();
-        NArrayCore* result = new NArrayCore( arrShape, arrData, { arr }, NArrayCore::Operation::UNSQUEEZE );
+        if ( dim < 0 || dim > arr->GetShape().size() )
+            throw runtime_error("[Unsqueeze] Invalid dimension.");
+        vector<int> resultShape = arr->GetShape();
+        resultShape.insert( resultShape.begin() + dim, 1 );
+        NArrayCore* result = new NArrayCore( resultShape, arr->Get(), { arr }, NArrayCore::Operation::UNSQUEEZE );
         result->UnsqueezeDim = dim;
         return result;
     }
