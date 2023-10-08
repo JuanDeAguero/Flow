@@ -34,7 +34,7 @@ void Flow::NArrayCore::BackwardSum()
     vector<int> operandShape = operand->GetShape();
     for ( int i = 0; i < Gradient->Data.size(); i++ )
     {
-        vector<int> multiIndex = FlatToMultiIndex( i, GetShape() );
+        vector<int> multiIndex = FlatToMultiIndex( i, Shape );
         for ( int j = 0; j < operandShape[SumDim]; j++ )
         {
             multiIndex[SumDim] = j;
