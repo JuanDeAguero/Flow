@@ -43,10 +43,10 @@ int main()
 
         loss.Backpropagate();
 
-        w1 = Sub( w1.Copy(), Mul( w1.GetGradient(), learningRate ) );
-        b1 = Sub( b1.Copy(), Mul( b1.GetGradient(), learningRate ) );
-        w2 = Sub( w2.Copy(), Mul( w2.GetGradient(), learningRate ) );
-        b2 = Sub( b2.Copy(), Mul( b2.GetGradient(), learningRate ) );
+        w1 = Sub( w1.Copy(), Mul( w1.GetGradient().Copy(), learningRate ) );
+        b1 = Sub( b1.Copy(), Mul( b1.GetGradient().Copy(), learningRate ) );
+        w2 = Sub( w2.Copy(), Mul( w2.GetGradient().Copy(), learningRate ) );
+        b2 = Sub( b2.Copy(), Mul( b2.GetGradient().Copy(), learningRate ) );
 
         Flow::Print( loss.Get()[0] + loss.Get()[2] + loss.Get()[2], 20 );
     }

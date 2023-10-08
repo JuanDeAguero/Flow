@@ -69,8 +69,6 @@ namespace Flow
 
         NArrayCore( vector<int> shape, vector<float> data, bool isGradient );
 
-        void ComputeStride();
-
         vector<NArrayCore*> TopologicalSort();
 
         void BuildTopo( NArrayCore* current, unordered_set<NArrayCore*>& visited, vector<NArrayCore*>& topo );
@@ -178,6 +176,12 @@ namespace Flow
 
     int SizeFromShape( vector<int> shape );
 
+    vector<int> ComputeStride( vector<int> shape );
+
+    int MultiToFlatIndex( vector<int> index, vector<int> shape );
+
+    vector<int> FlatToMultiIndex( int index, vector<int> shape );
+
     vector<int> GetShapeForBroadcast( NArrayCore* arr1, NArrayCore* arr2 );
 
     NArrayCore* RandomCore( vector<int> shape );
@@ -185,8 +189,4 @@ namespace Flow
     NArrayCore* OnesCore( vector<int> shape );
 
     void Print( NArrayCore* arr );
-
-    int MultiToFlatIndex( vector<int> index, vector<int> shape );
-
-    vector<int> FlatToMultiIndex( int index, vector<int> shape );
 }

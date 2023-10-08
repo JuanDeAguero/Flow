@@ -16,7 +16,7 @@ Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data )
 {
     Data = data;
     Shape = shape;
-    ComputeStride();
+    Stride = ComputeStride(shape);
     vector<float> gradientData( SizeFromShape(shape), 0.0f );
     Gradient = new NArrayCore( shape, gradientData, true );
     Op = Operation::NONE;
@@ -26,7 +26,7 @@ Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data, vector<NArr
 {
     Data = data;
     Shape = shape;
-    ComputeStride();
+    Stride = ComputeStride(shape);
     vector<float> gradientData( SizeFromShape(shape), 0.0f );
     Gradient = new NArrayCore( shape, gradientData, true );
     Operands = operands;
@@ -38,7 +38,7 @@ float Flow::NArrayCore::Get( vector<int> coordinates )
     int index = GetIndex(coordinates);
     if ( index >= 0 && index < Data.size() )
         return Data[index];
-    throw runtime_error("[Get] Index out of bounds.");
+    else throw runtime_error("[Get] Index out of bounds.");
 }
 
 vector<float> Flow::NArrayCore::Get()
@@ -72,7 +72,7 @@ vector<int> Flow::NArrayCore::GetStride()
 
 Flow::NArrayCore* Flow::NArrayCore::GetGradient()
 {
-    return Gradient->Copy();
+    return Gradient;
 }
 
 void Flow::NArrayCore::Set( vector<int> coordinates, float value )
@@ -80,7 +80,7 @@ void Flow::NArrayCore::Set( vector<int> coordinates, float value )
     int index = GetIndex(coordinates);
     if ( index >= 0 && index < Data.size() )
         Data[index] = value;
-    throw runtime_error("[Set] Index out of bounds.");
+    else throw runtime_error("[Set] Index out of bounds.");
 }
 
 void Flow::NArrayCore::Reset( float value )
@@ -91,6 +91,8 @@ void Flow::NArrayCore::Reset( float value )
 
 void Flow::NArrayCore::Backpropagate()
 {
+    if ( Operands.size() == 0 )
+        throw runtime_error("[Backpropagate] No operands.");
     Gradient->Reset(1.0f);
     TopologicalSort();
     for ( Flow::NArrayCore* arr : TopologicalSort() )
@@ -99,32 +101,20 @@ void Flow::NArrayCore::Backpropagate()
 
 Flow::NArrayCore* Flow::NArrayCore::Copy()
 {
-    NArrayCore* copy = new NArrayCore( Shape, Data );
-    return copy;
+    return new NArrayCore( Shape, Data );
 }
 
 Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data, bool isGradient )
 {
     Data = data;
     Shape = shape;
-    ComputeStride();
+    Stride = ComputeStride(shape);
     if (!isGradient)
     {
         vector<float> gradientData( SizeFromShape(shape), 0.0f );
         Gradient = new NArrayCore( shape, gradientData, true );
     }
     Op = Operation::NONE;
-}
-
-void Flow::NArrayCore::ComputeStride()
-{
-    Stride.resize(Shape.size());
-    int strideValue = 1;
-    for ( int i = Shape.size() - 1; i >= 0; i-- )
-    {
-        Stride[i] = strideValue;
-        strideValue *= Shape[i];
-    }
 }
 
 vector<Flow::NArrayCore*> Flow::NArrayCore::TopologicalSort()
@@ -142,11 +132,14 @@ void Flow::NArrayCore::BuildTopo( NArrayCore* current, unordered_set<NArrayCore*
         return;
     visited.insert(current);
     NArrayCore* first = current->Operands[0];
-    if (first) BuildTopo( first, visited, topo );
-    if ( current->Operands.size() != 1 )
+    if (first)
     {
-        NArrayCore* second = current->Operands[1];
-        if (second) BuildTopo( second, visited, topo );
+        BuildTopo( first, visited, topo );
+        if ( current->Operands.size() != 1 )
+        {
+            NArrayCore* second = current->Operands[1];
+            if (second) BuildTopo( second, visited, topo );
+        }
     }
     topo.push_back(current);
 }
@@ -154,10 +147,12 @@ void Flow::NArrayCore::BuildTopo( NArrayCore* current, unordered_set<NArrayCore*
 void Flow::NArrayCore::Backward()
 {
     if ( Operands.size() == 0 )
-        return;
+        throw runtime_error("[Backward] No operands.");
     switch (Op)
     {
-        case Operation::NONE:                           break;
+        case Operation::NONE:
+            throw runtime_error("[Backward] Invalid operation.");
+            break;
         case Operation::ADD:       BackwardAdd();       break;
         case Operation::MUL:       BackwardMul();       break;
         case Operation::MM:        BackwardMM();        break;
@@ -222,29 +217,16 @@ namespace Flow
         return size;
     }
 
-    NArrayCore* RandomCore( vector<int> shape )
+    vector<int> ComputeStride( vector<int> shape )
     {
-        random_device randomDevice;
-        mt19937 generator(randomDevice());
-        uniform_real_distribution<float> distribution( -1.0f, 1.0f );
-        int size = SizeFromShape(shape);
-        vector<float> data( size, 0.0f );
-        for ( int i = 0; i < size; i++ )
-            data[i] = distribution(generator);
-        return new NArrayCore( shape, data );
-    }
-
-    NArrayCore* OnesCore( vector<int> shape )
-    {
-        int size = SizeFromShape(shape);
-        vector<float> data( size, 1.0f );
-        return new NArrayCore( shape, data );
-    }
-
-    void Print( NArrayCore* arr )
-    {
-        for ( float value : arr->Get() )
-            Print(value);
+        vector<int> stride(shape.size());
+        int strideValue = 1;
+        for ( int i = shape.size() - 1; i >= 0; i-- )
+        {
+            stride[i] = strideValue;
+            strideValue *= shape[i];
+        }
+        return stride;
     }
 
     int MultiToFlatIndex( vector<int> index, vector<int> shape )
@@ -268,5 +250,30 @@ namespace Flow
             index /= shape[i];
         }
         return multiIndex;
+    }
+
+    NArrayCore* RandomCore( vector<int> shape )
+    {
+        random_device randomDevice;
+        mt19937 generator(randomDevice());
+        uniform_real_distribution<float> distribution( -1.0f, 1.0f );
+        int size = SizeFromShape(shape);
+        vector<float> data( size, 0.0f );
+        for ( int i = 0; i < size; i++ )
+            data[i] = distribution(generator);
+        return new NArrayCore( shape, data );
+    }
+
+    NArrayCore* OnesCore( vector<int> shape )
+    {
+        int size = SizeFromShape(shape);
+        vector<float> data( size, 1.0f );
+        return new NArrayCore( shape, data );
+    }
+
+    void Print( NArrayCore* arr )
+    {
+        for ( float value : arr->Get() )
+            Print(value);
     }
 }
