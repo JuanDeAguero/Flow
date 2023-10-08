@@ -19,7 +19,7 @@ namespace Flow
                 throw runtime_error("[Index] All indices must be integers.");
             indices[i] = static_cast<int>(indexData[i]);
             if ( indices[i] < 0 || indices[i] >= arr->GetShape()[dim] )
-                throw runtime_error("[Index] Index out of bounds for dimension specified.");
+                throw runtime_error("[Index] Index out of bounds.");
         }
         vector<int> resultShape = arr->GetShape();
         resultShape[dim] = indices.size();
