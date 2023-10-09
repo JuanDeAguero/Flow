@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Flow/NArray.h"
+#include "Flow/Print.h"
 #include "Flow/Vector.h"
 
 using namespace std;
@@ -23,6 +24,9 @@ static bool Test( int num, int& numPassed,
         case Flow::NArrayCore::Operation::MUL: result = Flow::Mul( arr1, arr2 ); name = "Mul"; break;
     }
     result.Backpropagate();
+    
+    Flow::Print(result);
+
     if ( Flow::Equals( expectedData, result.Get(), 0.01f ) && expectedShape == result.GetShape() &&
         Flow::Equals( expectedGradData1, arr1.GetGradient().Get(), 0.01f ) && expectedGradShape1 == arr1.GetGradient().GetShape() &&
         Flow::Equals( expectedGradData2, arr2.GetGradient().Get(), 0.01f ) && expectedGradShape2 == arr2.GetGradient().GetShape() )

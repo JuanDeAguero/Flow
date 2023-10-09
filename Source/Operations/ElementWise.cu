@@ -6,6 +6,7 @@
 
 #include <cuda_runtime.h>
 #include <stdexcept>
+#include <string.h>
 
 namespace Flow
 {
@@ -29,7 +30,10 @@ namespace Flow
     void cudaAssert( cudaError_t status )
     {
         if ( status != cudaSuccess )
-            throw runtime_error( "[CUDA] " + cudaGetErrorString(status) );
+        {
+            fprintf( stderr, "CUDA Error: %s\n", cudaGetErrorString(status) );
+            exit(1);
+        }
     }
 
     void ElementWise_CUDA( NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op )
