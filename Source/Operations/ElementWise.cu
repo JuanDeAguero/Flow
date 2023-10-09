@@ -5,72 +5,54 @@
 #include "Flow/NArrayCore.h"
 
 #include <cuda_runtime.h>
+#include <stdexcept>
 
 namespace Flow
-{// CUDA Kernel
-__global__ void ElementWise_Kernel(float* arr1, float* arr2, float* result, int totalSize, NArrayCore::Operation op) {
-    int tid = threadIdx.x + blockIdx.x * blockDim.x;
-    
-    if (tid < totalSize) {
-        switch (op) {
-            case NArrayCore::Operation::ADD:
-                result[tid] = arr1[tid] + arr2[tid];
-                break;
-            case NArrayCore::Operation::MUL:
-                result[tid] = arr1[tid] * arr2[tid];
-                break;
-            // Add other operations as needed...
+{
+    __global__ void ElementWise_Kernel( float* arr1, float* arr2, float* result, int size, NArrayCore::Operation op )
+    {
+        int id = threadIdx.x + blockIdx.x * blockDim.x;
+        if ( id < size )
+        {
+            switch (op)
+            {
+                case NArrayCore::Operation::ADD:
+                    result[id] = arr1[id] + arr2[id];
+                    break;
+                case NArrayCore::Operation::MUL:
+                    result[id] = arr1[id] * arr2[id];
+                    break;
+            }
         }
     }
-}
 
-// CUDA error checking
-void checkCudaErrors(cudaError_t status) {
-    if (status != cudaSuccess) {
-        fprintf(stderr, "CUDA Error: %s\n", cudaGetErrorString(status));
-        exit(1);
-    }
-}
-
-// CUDA wrapper function
-void ElementWise_CUDA(NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op) {
-    int totalSize = SizeFromShape(arr1->GetShape());
-
-    if (totalSize != SizeFromShape(arr2->GetShape())) {
-        fprintf(stderr, "Arrays shapes don't match for element-wise operations.\n");
-        exit(1);
+    void cudaAssert( cudaError_t status )
+    {
+        if ( status != cudaSuccess )
+            throw runtime_error( "[CUDA] " + cudaGetErrorString(status) );
     }
 
-    // Allocate GPU memory
-    float* d_arr1;
-    float* d_arr2;
-    float* d_result;
-    checkCudaErrors(cudaMalloc(&d_arr1, totalSize * sizeof(float)));
-    checkCudaErrors(cudaMalloc(&d_arr2, totalSize * sizeof(float)));
-    checkCudaErrors(cudaMalloc(&d_result, totalSize * sizeof(float)));
-
-    // Transfer data to GPU
-    checkCudaErrors(cudaMemcpy(d_arr1, arr1->Get().data(), totalSize * sizeof(float), cudaMemcpyHostToDevice));
-    checkCudaErrors(cudaMemcpy(d_arr2, arr2->Get().data(), totalSize * sizeof(float), cudaMemcpyHostToDevice));
-
-    // Define launch configuration
-    const int blockSize = 256; // This can be optimized for specific hardware
-    const int gridSize = (totalSize + blockSize - 1) / blockSize;
-
-    // Launch the kernel
-    ElementWise_Kernel<<<gridSize, blockSize>>>(d_arr1, d_arr2, d_result, totalSize, op);
-    checkCudaErrors(cudaGetLastError()); // Check for errors in kernel launch
-
-    // Synchronize threads to ensure all have completed
-    checkCudaErrors(cudaDeviceSynchronize());
-
-    // Transfer result back to host
-    checkCudaErrors(cudaMemcpy(result->Get().data(), d_result, totalSize * sizeof(float), cudaMemcpyDeviceToHost));
-
-    // Clean up GPU memory
-    checkCudaErrors(cudaFree(d_arr1));
-    checkCudaErrors(cudaFree(d_arr2));
-    checkCudaErrors(cudaFree(d_result));
-}
-
+    void ElementWise_CUDA( NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op )
+    {
+        int size = SizeFromShape(arr1->GetShape());
+        if ( size != SizeFromShape(arr2->GetShape()) )
+            throw runtime_error("[ElementWise_CUDA] Arrays shapes don't match for element-wise operation.");
+        float* d_arr1;
+        float* d_arr2;
+        float* d_result;
+        cudaAssert(cudaMalloc(&d_arr1, size * sizeof(float)));
+        cudaAssert(cudaMalloc(&d_arr2, size * sizeof(float)));
+        cudaAssert(cudaMalloc(&d_result, size * sizeof(float)));
+        cudaAssert(cudaMemcpy(d_arr1, arr1->Get().data(), size * sizeof(float), cudaMemcpyHostToDevice));
+        cudaAssert(cudaMemcpy(d_arr2, arr2->Get().data(), size * sizeof(float), cudaMemcpyHostToDevice));
+        const int blockSize = 256;
+        const int gridSize = (size + blockSize - 1) / blockSize;
+        ElementWise_Kernel<<<gridSize, blockSize>>>(d_arr1, d_arr2, d_result, size, op);
+        cudaAssert(cudaGetLastError());
+        cudaAssert(cudaDeviceSynchronize());
+        cudaAssert(cudaMemcpy(result->Get().data(), d_result, size * sizeof(float), cudaMemcpyDeviceToHost));
+        cudaAssert(cudaFree(d_arr1));
+        cudaAssert(cudaFree(d_arr2));
+        cudaAssert(cudaFree(d_result));
+    }
 }

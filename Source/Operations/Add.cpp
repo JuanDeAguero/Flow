@@ -16,6 +16,7 @@ namespace Flow
         auto op = NArrayCore::Operation::ADD;
         NArrayCore* result = new NArrayCore( arr1B->GetShape(), arr1B->Get(), { arr1B, arr2B }, op );
         vector<int> index = {};
+        //ElementWise( index, arr1B, arr2B, result, op );
         ElementWise_CUDA( arr1B, arr2B, result, op );
         return result;
     }
