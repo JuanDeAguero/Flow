@@ -6,26 +6,72 @@
 
 namespace Flow
 {
-    static void ElementWise( vector<int>& index, NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op )
+    static void ComputeOperation( NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op, vector<int> index )
     {
-        if ( index.size() == arr1->GetShape().size() )
+        switch (op)
         {
-            switch (op)
-            {
-                case NArrayCore::Operation::ADD:
-                    result->Set( index, arr1->Get(index) + arr2->Get(index) );
-                    break;
-                case NArrayCore::Operation::MUL:
-                    result->Set( index, arr1->Get(index) * arr2->Get(index) );
-                    break;
-            }
-            return;
+            case NArrayCore::Operation::ADD:
+                result->Set( index, arr1->Get(index) + arr2->Get(index) );
+                break;
+            case NArrayCore::Operation::MUL:
+                result->Set( index, arr1->Get(index) * arr2->Get(index) );
+                break;
         }
-        for ( int i = 0; i < arr1->GetShape()[index.size()]; i++ )
+    }
+
+    static void ElementWise( NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op )
+    {
+        vector<int> shape = arr1->GetShape();
+        int numDims = shape.size();
+        if ( numDims == 1 )
         {
-            vector<int> newIndex = index;
-            newIndex.push_back(i);
-            ElementWise( newIndex, arr1, arr2, result, op );
+            for ( int i = 0; i < shape[0]; i++ )
+            {
+                vector<int> index = { i };
+                ComputeOperation( arr1, arr2, result, op, index );
+            }
+        }
+        else if ( numDims == 2 )
+        {
+            for ( int i = 0; i < shape[0]; i++ )
+            {
+                for ( int j = 0; j < shape[1]; j++ )
+                {
+                    vector<int> index = { i, j };
+                    ComputeOperation( arr1, arr2, result, op, index );
+                }
+            }
+        }
+        else if ( numDims == 3 )
+        {
+            for ( int i = 0; i < shape[0]; i++ )
+            {
+                for ( int j = 0; j < shape[1]; j++ )
+                {
+                    for ( int k = 0; k < shape[2]; k++ )
+                    {
+                        vector<int> index = { i, j, k };
+                        ComputeOperation( arr1, arr2, result, op, index );
+                    }
+                }
+            }
+        }
+        else if ( numDims == 4 )
+        {
+            for ( int i = 0; i < shape[0]; i++ )
+            {
+                for ( int j = 0; j < shape[1]; j++ )
+                {
+                    for ( int k = 0; k < shape[2]; k++ )
+                    {
+                        for ( int x = 0; x < shape[3]; x++ )
+                        {
+                            vector<int> index = { i, j, k, x };
+                            ComputeOperation( arr1, arr2, result, op, index );
+                        }
+                    }
+                }
+            }
         }
     }
 

@@ -14,8 +14,7 @@ namespace Flow
         Flow::NArrayCore* arr2B = Flow::Broadcast( arr2, shape );
         auto op = NArrayCore::Operation::MUL;
         NArrayCore* result = new NArrayCore( arr1B->GetShape(), arr1B->Get(), { arr1B, arr2B }, op );
-        vector<int> index = {};
-        ElementWise( index, arr1B, arr2B, result, op );
+        ElementWise( arr1B, arr2B, result, op );
         return result;
     }
 
