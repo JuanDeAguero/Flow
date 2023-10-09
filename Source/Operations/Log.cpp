@@ -1,5 +1,6 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#include <cmath>
 #include <stdexcept>
 #include <string>
 

@@ -1,5 +1,7 @@
 // Copyright (c) Juan M. G. de Agüero 2023
 
+#include <cmath>
+
 #include "Vector.h"
 
 using namespace std;

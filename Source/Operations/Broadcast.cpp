@@ -25,7 +25,7 @@ namespace Flow
         return shape;
     }
 
-    NArrayCore* Flow::Broadcast( NArrayCore* arr, vector<int> shape )
+    NArrayCore* Broadcast( NArrayCore* arr, vector<int> shape )
     {
         if ( shape.size() < arr->GetShape().size() )
             throw runtime_error("[Broadcast] Incompatible shape.");
