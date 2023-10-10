@@ -1,7 +1,6 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
 #include <cmath>
-#include <stdexcept>
 
 #include "Flow/NArrayCore.h"
 
@@ -18,10 +17,9 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardExp()
 {
-    NArrayCore* operand = Operands[0];
     for ( int i = 0; i < Data.size(); i++ )
     {
-        float grad = Gradient->Data[i] * exp( operand->Data[i] );
-        operand->Gradient->Data[i] += grad;
+        float grad = Gradient->Data[i] * exp( Operands[0]->Data[i] );
+        Operands[0]->Gradient->Data[i] += grad;
     }
 }

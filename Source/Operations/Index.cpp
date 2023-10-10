@@ -1,26 +1,14 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
-#include <stdexcept>
-
 #include "Flow/NArrayCore.h"
-#include "Flow/Print.h"
 
 namespace Flow
 {
     NArrayCore* Index( NArrayCore* arr, int dim, NArrayCore* index )
     {
-        if ( index->GetShape().size() != 1 )
-            throw runtime_error("[Index] The index must be 1D.");
-        vector<float> indexData = index->Get();
-        vector<int> indices(indexData.size());
-        for ( int i = 0; i < indexData.size(); i++ )
-        {
-            if ( indexData[i] != static_cast<int>(indexData[i]) )
-                throw runtime_error("[Index] All indices must be integers.");
-            indices[i] = static_cast<int>(indexData[i]);
-            if ( indices[i] < 0 || indices[i] >= arr->GetShape()[dim] )
-                throw runtime_error("[Index] Index out of bounds.");
-        }
+        vector<int> indices(index->Get().size());
+        for ( int i = 0; i < index->Get().size(); i++ )
+            indices[i] = static_cast<int>(index->Get()[i]);
         vector<int> resultShape = arr->GetShape();
         resultShape[dim] = indices.size();
         int resultSize = 1;
@@ -42,16 +30,14 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardIndex()
 {
-    NArrayCore* operand = Operands[0];
-    vector<float> indexData = Index->Get();
-    vector<int> indices(indexData.size());
-    for ( int i = 0; i < indexData.size(); i++ )
-        indices[i] = static_cast<int>(indexData[i]);
+    vector<int> indices(Index->Get().size());
+    for ( int i = 0; i < Index->Get().size(); i++ )
+        indices[i] = static_cast<int>(Index->Get()[i]);
     for ( int i = 0; i < Gradient->Data.size(); i++ )
     {
         vector<int> multiIndex = FlatToMultiIndex( i, GetShape() );
         multiIndex[IndexDim] = indices[multiIndex[IndexDim]];
-        int flatIndex = MultiToFlatIndex( multiIndex, operand->GetShape() );
-        operand->Gradient->Data[flatIndex] += Gradient->Data[i];
+        int flatIndex = MultiToFlatIndex( multiIndex, Operands[0]->GetShape() );
+        Operands[0]->Gradient->Data[flatIndex] += Gradient->Data[i];
     }
 }

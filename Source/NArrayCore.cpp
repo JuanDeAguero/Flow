@@ -6,7 +6,6 @@
 #include <iostream>
 #include <random>
 #include <sstream>
-#include <stdexcept>
 
 #include "Flow/NArrayCore.h"
 #include "Flow/Print.h"
@@ -39,7 +38,6 @@ float Flow::NArrayCore::Get( vector<int> coordinates )
     int index = GetIndex(coordinates);
     if ( index >= 0 && index < Data.size() )
         return Data[index];
-    else throw runtime_error("[Get] Index out of bounds.");
 }
 
 vector<float> Flow::NArrayCore::Get()
@@ -50,12 +48,12 @@ vector<float> Flow::NArrayCore::Get()
 int Flow::NArrayCore::GetIndex( vector<int> coordinates )
 {
     if ( coordinates.size() != Shape.size() )
-        throw runtime_error("[GetIndex] Mismatched dimensions between coordinates and shape.");
+        return -1;
     int index = 0;
     for ( int i = 0; i < coordinates.size(); i++ )
     {
         if ( coordinates[i] >= Shape[i] || coordinates[i] < 0 )
-            throw runtime_error("[GetIndex] Coordinates out of bounds.");
+            return -1;
         index += coordinates[i] * Stride[i];
     }
     return index;
@@ -81,7 +79,6 @@ void Flow::NArrayCore::Set( vector<int> coordinates, float value )
     int index = GetIndex(coordinates);
     if ( index >= 0 && index < Data.size() )
         Data[index] = value;
-    else throw runtime_error("[Set] Index out of bounds.");
 }
 
 void Flow::NArrayCore::Reset( float value )
@@ -93,7 +90,7 @@ void Flow::NArrayCore::Reset( float value )
 void Flow::NArrayCore::Backpropagate()
 {
     if ( Operands.size() == 0 )
-        throw runtime_error("[Backpropagate] No operands.");
+        return;
     Gradient->Reset(1.0f);
     TopologicalSort();
     for ( Flow::NArrayCore* arr : TopologicalSort() )
@@ -148,12 +145,10 @@ void Flow::NArrayCore::BuildTopo( NArrayCore* current, unordered_set<NArrayCore*
 void Flow::NArrayCore::Backward()
 {
     if ( Operands.size() == 0 )
-        throw runtime_error("[Backward] No operands.");
+        return;
     switch (Op)
     {
-        case Operation::NONE:
-            throw runtime_error("[Backward] Invalid operation.");
-            break;
+        case Operation::NONE:                           break;
         case Operation::ADD:       BackwardAdd();       break;
         case Operation::MUL:       BackwardMul();       break;
         case Operation::MM:        BackwardMM();        break;

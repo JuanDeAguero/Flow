@@ -1,7 +1,5 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
-#include <stdexcept>
-
 #include "ElementWise.hpp"
 #include "Flow/NArrayCore.h"
 
@@ -27,13 +25,9 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardMul()
 {
-    if ( Operands.size() != 2 )
-        throw runtime_error("[BackwardMul] Invalid number of operands.");
-    NArrayCore* operand1 = Operands[0];
-    NArrayCore* operand2 = Operands[1];
     for ( int i = 0; i < Data.size(); i++ )
     {
-        operand1->Gradient->Data[i] += operand2->Data[i] * Gradient->Data[i];
-        operand2->Gradient->Data[i] += operand1->Data[i] * Gradient->Data[i];
+        Operands[0]->Gradient->Data[i] += Operands[1]->Data[i] * Gradient->Data[i];
+        Operands[1]->Gradient->Data[i] += Operands[0]->Data[i] * Gradient->Data[i];
     }
 }

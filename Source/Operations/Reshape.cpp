@@ -1,18 +1,16 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
-#include <stdexcept>
-
 #include "Flow/NArrayCore.h"
 
 namespace Flow
 {
     NArrayCore* Reshape( NArrayCore* arr, vector<int> shape )
     {
-        throw runtime_error("[Reshape] Not implemented.");
+        return nullptr;
     }
 }
 
 void Flow::NArrayCore::BackwardReshape()
 {
-    throw runtime_error("[Reshape] Not implemented.");
+    
 }

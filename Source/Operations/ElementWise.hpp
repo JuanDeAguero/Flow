@@ -73,6 +73,26 @@ namespace Flow
                 }
             }
         }
+        else if ( numDims == 5 )
+        {
+            for ( int i = 0; i < shape[0]; i++ )
+            {
+                for ( int j = 0; j < shape[1]; j++ )
+                {
+                    for ( int k = 0; k < shape[2]; k++ )
+                    {
+                        for ( int x = 0; x < shape[3]; x++ )
+                        {
+                            for ( int y = 0; y < shape[4]; y++ )
+                            {
+                                vector<int> index = { i, j, k, x, y };
+                                ComputeOperation( arr1, arr2, result, op, index );
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     void ElementWise_CUDA( NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op );

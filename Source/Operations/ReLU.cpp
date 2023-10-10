@@ -1,7 +1,5 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
-#include <stdexcept>
-
 #include "Flow/NArrayCore.h"
 
 namespace Flow
@@ -17,10 +15,9 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardReLU()
 {
-    NArrayCore* operand = Operands[0];
     for ( int i = 0; i < Data.size(); i++ )
     {
-        float grad = ( operand->Data[i] > 0.0f ) ? Gradient->Data[i] : 0.0f;
-        operand->Gradient->Data[i] += grad;
+        float grad = ( Operands[0]->Data[i] > 0.0f ) ? Gradient->Data[i] : 0.0f;
+        Operands[0]->Gradient->Data[i] += grad;
     }
 }

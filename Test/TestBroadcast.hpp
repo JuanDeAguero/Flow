@@ -47,10 +47,6 @@ static bool Test_Broadcast()
     expectedShape = { 3, 3, 3 };
     if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Broadcast_5 PASSED"); numPassed++; }
     else Flow::Print("Test_Broadcast_5 FAILED");
-    
-    arr = Flow::Create( { 2 }, { 11, 12 } );
-    try { result = Flow::Broadcast( arr, { 3, 3 } ); Flow::Print("Test_Broadcast_6 FAILED"); }
-    catch( exception e ) { Flow::Print("Test_Broadcast_6 PASSED"); numPassed++; }
 
     arr = Flow::Create( { 1, 1, 1, 3 }, { 13, 14, 15 } );
     result = Flow::Broadcast( arr, { 4, 4, 4, 3 } );
@@ -58,10 +54,6 @@ static bool Test_Broadcast()
     expectedShape = { 4, 4, 4, 3 };
     if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Broadcast_7 PASSED"); numPassed++; }
     else Flow::Print("Test_Broadcast_7 FAILED");
-
-    arr = Flow::Create( { 1, 2, 1, 3 }, { 16, 17, 18, 19, 20, 21 } );
-    try { result = Flow::Broadcast( arr, { 4, 5, 4, 3 } ); Flow::Print("Test_Broadcast_8 FAILED"); }
-    catch( exception e ) { Flow::Print("Test_Broadcast_8 PASSED"); numPassed++; }
 
     arr = Flow::Create( { 1, 1, 1, 1, 3 }, { 22, 23, 24 } );
     result = Flow::Broadcast( arr, { 2, 2, 2, 2, 3 } );

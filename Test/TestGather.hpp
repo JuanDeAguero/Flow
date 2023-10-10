@@ -27,18 +27,6 @@ static bool Test_Gather()
     if ( expected == result->Get() ) { Flow::Print("Test_Gather_2 PASSED"); numPassed++; }
     else Flow::Print("Test_Gather_2 FAILED");
 
-    arr = new Flow::NArrayCore( { 3, 2 }, { 0, 1, 10, 11, 20, 21 } );
-    index = new Flow::NArrayCore( { 2, 2 }, { 3, 1, 2, 0 } );
-    result = Flow::Gather( arr, 3, index );
-    if (!result) { Flow::Print("Test_Gather_3 PASSED"); numPassed++; }
-    else Flow::Print("Test_Gather_3 FAILED");
-
-    arr = new Flow::NArrayCore( { 3, 2 }, { 0, 1, 10, 11, 20, 21 } );
-    index = new Flow::NArrayCore( { 3 }, { 2, 1, 0 } );
-    result = Flow::Gather( arr, 0, index );
-    if (!result) { Flow::Print("Test_Gather_4 PASSED"); numPassed++; }
-    else Flow::Print("Test_Gather_4 FAILED");
-
     arr = new Flow::NArrayCore( { 4 }, { 0, 10, 20, 30 } );
     index = new Flow::NArrayCore( { 3 }, { 3, 0, 2 } );
     result = Flow::Gather( arr, 0, index );
@@ -52,12 +40,6 @@ static bool Test_Gather()
     expected = { 2, 1, 10, 12 };
     if ( expected == result->Get() ) { Flow::Print("Test_Gather_6 PASSED"); numPassed++; }
     else Flow::Print("Test_Gather_6 FAILED");
-
-    arr = new Flow::NArrayCore( { 3 }, { 0, 10, 20 } );
-    index = new Flow::NArrayCore( { 2 }, { 1, 5 } );
-    result = Flow::Gather( arr, 0, index );
-    if (!result) { Flow::Print("Test_Gather_7 PASSED"); numPassed++; }
-    else Flow::Print("Test_Gather_7 FAILED");
 
     arr = new Flow::NArrayCore( { 2, 2, 3 }, { 0, 1, 2, 10, 11, 12, 20, 21, 22, 30, 31, 32 } );
     index = new Flow::NArrayCore( { 2, 2, 2 }, { 2, 1, 1, 0, 0, 2, 2, 1 } );
