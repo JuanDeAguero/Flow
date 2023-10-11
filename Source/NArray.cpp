@@ -33,19 +33,9 @@ vector<float> Flow::NArray::Get()
     return Array->Get();
 }
 
-int Flow::NArray::GetIndex( vector<int> coordinates )
-{
-    return Array->GetIndex(coordinates);
-}
-
 vector<int> Flow::NArray::GetShape()
 {
     return Array->GetShape();
-}
-
-vector<int> Flow::NArray::GetStride()
-{
-    return Array->GetStride();
 }
 
 Flow::NArray Flow::NArray::GetGradient()

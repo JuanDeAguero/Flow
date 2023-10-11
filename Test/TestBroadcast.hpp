@@ -53,16 +53,16 @@ static bool Test_Broadcast()
     expectedData =  { 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15 };
     expectedShape = { 4, 4, 4, 3 };
     if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Broadcast_7 PASSED"); numPassed++; }
-    else Flow::Print("Test_Broadcast_7 FAILED");
+    else Flow::Print("Test_Broadcast_6 FAILED");
 
     arr = Flow::Create( { 1, 1, 1, 1, 3 }, { 22, 23, 24 } );
     result = Flow::Broadcast( arr, { 2, 2, 2, 2, 3 } );
     expectedData =  { 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24 };
     expectedShape = { 2, 2, 2, 2, 3 };
     if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Broadcast_9 PASSED"); numPassed++; }
-    else Flow::Print("Test_Broadcast_9 FAILED");
+    else Flow::Print("Test_Broadcast_7 FAILED");
 
-    int numTests = 9;
+    int numTests = 7;
     Flow::Print( "Test_Broadcast " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
 }

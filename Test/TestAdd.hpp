@@ -15,6 +15,11 @@ static bool Test_Add()
 {
     int numPassed = 0;
 
+    vector<float> d( 10000000, 123 );
+    Flow::NArray a = Flow::Create( { 10000000 }, d );
+    Flow::NArray b = Flow::Create( { 10000000 }, d );
+    Flow::NArray c = Flow::Add( a, b );
+
     Test( 1, numPassed,
         Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ),
         Flow::Create( { 3 }, { 1, 10, 100 } ), {}, {},

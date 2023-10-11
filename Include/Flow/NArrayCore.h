@@ -37,11 +37,11 @@ namespace Flow
 
         vector<float> Get();
 
-        int GetIndex( vector<int> coordinates );
+        float* GetData();
 
         vector<int> GetShape();
-
-        vector<int> GetStride();
+        
+        int* GetShapeData();
 
         NArrayCore* GetGradient();
         
@@ -58,8 +58,6 @@ namespace Flow
         vector<float> Data;
 
         vector<int> Shape;
-
-        vector<int> Stride;
 
         NArrayCore* Gradient;
 
@@ -156,6 +154,8 @@ namespace Flow
 
     NArrayCore* Broadcast( NArrayCore* arr, vector<int> shape );
 
+    NArrayCore* Broadcast_CUDA( NArrayCore* arr, vector<int> shape );
+
     NArrayCore* Gather( NArrayCore* arr, int dim, NArrayCore* index );
 
     NArrayCore* Unsqueeze( NArrayCore* arr, int dim );
@@ -175,8 +175,6 @@ namespace Flow
     NArrayCore* CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 );
 
     int SizeFromShape( vector<int> shape );
-
-    vector<int> ComputeStride( vector<int> shape );
 
     int MultiToFlatIndex( vector<int> index, vector<int> shape );
 

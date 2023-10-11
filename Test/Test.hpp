@@ -6,6 +6,8 @@
 #include "Flow/Print.h"
 #include "Flow/Vector.h"
 
+#include <iostream>
+
 using namespace std;
 
 static bool Test( int num, int& numPassed,

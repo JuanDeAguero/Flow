@@ -27,11 +27,7 @@ namespace Flow
 
         vector<float> Get();
 
-        int GetIndex( vector<int> coordinates );
-
         vector<int> GetShape();
-
-        vector<int> GetStride();
 
         NArray GetGradient();
         

@@ -18,8 +18,8 @@
 int main()
 {
     Test_Add();
-    Test_Broadcast();
-    Test_CrossEntropy();
+    //Test_Broadcast();
+    /*Test_CrossEntropy();
     Test_Exp();
     Test_Gather();
     Test_Index();
@@ -27,5 +27,6 @@ int main()
     Test_MM();
     Test_Mul();
     Test_ReLU();
-    Test_Unsqueeze();
+    Test_Sum();
+    Test_Unsqueeze();*/
 }

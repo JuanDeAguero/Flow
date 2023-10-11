@@ -16,8 +16,7 @@ Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data )
 {
     Data = data;
     Shape = shape;
-    Stride = ComputeStride(shape);
-    vector<float> gradientData( SizeFromShape(shape), 0.0f );
+    vector<float> gradientData( data.size(), 0.0f );
     Gradient = new NArrayCore( shape, gradientData, true );
     Op = Operation::NONE;
 }
@@ -26,8 +25,7 @@ Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data, vector<NArr
 {
     Data = data;
     Shape = shape;
-    Stride = ComputeStride(shape);
-    vector<float> gradientData( SizeFromShape(shape), 0.0f );
+    vector<float> gradientData( data.size(), 0.0f );
     Gradient = new NArrayCore( shape, gradientData, true );
     Operands = operands;
     Op = op;
@@ -35,7 +33,7 @@ Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data, vector<NArr
 
 float Flow::NArrayCore::Get( vector<int> coordinates )
 {
-    int index = GetIndex(coordinates);
+    int index = MultiToFlatIndex( coordinates, Shape );
     if ( index >= 0 && index < Data.size() )
         return Data[index];
 }
@@ -45,18 +43,9 @@ vector<float> Flow::NArrayCore::Get()
     return Data;
 }
 
-int Flow::NArrayCore::GetIndex( vector<int> coordinates )
+float* Flow::NArrayCore::GetData()
 {
-    if ( coordinates.size() != Shape.size() )
-        return -1;
-    int index = 0;
-    for ( int i = 0; i < coordinates.size(); i++ )
-    {
-        if ( coordinates[i] >= Shape[i] || coordinates[i] < 0 )
-            return -1;
-        index += coordinates[i] * Stride[i];
-    }
-    return index;
+    return Data.data();
 }
 
 vector<int> Flow::NArrayCore::GetShape()
@@ -64,9 +53,9 @@ vector<int> Flow::NArrayCore::GetShape()
     return Shape;
 }
 
-vector<int> Flow::NArrayCore::GetStride()
+int* Flow::NArrayCore::GetShapeData()
 {
-    return Stride;
+    return Shape.data();
 }
 
 Flow::NArrayCore* Flow::NArrayCore::GetGradient()
@@ -76,7 +65,7 @@ Flow::NArrayCore* Flow::NArrayCore::GetGradient()
 
 void Flow::NArrayCore::Set( vector<int> coordinates, float value )
 {
-    int index = GetIndex(coordinates);
+    int index = MultiToFlatIndex( coordinates, Shape );
     if ( index >= 0 && index < Data.size() )
         Data[index] = value;
 }
@@ -106,10 +95,9 @@ Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data, bool isGrad
 {
     Data = data;
     Shape = shape;
-    Stride = ComputeStride(shape);
     if (!isGradient)
     {
-        vector<float> gradientData( SizeFromShape(shape), 0.0f );
+        vector<float> gradientData( data.size(), 0.0f );
         Gradient = new NArrayCore( shape, gradientData, true );
     }
     Op = Operation::NONE;
@@ -188,7 +176,7 @@ namespace Flow
     NArrayCore* Mean( NArrayCore* arr )
     {
         NArrayCore* sum = Sum( arr, 0 );
-        float numElements = static_cast<float>( SizeFromShape(arr->GetShape()) );
+        float numElements = static_cast<float>(arr->Get().size());
         NArrayCore* n = new NArrayCore( { 1 }, { numElements } );
         return Div( sum, n );
     }
@@ -211,18 +199,6 @@ namespace Flow
         for ( int i = 1; i < shape.size(); i++ )
             size *= shape[i];
         return size;
-    }
-
-    vector<int> ComputeStride( vector<int> shape )
-    {
-        vector<int> stride(shape.size());
-        int strideValue = 1;
-        for ( int i = shape.size() - 1; i >= 0; i-- )
-        {
-            stride[i] = strideValue;
-            strideValue *= shape[i];
-        }
-        return stride;
     }
 
     int MultiToFlatIndex( vector<int> index, vector<int> shape )
