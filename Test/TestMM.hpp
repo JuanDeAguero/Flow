@@ -31,4 +31,5 @@ static bool Test_MM()
     int numTests = 2;
     Flow::Print( "Test_MM " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
+    else return false;
 }

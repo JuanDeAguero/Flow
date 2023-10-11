@@ -10,10 +10,12 @@ add_library(flow STATIC
     Source/NArray.cpp
     Source/NArrayCore.cpp
     Source/Operations/Add.cpp
+    Source/Operations/Add.cu
     Source/Operations/Broadcast.cpp
     Source/Operations/Broadcast.cu
     Source/Operations/ElementWise.cu
     Source/Operations/Exp.cpp
+    Source/Operations/Exp.cu
     Source/Operations/Gather.cpp
     Source/Operations/Index.cpp
     Source/Operations/Log.cpp

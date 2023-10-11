@@ -54,4 +54,5 @@ static bool Test_Index()
     int numTests = 5;
     Flow::Print( "Test_Index " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
+    else return false;
 }

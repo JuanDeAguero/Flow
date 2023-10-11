@@ -3,25 +3,25 @@
 #include "CUDA.cuh"
 #include "Flow/NArrayCore.h"
 
+__global__
+void Broadcast_Kernel( float* arr, int* arrShape, int arrShapeSize, int* shape, int shapeSize, float* result )
+{
+    int i = blockIdx.x;
+    int position[10];
+    Flow::FlatToMultiIndex_Device( i, shape, shapeSize, position );
+    int originalCoords[10];
+    for ( int j = 0; j < arrShapeSize; j++ )
+    {
+        int coord = position[ shapeSize - arrShapeSize + j ];
+        if ( arrShape[j] == 1 ) coord = 0;
+        originalCoords[j] = coord;
+    }
+    int flatIndex = Flow::MultiToFlatIndex_Device( originalCoords, arrShape, arrShapeSize );
+    result[i] = arr[flatIndex];
+}
+
 namespace Flow
 {
-    __global__
-    void Broadcast_Kernel( float* arr, int* arrShape, int arrShapeSize, int* shape, int shapeSize, float* result )
-    {
-        int i = blockIdx.x;
-        int position[10];
-        FlatToMultiIndex_Device( i, shape, shapeSize, position );
-        int originalCoords[10];
-        for ( int j = 0; j < arrShapeSize; j++ )
-        {
-            int coord = position[ shapeSize - arrShapeSize + j ];
-            if ( arrShape[j] == 1 ) coord = 0;
-            originalCoords[j] = coord;
-        }
-        int flatIndex = MultiToFlatIndex_Device( originalCoords, arrShape, arrShapeSize );
-        result[i] = arr[flatIndex];
-    }
-
     __host__
     NArrayCore* Broadcast_CUDA( NArrayCore* arr, vector<int> shape )
     {
@@ -40,7 +40,24 @@ namespace Flow
         Broadcast_Kernel<<< n, 1 >>>( arr_d, arrShape_d, arr->GetShape().size(), shape_d, shape.size(), result_d );
         float* result_ptr = (float*)malloc( n * sizeof(float) );
         cudaMemcpy( result_ptr, result_d, n * sizeof(float), cudaMemcpyDeviceToHost );
+        cudaFree(arr_d);
+        cudaFree(arrShape_d);
+        cudaFree(shape_d);
+        cudaFree(result_d);
         vector<float> resultData = vector<float>( result_ptr, result_ptr + n );
         return new NArrayCore( shape, resultData, { arr }, NArrayCore::Operation::BROADCAST );
     }
+}
+
+__global__
+void BackwardBroadcast_Kernel()
+{
+    int i = blockIdx.x;
+
+}
+
+__host__
+void Flow::NArrayCore::BackwardBroadcast_CUDA()
+{
+
 }

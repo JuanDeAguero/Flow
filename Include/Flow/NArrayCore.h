@@ -7,6 +7,8 @@
 #include <unordered_set>
 #include <vector>
 
+static bool UseCUDA = true;
+
 namespace Flow
 {
     using namespace std;
@@ -75,6 +77,8 @@ namespace Flow
 
         void BackwardAdd();
 
+        void BackwardAdd_CUDA();
+
         void BackwardMul();
 
         void BackwardMM();
@@ -82,6 +86,8 @@ namespace Flow
         void BackwardPow();
 
         void BackwardExp();
+
+        void BackwardExp_CUDA();
 
         void BackwardTanh();
 
@@ -98,6 +104,8 @@ namespace Flow
         void BackwardTranspose();
 
         void BackwardBroadcast();
+
+        void BackwardBroadcast_CUDA();
 
         void BackwardGather();
 

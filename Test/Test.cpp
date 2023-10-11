@@ -17,16 +17,21 @@
 
 int main()
 {
-    Test_Add();
-    //Test_Broadcast();
-    /*Test_CrossEntropy();
-    Test_Exp();
-    Test_Gather();
-    Test_Index();
-    Test_Max();
-    Test_MM();
-    Test_Mul();
-    Test_ReLU();
-    Test_Sum();
-    Test_Unsqueeze();*/
+    int numPassed = 0;
+
+    if (Test_Add())          numPassed++;
+    if (Test_Broadcast())    numPassed++;
+    if (Test_CrossEntropy()) numPassed++;
+    if (Test_Exp())          numPassed++;
+    if (Test_Gather())       numPassed++;
+    if (Test_Index())        numPassed++;
+    if (Test_Max())          numPassed++;
+    if (Test_MM())           numPassed++;
+    if (Test_Mul())          numPassed++;
+    if (Test_ReLU())         numPassed++;
+    if (Test_Sum())          numPassed++;
+    if (Test_Unsqueeze())    numPassed++;
+
+    int numTests = 12;
+    Flow::Print( "== FLOW TEST " + to_string(numPassed) + "/" + to_string(numTests) + " ==" );
 }

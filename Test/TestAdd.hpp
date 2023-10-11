@@ -1,8 +1,7 @@
-// Copyright (c) 2023 Juan M. G. de Agüero
+// Cop,yright (c) 2023 Juan M. G. de Agüero
 
 #pragma once
 
-#include <random>
 #include <vector>
 
 #include "Flow/NArray.h"
@@ -14,16 +13,16 @@ using namespace std;
 static bool Test_Add()
 {
     int numPassed = 0;
+    Flow::NArrayCore::Operation op = Flow::NArrayCore::Operation::ADD;
 
-    vector<float> d( 10000000, 123 );
-    Flow::NArray a = Flow::Create( { 10000000 }, d );
-    Flow::NArray b = Flow::Create( { 10000000 }, d );
-    Flow::NArray c = Flow::Add( a, b );
+    vector<float> data( 100000, 123 );
+    Flow::NArray arr1 = Flow::Create( { 100000 }, data );
+    Flow::NArray arr2 = Flow::Create( { 100000 }, data );
+    Flow::NArray result = Flow::Add( arr1, arr2 );
 
     Test( 1, numPassed,
         Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ),
-        Flow::Create( { 3 }, { 1, 10, 100 } ), {}, {},
-        Flow::NArrayCore::Operation::ADD,
+        Flow::Create( { 3 }, { 1, 10, 100 } ), {}, {}, {}, op,
         { 1, 11, 102, 4, 14, 105, 7, 17, 108 },
         { 3, 3 },
         { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
@@ -33,8 +32,7 @@ static bool Test_Add()
 
     Test( 2, numPassed,
         Flow::Create( { 3, 1 }, { 0, 1, 2 } ),
-        Flow::Create( { 1, 3 }, { 3, 4, 5 } ), {}, {},
-        Flow::NArrayCore::Operation::ADD,
+        Flow::Create( { 1, 3 }, { 3, 4, 5 } ), {}, {}, {}, op,
         { 3, 4, 5, 4, 5, 6, 5, 6, 7 },
         { 3, 3 },
         { 3, 3, 3 },
@@ -44,8 +42,7 @@ static bool Test_Add()
 
     Test( 3, numPassed,
         Flow::Create( { 2, 2 }, { 4, 1, 2, 3 } ),
-        Flow::Create( { 2, 2 }, { 3, 6, 2, 5 } ), {}, {},
-        Flow::NArrayCore::Operation::ADD,
+        Flow::Create( { 2, 2 }, { 3, 6, 2, 5 } ), {}, {}, {}, op,
         { 7, 7, 4, 8 },
         { 2, 2 },
         { 1, 1, 1, 1 },
@@ -55,8 +52,7 @@ static bool Test_Add()
 
     Test( 4, numPassed,
         Flow::Create( { 3 }, { 1, 2, 3 } ),
-        Flow::Create( { 3 }, { 4, 5, 6 } ), {}, {},
-        Flow::NArrayCore::Operation::ADD,
+        Flow::Create( { 3 }, { 4, 5, 6 } ), {}, {}, {}, op,
         { 5, 7, 9 },
         { 3 },
         { 1, 1, 1 },
@@ -66,8 +62,7 @@ static bool Test_Add()
 
     Test( 5, numPassed,
         Flow::Create( { 3, 2 }, { 1, 2, 3, 4, 5, 6 } ),
-        Flow::Create( { 2 }, { 1, 2 } ), {}, {},
-        Flow::NArrayCore::Operation::ADD,
+        Flow::Create( { 2 }, { 1, 2 } ), {}, {}, {}, op,
         { 2, 4, 4, 6, 6, 8 },
         { 3, 2 },
         { 1, 1, 1, 1, 1, 1 },
@@ -77,8 +72,7 @@ static bool Test_Add()
 
     Test( 6, numPassed,
         Flow::Create( { 3, 3 }, { 1, 2, 3, 4, 5, 6, 7, 8, 9 } ),
-        Flow::Create( { 1 }, { 10 } ), {}, {},
-        Flow::NArrayCore::Operation::ADD,
+        Flow::Create( { 1 }, { 10 } ), {}, {}, {}, op,
         { 11, 12, 13, 14, 15, 16, 17, 18, 19 },
         { 3, 3 },
         { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
@@ -88,8 +82,7 @@ static bool Test_Add()
 
     Test( 7, numPassed,
         Flow::Create( { 2 }, { 1, 2 } ),
-        Flow::Create( { 3, 2 }, { 3, 4, 5, 6, 7, 8 } ), {}, {},
-        Flow::NArrayCore::Operation::ADD,
+        Flow::Create( { 3, 2 }, { 3, 4, 5, 6, 7, 8 } ), {}, {}, {}, op,
         { 4, 6, 6, 8, 8, 10 },
         { 3, 2 },
         { 3, 3 },
@@ -99,8 +92,7 @@ static bool Test_Add()
 
     Test( 8, numPassed,
         Flow::Create( { 2, 1 }, { 1, 2 } ),
-        Flow::Create( { 2, 3 }, { 3, 4, 5, 6, 7, 8 } ), {}, {},
-        Flow::NArrayCore::Operation::ADD,
+        Flow::Create( { 2, 3 }, { 3, 4, 5, 6, 7, 8 } ), {}, {}, {}, op,
         { 4, 5, 6, 8, 9, 10 },
         { 2, 3 },
         { 3, 3 },
@@ -110,8 +102,7 @@ static bool Test_Add()
 
     Test( 9, numPassed,
         Flow::Create( { 2 }, { 1, 2 } ),
-        Flow::Create( { 2 }, { 3, 4 } ), {}, {},
-        Flow::NArrayCore::Operation::ADD,
+        Flow::Create( { 2 }, { 3, 4 } ), {}, {}, {}, op,
         { 4, 6 },
         { 2 },
         { 1, 1 },
@@ -121,8 +112,7 @@ static bool Test_Add()
 
     Test( 10, numPassed,
         Flow::Create( { 3, 1 }, { 1, 2, 3 } ),
-        Flow::Create( { 1, 4 }, { 1, 2, 3, 4 } ), {}, {},
-        Flow::NArrayCore::Operation::ADD,
+        Flow::Create( { 1, 4 }, { 1, 2, 3, 4 } ), {}, {}, {}, op,
         { 2, 3, 4, 5, 3, 4, 5, 6, 4, 5, 6, 7 },
         { 3, 4 },
         { 4, 4, 4 },
@@ -132,8 +122,7 @@ static bool Test_Add()
 
     Test( 11, numPassed,
         Flow::Create( { 2, 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8,  8, 7, 6, 5, 4, 3, 2, 1, 0 } ),
-        Flow::Create( { 3 }, { 1, 10, 100 } ), {}, {},
-        Flow::NArrayCore::Operation::ADD,
+        Flow::Create( { 3 }, { 1, 10, 100 } ), {}, {}, {}, op,
         { 1, 11, 102, 4, 14, 105, 7, 17, 108, 9, 17, 106, 6, 14, 103, 3, 11, 100 },
         { 2, 3, 3 },
         { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
@@ -143,8 +132,7 @@ static bool Test_Add()
 
     Test( 12, numPassed,
         Flow::Create( { 2, 3, 1 }, { 0, 1, 2, 3, 4, 5 } ),
-        Flow::Create( { 1, 1, 3 }, { 3, 4, 5 } ), {}, {},
-        Flow::NArrayCore::Operation::ADD,
+        Flow::Create( { 1, 1, 3 }, { 3, 4, 5 } ), {}, {}, {}, op,
         { 3, 4, 5, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9, 8, 9, 10 },
         { 2, 3, 3 },
         { 3, 3, 3, 3, 3, 3 },
@@ -152,53 +140,58 @@ static bool Test_Add()
         { 6, 6, 6 },
         { 1, 1, 3 } );
 
-    Flow::NArray arr1;
-    Flow::NArray arr2;
-    Flow::NArray result;
-    vector<float> data;
-    vector<int> shape;
+    Test( 13, numPassed,
+        Flow::Create( { 2, 2, 2 }, { 1, 2, 3, 4, 5, 6, 7, 8 } ),
+        Flow::Create( { 2, 2, 2 }, { 8, 7, 6, 5, 4, 3, 2, 1 } ), {}, {}, {}, op,
+        { 9, 9, 9, 9, 9, 9, 9, 9 },
+        { 2, 2, 2 },
+        { 1, 1, 1, 1, 1, 1, 1, 1 },
+        { 2, 2, 2 },
+        { 1, 1, 1, 1, 1, 1, 1, 1 },
+        { 2, 2, 2 } );
 
-    arr1 = Flow::Create( { 2, 2, 2 }, { 1, 2, 3, 4, 5, 6, 7, 8 } );
-    arr2 = Flow::Create( { 2, 2, 2 }, { 8, 7, 6, 5, 4, 3, 2, 1 } );
-    result = Flow::Add( arr1, arr2 );
-    data = { 9, 9, 9, 9, 9, 9, 9, 9 };
-    shape = { 2, 2, 2 };
-    if ( data == result.Get() && shape == result.GetShape() )  { Flow::Print("Test_Add_13 PASSED"); numPassed++; }
-    else Flow::Print("Test_Add_13 FAILED");
+    Test( 14, numPassed,
+        Flow::Create( { 2, 3, 2 }, { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 } ),
+        Flow::Create( { 2 }, { 1, 2 } ), {}, {}, {}, op,
+        { 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14 },
+        { 2, 3, 2 },
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        { 2, 3, 2 },
+        { 6, 6 },
+        { 2 } );
 
-    arr1 = Flow::Create( { 2, 3, 2 }, { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 } );
-    arr2 = Flow::Create( { 2 }, { 1, 2 } );
-    result = Flow::Add( arr1, arr2 );
-    data = { 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14 };
-    shape = { 2, 3, 2 };
-    if ( data == result.Get() && shape == result.GetShape() )  { Flow::Print("Test_Add_14 PASSED"); numPassed++; }
-    else Flow::Print("Test_Add_14 FAILED");
+    Test( 15, numPassed,
+        Flow::Create( { 2, 2, 2, 2 }, { 1, 3, 5, 7, 9, 11, 13, 15, 2, 4, 6, 8, 10, 12, 14, 16 } ),
+        Flow::Create( { 2, 2, 2, 2 }, { 16, 14, 12, 10, 8, 6, 4, 2, 15, 13, 11, 9, 7, 5, 3, 1 } ), {}, {}, {}, op,
+        { 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17 },
+        { 2, 2, 2, 2 },
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        { 2, 2, 2, 2 },
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        { 2, 2, 2, 2 } );
 
-    arr1 = Flow::Create( { 2, 2, 2, 2 }, { 1, 3, 5, 7, 9, 11, 13, 15, 2, 4, 6, 8, 10, 12, 14, 16 } );
-    arr2 = Flow::Create( { 2, 2, 2, 2 }, { 16, 14, 12, 10, 8, 6, 4, 2, 15, 13, 11, 9, 7, 5, 3, 1 } );
-    result = Flow::Add( arr1, arr2 );
-    data = { 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17 };
-    shape = { 2, 2, 2, 2 };
-    if ( data == result.Get() && shape == result.GetShape() )  { Flow::Print("Test_Add_15 PASSED"); numPassed++; }
-    else Flow::Print("Test_Add_15 FAILED");
+    Test( 16, numPassed,
+        Flow::Create( { 2, 2, 2, 2 }, { 11, 13, 15, 17, 12, 14, 16, 18, 13, 15, 17, 19, 14, 16, 18, 20 } ),
+        Flow::Create( { 2 }, { 1, 3 } ), {}, {}, {}, op,
+        { 12, 16, 16, 20, 13, 17, 17, 21, 14, 18, 18, 22, 15, 19, 19, 23 },
+        { 2, 2, 2, 2 },
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        { 2, 2, 2, 2 },
+        { 8, 8 },
+        { 2 } );
 
-    arr1 = Flow::Create( { 2, 2, 2, 2 }, { 11, 13, 15, 17, 12, 14, 16, 18, 13, 15, 17, 19, 14, 16, 18, 20 } );
-    arr2 = Flow::Create( { 2 }, { 1, 3 } );
-    result = Flow::Add( arr1, arr2 );
-    data = { 12, 16, 16, 20, 13, 17, 17, 21, 14, 18, 18, 22, 15, 19, 19, 23 };
-    shape = { 2, 2, 2, 2 };
-    if ( data == result.Get() && shape == result.GetShape() )  { Flow::Print("Test_Add_16 PASSED"); numPassed++; }
-    else Flow::Print("Test_Add_16 FAILED");
-
-    arr1 = Flow::Create( { 5, 2, 3, 2 }, { 51, 53, 52, 54, 53, 55, 54, 56, 55, 57, 56, 58, 57, 59, 58, 60, 59, 61, 60, 62, 61, 63, 62, 64, 63, 65, 64, 66, 65, 67, 66, 68, 67, 69, 68, 70, 69, 71, 70, 72, 71, 73, 72, 74, 73, 75, 74, 76, 75, 77, 76, 78, 77, 79, 78, 80, 79, 81, 80, 82 } );
-    arr2 = Flow::Create( { 2, 3, 1 }, { 1, 2, 3, 4, 5, 6 } );
-    result = Flow::Add( arr1, arr2 );
-    data = { 52, 54, 54, 56, 56, 58, 58, 60, 60, 62, 62, 64, 58, 60, 60, 62, 62, 64, 64, 66, 66, 68, 68, 70, 64, 66, 66, 68, 68, 70, 70, 72, 72, 74, 74, 76, 70, 72, 72, 74, 74, 76, 76, 78, 78, 80, 80, 82, 76, 78, 78, 80, 80, 82, 82, 84, 84, 86, 86, 88 };
-    shape = { 5, 2, 3, 2 };
-    if ( data == result.Get() && shape == result.GetShape() )  { Flow::Print("Test_Add_17 PASSED"); numPassed++; }
-    else Flow::Print("Test_Add_17 FAILED");
+    Test( 17, numPassed,
+        Flow::Create( { 5, 2, 3, 2 }, { 51, 53, 52, 54, 53, 55, 54, 56, 55, 57, 56, 58, 57, 59, 58, 60, 59, 61, 60, 62, 61, 63, 62, 64, 63, 65, 64, 66, 65, 67, 66, 68, 67, 69, 68, 70, 69, 71, 70, 72, 71, 73, 72, 74, 73, 75, 74, 76, 75, 77, 76, 78, 77, 79, 78, 80, 79, 81, 80, 82 } ),
+        Flow::Create( { 2, 3, 1 }, { 1, 2, 3, 4, 5, 6 } ), {}, {}, {}, op,
+        { 52, 54, 54, 56, 56, 58, 58, 60, 60, 62, 62, 64, 58, 60, 60, 62, 62, 64, 64, 66, 66, 68, 68, 70, 64, 66, 66, 68, 68, 70, 70, 72, 72, 74, 74, 76, 70, 72, 72, 74, 74, 76, 76, 78, 78, 80, 80, 82, 76, 78, 78, 80, 80, 82, 82, 84, 84, 86, 86, 88 },
+        { 5, 2, 3, 2 },
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        { 5, 2, 3, 2 },
+        { 10, 10, 10, 10, 10, 10 },
+        { 2, 3, 1 } );
 
     int numTests = 17;
     Flow::Print( "Test_Add " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
+    else return false;
 }

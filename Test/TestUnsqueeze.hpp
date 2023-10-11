@@ -34,4 +34,5 @@ static bool Test_Unsqueeze()
     int numTests = 3;
     Flow::Print( "Test_Unsqueeze " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
+    else return false;
 }

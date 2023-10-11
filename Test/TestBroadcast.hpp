@@ -6,63 +6,82 @@
 
 #include "Flow/NArray.h"
 #include "Flow/Print.h"
+#include "Test.hpp"
 
 using namespace std;
 
 static bool Test_Broadcast()
 {
     int numPassed = 0;
+    Flow::NArrayCore::Operation op = Flow::NArrayCore::Operation::BROADCAST;
 
-    Flow::NArray arr = Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } );
-    Flow::NArray result = Flow::Broadcast( arr, { 1, 3, 3 } );
-    vector<float> expectedData = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
-    vector<int> expectedShape = { 1, 3, 3 };
-    if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Broadcast_1 PASSED"); numPassed++; }
-    else Flow::Print("Test_Broadcast_1 FAILED");
+    vector<float> data( 100000, 123 );
+    Flow::NArray arr = Flow::Create( { 100000 }, data );
+    Flow::NArray result = Flow::Broadcast( arr, { 100000 } );
 
-    arr = Flow::Create( { 3 }, { 1, 2, 3 } );
-    result = Flow::Broadcast( arr, { 3, 3 } );
-    expectedData = { 1, 2, 3, 1, 2, 3, 1, 2, 3 };
-    expectedShape = { 3, 3 };
-    if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Broadcast_2 PASSED"); numPassed++; }
-    else Flow::Print("Test_Broadcast_2 FAILED");
+    Test( 1, numPassed,
+        Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ), Flow::NArray(), {},
+        { { 1, 3, 3 } }, {}, op,
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8 },
+        { 1, 3, 3 },
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        { 3, 3 }, {}, {} );
 
-    arr = Flow::Create( { 3 }, { 4, 5, 6 } );
-    result = Flow::Broadcast( arr, { 3, 3 } );
-    expectedData = { 4, 5, 6, 4, 5, 6, 4, 5, 6 };
-    expectedShape = { 3, 3 };
-    if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Broadcast_3 PASSED"); numPassed++; }
-    else Flow::Print("Test_Broadcast_3 FAILED");
+    Test( 2, numPassed,
+        Flow::Create( { 3 }, { 1, 2, 3 } ), Flow::NArray(), {},
+        { { 3, 3 } }, {}, op,
+        { 1, 2, 3, 1, 2, 3, 1, 2, 3 },
+        { 3, 3 },
+        { 3, 3, 3 },
+        { 3 }, {}, {} );
+
+    Test( 3, numPassed,
+        Flow::Create( { 3 }, { 4, 5, 6 } ), Flow::NArray(), {},
+        { { 3, 3 } }, {}, op,
+        { 4, 5, 6, 4, 5, 6, 4, 5, 6 },
+        { 3, 3 },
+        { 3, 3, 3 },
+        { 3 }, {}, {}
+    );
     
-    arr = Flow::Create( { 1, 3 }, { 7, 8, 9 } );
-    result = Flow::Broadcast( arr, { 4, 1, 3 } );
-    expectedData = { 7, 8, 9, 7, 8, 9, 7, 8, 9, 7, 8, 9 };
-    expectedShape = { 4, 1, 3 };
-    if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Broadcast_4 PASSED"); numPassed++; }
-    else Flow::Print("Test_Broadcast_4 FAILED");
-    
-    arr = Flow::Create( { 1 }, { 10 } );
-    result = Flow::Broadcast( arr, { 3, 3, 3 } );
-    expectedData = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
-    expectedShape = { 3, 3, 3 };
-    if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Broadcast_5 PASSED"); numPassed++; }
-    else Flow::Print("Test_Broadcast_5 FAILED");
+    Test( 4, numPassed,
+        Flow::Create( { 1, 3 }, { 7, 8, 9 } ), Flow::NArray(), {},
+        { { 4, 1, 3 } }, {}, op,
+        { 7, 8, 9, 7, 8, 9, 7, 8, 9, 7, 8, 9 },
+        { 4, 1, 3 },
+        { 4, 4, 4 },
+        { 1, 3 }, {}, {}
+    );
 
-    arr = Flow::Create( { 1, 1, 1, 3 }, { 13, 14, 15 } );
-    result = Flow::Broadcast( arr, { 4, 4, 4, 3 } );
-    expectedData =  { 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15 };
-    expectedShape = { 4, 4, 4, 3 };
-    if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Broadcast_7 PASSED"); numPassed++; }
-    else Flow::Print("Test_Broadcast_6 FAILED");
+    Test( 5, numPassed,
+        Flow::Create( { 1 }, { 10 } ), Flow::NArray(), {},
+        { { 3, 3, 3 } }, {}, op,
+        { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 },
+        { 3, 3, 3 },
+        { 27 },
+        { 1 }, {}, {}
+    );
 
-    arr = Flow::Create( { 1, 1, 1, 1, 3 }, { 22, 23, 24 } );
-    result = Flow::Broadcast( arr, { 2, 2, 2, 2, 3 } );
-    expectedData =  { 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24 };
-    expectedShape = { 2, 2, 2, 2, 3 };
-    if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Broadcast_9 PASSED"); numPassed++; }
-    else Flow::Print("Test_Broadcast_7 FAILED");
+    Test( 6, numPassed,
+        Flow::Create( { 1, 1, 1, 3 }, { 13, 14, 15 } ), Flow::NArray(), {},
+        { { 4, 4, 4, 3 } }, {}, op,
+        { 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15 },
+        { 4, 4, 4, 3 },
+        { 64, 64, 64 },
+        { 1, 1, 1, 3 }, {}, {}
+    );
+
+    Test( 7, numPassed,
+        Flow::Create( { 1, 1, 1, 1, 3 }, { 22, 23, 24 } ), Flow::NArray(), {},
+        { { 2, 2, 2, 2, 3 } }, {}, op,
+        { 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24, 22, 23, 24 },
+        { 2, 2, 2, 2, 3 },
+        { 16, 16, 16 },
+        { 1, 1, 1, 1, 3 }, {}, {}
+    );
 
     int numTests = 7;
     Flow::Print( "Test_Broadcast " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
+    else return false;
 }

@@ -14,7 +14,7 @@ Flow::NArray::NArray( NArrayCore* arr )
 
 bool Flow::NArray::IsValid()
 {
-    if (Array) return true;
+    if ( Array != nullptr ) return true;
     else return false;
 }
 

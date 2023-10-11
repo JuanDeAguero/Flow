@@ -64,4 +64,5 @@ static bool Test_Sum()
     int numTests = 7;
     Flow::Print( "Test_Sum " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
+    else return false;
 }

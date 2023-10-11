@@ -33,4 +33,5 @@ static bool Test_CrossEntropy()
     int numTests = 1;
     Flow::Print( "Test_CrossEntropy " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
+    else return false;
 }

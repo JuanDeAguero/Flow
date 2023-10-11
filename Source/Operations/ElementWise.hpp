@@ -6,8 +6,16 @@
 
 namespace Flow
 {
+    void ElementWise_CUDA( NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op );
+
     static void ElementWise( NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op )
     {
+        if (UseCUDA)
+        {
+            ElementWise_CUDA( arr1, arr2, result, op );
+            return;
+        }
+        
         for ( int i = 0; i < arr1->Get().size(); i++ )
         {
             vector<int> index = FlatToMultiIndex( i, arr1->GetShape() );
@@ -22,6 +30,4 @@ namespace Flow
             }
         }
     }
-
-    void ElementWise_CUDA( NArrayCore* arr1, NArrayCore* arr2, NArrayCore* result, NArrayCore::Operation op );
 }

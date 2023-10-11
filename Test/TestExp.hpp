@@ -52,4 +52,5 @@ static bool Test_Exp()
     int numTests = 5;
     Flow::Print( "Test_Exp " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
+    else return false;
 }

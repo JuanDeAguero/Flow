@@ -49,4 +49,5 @@ static bool Test_ReLU()
     int numTests = 4;
     Flow::Print( "Test_ReLU " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
+    else return false;
 }

@@ -23,6 +23,9 @@ namespace Flow
 
     NArrayCore* Broadcast( NArrayCore* arr, vector<int> shape )
     {
+        if (UseCUDA)
+            return Broadcast_CUDA( arr, shape );
+
         vector<float> resultData( SizeFromShape(shape), 0.0f );
         for ( int i = 0; i < SizeFromShape(shape); i++ )
         {
