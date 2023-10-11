@@ -4,8 +4,8 @@ Machine Learning Library in C++
 - N dimentional array operations
   - Addition, subtraction, multiplication, matrix multiplication, ...
 - Autograd system
-- Deep neural networks (WIP)
-- GPU acceleration (WIP)
+- GPU acceleration with CUDA
+- Deep neural networks
 ## MNIST classifier
 Load the data.
 ```bash
