@@ -11,6 +11,7 @@
 #include "TestMax.hpp"
 #include "TestMM.hpp"
 #include "TestMul.hpp"
+#include "TestPow.hpp"
 #include "TestReLU.hpp"
 #include "TestSum.hpp"
 #include "TestUnsqueeze.hpp"
@@ -28,10 +29,11 @@ int main()
     if (Test_Max())          numPassed++;
     if (Test_MM())           numPassed++;
     if (Test_Mul())          numPassed++;
+    if (Test_Pow())          numPassed++;
     if (Test_ReLU())         numPassed++;
     if (Test_Sum())          numPassed++;
     if (Test_Unsqueeze())    numPassed++;
 
-    int numTests = 12;
+    int numTests = 13;
     Flow::Print( "== FLOW TEST " + to_string(numPassed) + "/" + to_string(numTests) + " ==" );
 }

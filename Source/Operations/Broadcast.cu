@@ -38,13 +38,12 @@ namespace Flow
         cudaMemcpy( arrShape_d, arr->GetShapeData(), arr->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
         cudaMemcpy( shape_d, shape.data(), shape.size() * sizeof(int), cudaMemcpyHostToDevice );
         Broadcast_Kernel<<< n, 1 >>>( arr_d, arrShape_d, arr->GetShape().size(), shape_d, shape.size(), result_d );
-        float* result_ptr = (float*)malloc( n * sizeof(float) );
-        cudaMemcpy( result_ptr, result_d, n * sizeof(float), cudaMemcpyDeviceToHost );
+        vector<float> resultData(n);
+        cudaMemcpy( resultData.data(), result_d, n * sizeof(float), cudaMemcpyDeviceToHost );
         cudaFree(arr_d);
         cudaFree(arrShape_d);
         cudaFree(shape_d);
         cudaFree(result_d);
-        vector<float> resultData = vector<float>( result_ptr, result_ptr + n );
         return new NArrayCore( shape, resultData, { arr }, NArrayCore::Operation::BROADCAST );
     }
 }
