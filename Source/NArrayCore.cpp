@@ -153,6 +153,7 @@ void Flow::NArrayCore::Backward()
         case Operation::GATHER:    BackwardGather();    break;
         case Operation::UNSQUEEZE: BackwardUnsqueeze(); break;
         case Operation::INDEX:     BackwardIndex();     break;
+        default: break;
     }
 }
 

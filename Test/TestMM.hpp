@@ -6,11 +6,10 @@
 #include "Flow/Print.h"
 #include "Test.hpp"
 
-using namespace std;
-
 static bool Test_MM()
 {
     int numPassed = 0;
+    int numTests = 2;
     Flow::NArrayCore::Operation op = Flow::NArrayCore::Operation::MM;
 
     Test( 1, numPassed,
@@ -33,8 +32,7 @@ static bool Test_MM()
         { 8, 8, 11, 11, 13, 13, 13, 13 },
         { 4, 2 } );
 
-    int numTests = 2;
-    Flow::Print( "Test_MM " + to_string(numPassed) + "/" + to_string(numTests) );
+    Flow::Print( "Test_MM " + std::to_string(numPassed) + "/" + std::to_string(numTests) );
     if ( numPassed == numTests ) return true;
     else return false;
 }

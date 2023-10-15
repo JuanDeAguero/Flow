@@ -8,19 +8,18 @@
 #include "Flow/Print.h"
 #include "Flow/Vector.h"
 
-using namespace std;
-
 static bool Test_ReLU()
 {
     int numPassed = 0;
+    int numTests = 4;
 
     Flow::NArray arr = Flow::Create( { 2, 2, 2, 2 }, { -0.5, 1.5, -1, 2, 1.5, -1.5, 2.5, -2.5, 0, 0, 0, 0, 0, 0, 0, 0 } );
     Flow::NArray result = Flow::ReLU(arr);
     result.Backpropagate();
-    vector<float> data = { 0, 1.5, 0, 2, 1.5, 0, 2.5, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    vector<int> shape = { 2, 2, 2, 2 };
-    vector<float> dataGrad = { 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    vector<int> shapeGrad = { 2, 2, 2, 2 };
+    std::vector<float> data = { 0, 1.5, 0, 2, 1.5, 0, 2.5, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    std::vector<int> shape = { 2, 2, 2, 2 };
+    std::vector<float> dataGrad = { 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    std::vector<int> shapeGrad = { 2, 2, 2, 2 };
     if ( Flow::Equals( data, result.Get(), 0.01f ) && shape == result.GetShape() &&
         Flow::Equals( dataGrad, arr.GetGradient().Get(), 0.01f ) && shapeGrad == arr.GetGradient().GetShape()) { Flow::Print("Test_ReLU_1 PASSED"); numPassed++; }
     else { Flow::Print("Test_ReLU_1 FAILED"); }
@@ -46,8 +45,7 @@ static bool Test_ReLU()
     if ( Flow::Equals( data, result.Get(), 0.01f ) && shape == result.GetShape() ) { Flow::Print("Test_ReLU_4 PASSED"); numPassed++; }
     else { Flow::Print("Test_ReLU_4 FAILED"); }
 
-    int numTests = 4;
-    Flow::Print( "Test_ReLU " + to_string(numPassed) + "/" + to_string(numTests) );
+    Flow::Print( "Test_ReLU " + std::to_string(numPassed) + "/" + std::to_string(numTests) );
     if ( numPassed == numTests ) return true;
     else return false;
 }

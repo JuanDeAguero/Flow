@@ -6,11 +6,10 @@
 #include "Flow/Print.h"
 #include "Test.hpp"
 
-using namespace std;
-
 static bool Test_Broadcast()
 {
     int numPassed = 0;
+    int numTests = 7;
     Flow::NArrayCore::Operation op = Flow::NArrayCore::Operation::BROADCAST;
 
     Test( 1, numPassed,
@@ -74,8 +73,7 @@ static bool Test_Broadcast()
         { 1, 1, 1, 1, 3 }, {}, {}
     );
 
-    int numTests = 7;
-    Flow::Print( "Test_Broadcast " + to_string(numPassed) + "/" + to_string(numTests) );
+    Flow::Print( "Test_Broadcast " + std::to_string(numPassed) + "/" + std::to_string(numTests) );
     if ( numPassed == numTests ) return true;
     else return false;
 }

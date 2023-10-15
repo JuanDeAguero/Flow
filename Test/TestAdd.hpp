@@ -8,14 +8,13 @@
 #include "Flow/Print.h"
 #include "Test.hpp"
 
-using namespace std;
-
 static bool Test_Add()
 {
     int numPassed = 0;
+    int numTests = 17;
     Flow::NArrayCore::Operation op = Flow::NArrayCore::Operation::ADD;
 
-    vector<float> data( 100000, 123 );
+    std::vector<float> data( 100000, 123 );
     Flow::NArray arr1 = Flow::Create( { 100000 }, data );
     Flow::NArray arr2 = Flow::Create( { 100000 }, data );
     Flow::NArray result = Flow::Add( arr1, arr2 );
@@ -190,8 +189,7 @@ static bool Test_Add()
         { 10, 10, 10, 10, 10, 10 },
         { 2, 3, 1 } );
 
-    int numTests = 17;
-    Flow::Print( "Test_Add " + to_string(numPassed) + "/" + to_string(numTests) );
+    Flow::Print( "Test_Add " + std::to_string(numPassed) + "/" + std::to_string(numTests) );
     if ( numPassed == numTests ) return true;
     else return false;
 }

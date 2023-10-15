@@ -8,16 +8,15 @@
 #include "Flow/Print.h"
 #include "Flow/Vector.h"
 
-using namespace std;
-
 static bool Test_Sum()
 {
     int numPassed = 0;
+    int numTests = 7;
 
     Flow::NArray arr = Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } );
     Flow::NArray result = Flow::Sum( arr, 0 );
-    vector<float> expectedData = { 9, 12, 15 };
-    vector<int> expectedShape = { 1, 3 };
+    std::vector<float> expectedData = { 9, 12, 15 };
+    std::vector<int> expectedShape = { 1, 3 };
     if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Sum_1 PASSED"); numPassed++; } 
     else Flow::Print("Test_Sum_1 FAILED");
 
@@ -61,8 +60,7 @@ static bool Test_Sum()
     if ( Flow::Equals( expectedData, result.Get(), 0.01f ) && expectedShape == result.GetShape() ) { Flow::Print("Test_Sum_7 PASSED"); numPassed++; } 
     else Flow::Print("Test_Sum_7 FAILED");
 
-    int numTests = 7;
-    Flow::Print( "Test_Sum " + to_string(numPassed) + "/" + to_string(numTests) );
+    Flow::Print( "Test_Sum " + std::to_string(numPassed) + "/" + std::to_string(numTests) );
     if ( numPassed == numTests ) return true;
     else return false;
 }

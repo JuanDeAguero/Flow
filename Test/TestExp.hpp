@@ -6,11 +6,10 @@
 #include "Flow/Print.h"
 #include "Test.hpp"
 
-using namespace std;
-
 static bool Test_Exp()
 {
     int numPassed = 0;
+    int numTests = 5;
     Flow::NArrayCore::Operation op = Flow::NArrayCore::Operation::EXP;
 
     Test( 1, numPassed,
@@ -48,8 +47,7 @@ static bool Test_Exp()
         { 1.0, 2.7183, 0.3679, 7.3891, 4.4817, 0.2231, 12.1825, 0.0821 },
         { 2, 2, 2, 2 }, {}, {} );
 
-    int numTests = 5;
-    Flow::Print( "Test_Exp " + to_string(numPassed) + "/" + to_string(numTests) );
+    Flow::Print( "Test_Exp " + std::to_string(numPassed) + "/" + std::to_string(numTests) );
     if ( numPassed == numTests ) return true;
     else return false;
 }

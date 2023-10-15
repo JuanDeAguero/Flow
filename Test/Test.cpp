@@ -35,5 +35,5 @@ int main()
     if (Test_Unsqueeze())    numPassed++;
 
     int numTests = 13;
-    Flow::Print( "== FLOW TEST " + to_string(numPassed) + "/" + to_string(numTests) + " ==" );
+    Flow::Print( "== FLOW TEST " + std::to_string(numPassed) + "/" + std::to_string(numTests) + " ==" );
 }

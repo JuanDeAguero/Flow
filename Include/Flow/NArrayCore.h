@@ -30,7 +30,8 @@ namespace Flow
             SUM, MAX,
             RESHAPE, TRANSPOSE, BROADCAST,
             GATHER, SQUEEZE, UNSQUEEZE,
-            INDEX
+            INDEX,
+            CROSSENTROPY
         };
 
         NArrayCore( vector<int> shape, vector<float> data, vector<NArrayCore*> operands, Operation op );
