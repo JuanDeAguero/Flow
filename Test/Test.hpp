@@ -24,8 +24,14 @@ static bool Test( int num, int& numPassed,
         case Flow::NArrayCore::Operation::MM: result = Flow::MM( arr1, arr2 ); name = "MM"; binaryOp = true; break;
         case Flow::NArrayCore::Operation::POW: result = Flow::Pow( arr1, floatParams[0] ); name = "Pow"; break;
         case Flow::NArrayCore::Operation::EXP: result = Flow::Exp(arr1); name = "Exp"; break;
+        case Flow::NArrayCore::Operation::TANH: result = Flow::Tanh(arr1); name = "Tanh"; break;
+        case Flow::NArrayCore::Operation::RELU: result = Flow::ReLU(arr1); name = "ReLU"; break;
+        case Flow::NArrayCore::Operation::LOG: result = Flow::Log(arr1); name = "Log"; break;
+        case Flow::NArrayCore::Operation::SUM: result = Flow::Sum( arr1, intParams[0] ); name = "Sum"; break;
+        case Flow::NArrayCore::Operation::MAX: result = Flow::Max( arr1, intParams[0] ); name = "Max"; break;
         case Flow::NArrayCore::Operation::BROADCAST: result = Flow::Broadcast( arr1, intVecParams[0] ); name = "Broadcast"; break;
         case Flow::NArrayCore::Operation::GATHER: result = Flow::Gather( arr1, intParams[0], arr2 ); name = "Gather"; binaryOp = true; break;
+        case Flow::NArrayCore::Operation::UNSQUEEZE: result = Flow::Unsqueeze( arr1, intParams[0] ); name = "Unsqueeze"; break;
         case Flow::NArrayCore::Operation::INDEX: result = Flow::Index( arr1, intParams[0], arr2 ); name = "Index"; binaryOp = true; break;
         case Flow::NArrayCore::Operation::CROSSENTROPY: result = Flow::CrossEntropy( arr1, arr2 ); name = "CrossEntropy"; binaryOp = true; break;
     }

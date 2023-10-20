@@ -2,33 +2,39 @@
 
 #pragma once
 
-#include <vector>
-
 #include "Flow/NArray.h"
 #include "Flow/Print.h"
-#include "Flow/Vector.h"
+#include "Test.hpp"
 
 static bool Test_Unsqueeze()
 {
     int numPassed = 0;
     int numTests = 3;
+    Flow::NArrayCore::Operation op = Flow::NArrayCore::Operation::UNSQUEEZE;
 
-    Flow::NArray arr = Flow::Create( { 3, 1, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } );
-    Flow::NArray result = Flow::Unsqueeze( arr, 0 );
-    std::vector<float> expectedData = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
-    std::vector<int> expectedShape = { 1, 3, 1, 3 };
-    if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Unsqueeze_1 PASSED"); numPassed++; } 
-    else Flow::Print("Test_Unsqueeze_1 FAILED");
+    Test( 1, numPassed,
+        Flow::Create( { 3, 1, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ), Flow::NArray(),
+        { 0 }, {}, {}, {}, op,
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8 },
+        { 1, 3, 1, 3 },
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        { 3, 1, 3 }, {}, {} );
 
-    result = Flow::Unsqueeze( arr, 1 );
-    expectedShape = { 3, 1, 1, 3 };
-    if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Unsqueeze_2 PASSED"); numPassed++; } 
-    else Flow::Print("Test_Unsqueeze_2 FAILED");
+    Test( 2, numPassed,
+        Flow::Create( { 3, 1, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ), Flow::NArray(),
+        { 1 }, {}, {}, {}, op,
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8 },
+        { 3, 1, 1, 3 },
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        { 3, 1, 3 }, {}, {} );
 
-    result = Flow::Unsqueeze( arr, 3 );
-    expectedShape = { 3, 1, 3, 1 };
-    if ( expectedData == result.Get() && expectedShape == result.GetShape() ) { Flow::Print("Test_Unsqueeze_3 PASSED"); numPassed++; } 
-    else Flow::Print("Test_Unsqueeze_3 FAILED");
+    Test( 3, numPassed,
+        Flow::Create( { 3, 1, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ), Flow::NArray(),
+        { 3 }, {}, {}, {}, op,
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8 },
+        { 3, 1, 3, 1 },
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+        { 3, 1, 3 }, {}, {} );
 
     Flow::Print( "Test_Unsqueeze " + std::to_string(numPassed) + "/" + std::to_string(numTests) );
     if ( numPassed == numTests ) return true;
