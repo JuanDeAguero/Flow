@@ -10,12 +10,23 @@ add_library(flow STATIC
     Source/NArray.cpp
     Source/NArrayCore.cpp
     Source/Operations/Add.cpp
-    Source/Operations/Add.cu
     Source/Operations/Broadcast.cpp
-    Source/Operations/Broadcast.cu
-    Source/Operations/ElementWise.cu
+    Source/Operations/CUDA/Add.cu
+    Source/Operations/CUDA/Broadcast.cu
+    Source/Operations/CUDA/ElementWise.cu
+    Source/Operations/CUDA/Exp.cu
+    Source/Operations/CUDA/Gather.cu
+    Source/Operations/CUDA/Index.cu
+    Source/Operations/CUDA/Log.cu
+    Source/Operations/CUDA/Max.cu
+    Source/Operations/CUDA/MM.cu
+    Source/Operations/CUDA/Mul.cu
+    Source/Operations/CUDA/Pow.cu
+    Source/Operations/CUDA/ReLU.cu
+    Source/Operations/CUDA/Sum.cu
+    Source/Operations/CUDA/Tanh.cu
+    Source/Operations/CUDA/Unsqueeze.cu
     Source/Operations/Exp.cpp
-    Source/Operations/Exp.cu
     Source/Operations/Gather.cpp
     Source/Operations/Index.cpp
     Source/Operations/Log.cpp

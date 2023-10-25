@@ -46,6 +46,12 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardBroadcast()
 {
+    if (UseCUDA)
+    {
+        BackwardBroadcast_CUDA();
+        return;
+    }
+
     vector<float> operandGradient( Operands[0]->Data.size(), 0.0f );
     for ( int i = 0; i < Gradient->Data.size(); i++ )
     {

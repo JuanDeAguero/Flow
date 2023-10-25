@@ -27,16 +27,10 @@ int main()
     testImages.resize( 784 * 100 );
     testLabels.resize( 100 );
 
-    Flow::Print("data loaded");
-
     Flow::NArray xTrain = Flow::Create( { 100, 784 }, trainImages );
     Flow::NArray yTrain = Flow::Create( { 100 }, trainLabels );
     Flow::NArray xTest = Flow::Create( { 100, 784 }, testImages );
     Flow::NArray yTest = Flow::Create( { 100 }, trainLabels );
-
-    Flow::Print("add started");
-    Flow::NArray a = Add( xTrain.Copy(), xTrain.Copy() );
-    Flow::Print("add finished");
 
     xTrain = Flow::Div( xTrain.Copy(), Flow::Create( { 1 }, { 255 } ) );
     xTest = Flow::Div( xTest.Copy(), Flow::Create( { 1 }, { 255 } ) );

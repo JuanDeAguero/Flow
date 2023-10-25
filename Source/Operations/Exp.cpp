@@ -8,6 +8,9 @@ namespace Flow
 {
     NArrayCore* Exp( NArrayCore* arr )
     {
+        if (UseCUDA)
+            return Exp_CUDA(arr);
+
         vector<float> resultData = arr->Get();
         for ( float& value : resultData )
             value = exp(value);
@@ -17,6 +20,12 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardExp()
 {
+    if (UseCUDA)
+    {
+        BackwardExp_CUDA();
+        return;
+    }
+    
     for ( int i = 0; i < Data.size(); i++ )
     {
         float grad = Gradient->Data[i] * exp( Operands[0]->Data[i] );

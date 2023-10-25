@@ -7,11 +7,11 @@
 #include <unordered_set>
 #include <vector>
 
-static bool UseCUDA = true;
-
 namespace Flow
 {
     using namespace std;
+
+    static bool UseCUDA = true;
 
     class NArrayCore
     {
@@ -146,6 +146,8 @@ namespace Flow
     NArrayCore* Pow( NArrayCore* arr, float exponent );
 
     NArrayCore* Exp( NArrayCore* arr );
+
+    NArrayCore* Exp_CUDA( NArrayCore* arr );
 
     NArrayCore* Tanh( NArrayCore* arr );
 
