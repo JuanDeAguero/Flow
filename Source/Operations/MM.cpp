@@ -6,6 +6,9 @@ namespace Flow
 {
     NArrayCore* MM( NArrayCore* arr1, NArrayCore* arr2 )
     {
+        if (UseCUDA)
+            return MM_CUDA( arr1, arr2 );
+
         int m = arr1->GetShape()[0];
         int n = arr1->GetShape()[1];
         int p = arr2->GetShape()[1];
@@ -26,6 +29,12 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardMM()
 {
+    if (UseCUDA)
+    {
+        BackwardMM_CUDA();
+        return;
+    }
+
     int m = Operands[0]->GetShape()[0];
     int n = Operands[0]->GetShape()[1];
     int p = Operands[1]->GetShape()[1];

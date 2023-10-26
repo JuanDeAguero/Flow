@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -17,31 +19,31 @@ static vector<float> ReadLabelsMNIST( string filePath );
 
 int main()
 {
+    /*Flow::NArray arr1 = Flow::Random({ 10000, 500 });
+    Flow::NArray arr2 = Flow::Random({ 500, 10000 });
+    Flow::NArray arr3 = Flow::MM( arr1, arr2 );
+    Flow::Print("done");
+    return 0;*/
+
     vector<float> trainImages = ReadImagesMNIST("../train-images-idx3-ubyte");
     vector<float> trainLabels = ReadLabelsMNIST("../train-labels-idx1-ubyte");
     vector<float> testImages = ReadImagesMNIST("../t10k-images-idx3-ubyte");
     vector<float> testLabels = ReadLabelsMNIST("../t10k-labels-idx1-ubyte");
 
-    trainImages.resize( 784 * 100 );
-    trainLabels.resize( 100 );
-    testImages.resize( 784 * 100 );
-    testLabels.resize( 100 );
+    int n = 6000;
 
-    Flow::NArray xTrain = Flow::Create( { 100, 784 }, trainImages );
-    Flow::NArray yTrain = Flow::Create( { 100 }, trainLabels );
-    Flow::NArray xTest = Flow::Create( { 100, 784 }, testImages );
-    Flow::NArray yTest = Flow::Create( { 100 }, trainLabels );
+    trainImages.resize( 784 * n );
+    trainLabels.resize( n );
+    testImages.resize( 784 * n );
+    testLabels.resize( n );
+
+    Flow::NArray xTrain = Flow::Create( { n, 784 }, trainImages );
+    Flow::NArray yTrain = Flow::Create( { n }, trainLabels );
+    Flow::NArray xTest = Flow::Create( { n, 784 }, testImages );
+    Flow::NArray yTest = Flow::Create( { n }, trainLabels );
 
     xTrain = Flow::Div( xTrain.Copy(), Flow::Create( { 1 }, { 255 } ) );
     xTest = Flow::Div( xTest.Copy(), Flow::Create( { 1 }, { 255 } ) );
-
-    /*for ( int i = 0; i < 28; i++ )
-    {
-        for ( int j = 0; j < 28; j++ )
-            cout << setw(3) << right << xTrain.Get({ 76, i * 28 + j }) << " ";
-        cout << endl;
-    }
-    cout << "Label: " << trainLabels[76] << endl;*/
 
     Flow::NArray w1 = Flow::Random({ 784, 128 });
     Flow::NArray b1 = Flow::Random({ 128 });
@@ -70,6 +72,29 @@ int main()
 
         Flow::Print(loss);
     }
+
+    vector<float> testData;
+    for ( int i = 0; i < 28; i++ )
+    {
+        for ( int j = 0; j < 28; j++ )
+            testData.push_back(xTest.Get({ 11, i * 28 + j }));
+    }
+    Flow::NArray test = Flow::Create( { 1, 784 }, testData );
+    Flow::NArray a = ReLU( Add( MM( test, w1 ), b1 ) );
+    Flow::NArray yPred = Add( MM( a, w2 ), b2 );
+    float max = 0.0f;
+    int maxIndex = 0;
+    for ( int i = 0; i < yPred.Get().size(); i++ )
+    {
+        float y = yPred.Get()[i];
+        if ( y > max )
+        {
+            max = y;
+            maxIndex = i;
+        }
+    }
+    Flow::Print(maxIndex);
+    Flow::Print(yPred);
 }
 
 vector<float> ReadImagesMNIST( string filePath )

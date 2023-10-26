@@ -82,37 +82,59 @@ namespace Flow
 
         void BackwardMul();
 
+        void BackwardMul_CUDA();
+
         void BackwardMM();
+        
+        void BackwardMM_CUDA();
 
         void BackwardPow();
+        
+        void BackwardPow_CUDA();
 
         void BackwardExp();
-
+        
         void BackwardExp_CUDA();
 
         void BackwardTanh();
+        
+        void BackwardTanh_CUDA();
 
         void BackwardReLU();
+        
+        void BackwardReLU_CUDA();
 
         void BackwardLog();
+        
+        void BackwardLog_CUDA();
 
         void BackwardSum();
+        
+        void BackwardSum_CUDA();
 
         void BackwardMax();
+        
+        void BackwardMax_CUDA();
 
         void BackwardReshape();
 
         void BackwardTranspose();
 
         void BackwardBroadcast();
-
+        
         void BackwardBroadcast_CUDA();
 
         void BackwardGather();
+        
+        void BackwardGather_CUDA();
 
         void BackwardUnsqueeze();
+        
+        void BackwardUnsqueeze_CUDA();
 
         void BackwardIndex();
+        
+        void BackwardIndex_CUDA();
 
     public:
 
@@ -143,7 +165,11 @@ namespace Flow
 
     NArrayCore* MM( NArrayCore* arr1, NArrayCore* arr2 );
 
+    NArrayCore* MM_CUDA( NArrayCore* arr1, NArrayCore* arr2 );
+
     NArrayCore* Pow( NArrayCore* arr, float exponent );
+
+    NArrayCore* Pow_CUDA( NArrayCore* arr, float exponent );
 
     NArrayCore* Exp( NArrayCore* arr );
 
@@ -151,13 +177,23 @@ namespace Flow
 
     NArrayCore* Tanh( NArrayCore* arr );
 
+    NArrayCore* Tanh_CUDA( NArrayCore* arr );
+
     NArrayCore* ReLU( NArrayCore* arr );
+
+    NArrayCore* ReLU_CUDA( NArrayCore* arr );
 
     NArrayCore* Log( NArrayCore* arr );
 
+    NArrayCore* Log_CUDA( NArrayCore* arr );
+
     NArrayCore* Sum( NArrayCore* arr, int dim );
 
+    NArrayCore* Sum_CUDA( NArrayCore* arr, int dim );
+
     NArrayCore* Max( NArrayCore* arr, int dim );
+
+    NArrayCore* Max_CUDA( NArrayCore* arr, int dim );
 
     NArrayCore* Reshape( NArrayCore* arr, vector<int> shape );
 
@@ -169,9 +205,15 @@ namespace Flow
 
     NArrayCore* Gather( NArrayCore* arr, int dim, NArrayCore* index );
 
+    NArrayCore* Gather_CUDA( NArrayCore* arr, int dim, NArrayCore* index );
+
     NArrayCore* Unsqueeze( NArrayCore* arr, int dim );
 
+    NArrayCore* Unsqueeze_CUDA( NArrayCore* arr, int dim );
+
     NArrayCore* Index( NArrayCore* arr, int dim, NArrayCore* index );
+
+    NArrayCore* Index_CUDA( NArrayCore* arr, int dim, NArrayCore* index );
 
     NArrayCore* Neg( NArrayCore* arr );
 
