@@ -1,11 +1,16 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#include <stdexcept>
+
 #include "Flow/NArrayCore.h"
 
 namespace Flow
 {
     NArrayCore* MM( NArrayCore* arr1, NArrayCore* arr2 )
     {
+        if ( arr1->GetShape().size() != 2 || arr2->GetShape().size() != 2 )
+            throw runtime_error("MM only supports 2D x 2D.");
+
         if (UseCUDA)
             return MM_CUDA( arr1, arr2 );
 

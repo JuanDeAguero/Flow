@@ -1,12 +1,12 @@
 # Flow
 Machine Learning Library in C++
 ## Features
-- N dimentional array operations
+- N dimensional array operations
   - Addition, subtraction, multiplication, matrix multiplication, ...
 - Autograd system
 - GPU acceleration with CUDA
 - Deep neural networks
-## MNIST classifier
+## Example: MNIST classifier
 Load the data.
 ```bash
 vector<float> trainImages = ReadImagesMNIST("...");

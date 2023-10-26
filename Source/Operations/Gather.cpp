@@ -6,16 +6,18 @@ namespace Flow
 {
     NArrayCore* Gather( NArrayCore* arr, int dim, NArrayCore* index )
     {
+        if (UseCUDA)
+            return Gather_CUDA( arr, dim, index );
+
         vector<float> resultData;
-        vector<int> resultShape = index->GetShape();
         for ( int i = 0; i < index->Get().size(); i++ )
         {
-            vector<int> multiIndex = FlatToMultiIndex( i, resultShape );
+            vector<int> multiIndex = FlatToMultiIndex( i, index->GetShape() );
             multiIndex[dim] = static_cast<int>(index->Get()[i]);
             int flatIndex = MultiToFlatIndex( multiIndex, arr->GetShape() );
             resultData.push_back(arr->Get()[flatIndex]);
         }
-        NArrayCore* result = new NArrayCore( resultShape, resultData, { arr }, NArrayCore::Operation::GATHER );
+        NArrayCore* result = new NArrayCore( index->GetShape(), resultData, { arr }, NArrayCore::Operation::GATHER );
         result->GatherDim = dim;
         result->GatherIndex = index;
         return result;
@@ -24,6 +26,12 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardGather()
 {
+    /*if (UseCUDA)
+    {
+        BackwardGather_CUDA();
+        return;
+    }*/
+
     for ( int i = 0; i < GatherIndex->Data.size(); i++ )
     {
         vector<int> multiIndex = FlatToMultiIndex( i, GatherIndex->Shape );
