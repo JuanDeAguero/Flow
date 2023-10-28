@@ -9,7 +9,7 @@
 static bool Test_MM()
 {
     int numPassed = 0;
-    int numTests = 2;
+    int numTests = 3;
     Flow::NArrayCore::Operation op = Flow::NArrayCore::Operation::MM;
 
     Test( 1, numPassed,
@@ -31,6 +31,16 @@ static bool Test_MM()
         { 2, 4 },
         { 8, 8, 11, 11, 13, 13, 13, 13 },
         { 4, 2 } );
+
+    Test( 3, numPassed,
+        Flow::Create( { 2, 3 }, { 1, 2, 3, 4, 5, 6 } ),
+        Flow::Create( { 3, 2 }, { 1, 2, 3, 4, 5, 6 } ), {}, {}, {}, {}, op,
+        { 22, 28, 49, 64 },
+        { 2, 2 },
+        { 3, 7, 11, 3, 7, 11 },
+        { 2, 3 },
+        { 5, 5, 7, 7, 9, 9 },
+        { 3, 2 } );
 
     Flow::Print( "Test_MM " + std::to_string(numPassed) + "/" + std::to_string(numTests) );
     if ( numPassed == numTests ) return true;

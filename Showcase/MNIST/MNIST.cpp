@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #include "Flow.h"
@@ -38,7 +39,7 @@ int main()
     Flow::NArray xTrain = Flow::Create( { n, 784 }, trainImages );
     Flow::NArray yTrain = Flow::Create( { n }, trainLabels );
     Flow::NArray xTest = Flow::Create( { n, 784 }, testImages );
-    Flow::NArray yTest = Flow::Create( { n }, trainLabels );
+    Flow::NArray yTest = Flow::Create( { n }, testLabels );
 
     xTrain = Flow::Div( xTrain.Copy(), Flow::Create( { 1 }, { 255 } ) );
     xTest = Flow::Div( xTest.Copy(), Flow::Create( { 1 }, { 255 } ) );
@@ -71,28 +72,35 @@ int main()
         Flow::Print(loss);
     }
 
-    vector<float> testData;
-    for ( int i = 0; i < 28; i++ )
+    int numCorrect = 0;
+    n = 100;
+    for ( int i = 0; i < n; i++ )
     {
+        vector<float> testData;
         for ( int j = 0; j < 28; j++ )
-            testData.push_back(xTest.Get({ 11, i * 28 + j }));
-    }
-    Flow::NArray test = Flow::Create( { 1, 784 }, testData );
-    Flow::NArray a = ReLU( Add( MM( test, w1 ), b1 ) );
-    Flow::NArray yPred = Add( MM( a, w2 ), b2 );
-    float max = 0.0f;
-    int maxIndex = 0;
-    for ( int i = 0; i < yPred.Get().size(); i++ )
-    {
-        float y = yPred.Get()[i];
-        if ( y > max )
         {
-            max = y;
-            maxIndex = i;
+            for ( int k = 0; k < 28; k++ )
+                testData.push_back( xTest.Get({ i, j * 28 + k }) );
         }
+        Flow::NArray test = Flow::Create( { 1, 784 }, testData );
+        Flow::NArray a = ReLU( Add( MM( test, w1 ), b1 ) );
+        Flow::NArray yPred = Add( MM( a, w2 ), b2 );
+        float max = 0.0f;
+        int maxIndex = 0;
+        for ( int j = 0; j < yPred.Get().size(); j++ )
+        {
+            float y = yPred.Get()[j];
+            if ( y > max )
+            {
+                max = y;
+                maxIndex = j;
+            }
+        }
+        if ( yTest.Get({ i }) == maxIndex )
+            numCorrect++;
     }
-    Flow::Print(maxIndex);
-    Flow::Print(yPred);
+    float accuracy = ( static_cast<float>(numCorrect) / static_cast<float>(n) ) * 100.0f;
+    Flow::Print( to_string(accuracy) + "%" );
 }
 
 vector<float> ReadImagesMNIST( string filePath )
