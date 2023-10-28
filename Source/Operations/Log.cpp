@@ -8,6 +8,9 @@ namespace Flow
 {
     NArrayCore* Log( NArrayCore* arr )
     {
+        if (UseCUDA)
+            return Log_CUDA(arr);
+
         vector<float> resultData = arr->Get();
         for ( float& value : resultData )
             value = log(value);
@@ -17,6 +20,12 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardLog()
 {
+    if (UseCUDA)
+    {
+        BackwardLog_CUDA();
+        return;
+    }
+
     for ( int i = 0; i < Data.size(); i++ )
     {
         float grad = Gradient->Data[i] / Operands[0]->Data[i];

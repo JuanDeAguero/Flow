@@ -25,7 +25,6 @@ add_library(flow STATIC
     Source/Operations/CUDA/ReLU.cu
     Source/Operations/CUDA/Sum.cu
     Source/Operations/CUDA/Tanh.cu
-    Source/Operations/CUDA/Unsqueeze.cu
     Source/Operations/Exp.cpp
     Source/Operations/Gather.cpp
     Source/Operations/Index.cpp

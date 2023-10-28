@@ -8,6 +8,9 @@ namespace Flow
 {
     NArrayCore* Pow( NArrayCore* arr, float exponent )
     {
+        if (UseCUDA)
+            return Pow_CUDA( arr, exponent );
+
         vector<float> resultData = arr->Get();
         for ( float& value : resultData )
             value = pow( value, exponent );
@@ -19,6 +22,12 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardPow()
 {
+    if (UseCUDA)
+    {
+        BackwardPow_CUDA();
+        return;
+    }
+
     for ( int i = 0; i < Data.size(); i++ )
     {
         float grad = Gradient->Data[i] * Exponent * pow( Operands[0]->Data[i], Exponent - 1 );

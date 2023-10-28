@@ -8,6 +8,9 @@ namespace Flow
 {
     NArrayCore* Max( NArrayCore* arr, int dim )
     {
+        if (UseCUDA)
+            return Max_CUDA( arr, dim );
+
         vector<int> resultShape = arr->GetShape();
         resultShape[dim] = 1;
         vector<float> resultData( SizeFromShape(resultShape), numeric_limits<float>::min() );
@@ -26,6 +29,12 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardMax()
 {
+    if (UseCUDA)
+    {
+        BackwardMax_CUDA();
+        return;
+    }
+    
     for ( int i = 0; i < Data.size(); i++ )
     {
         vector<int> multiIndex = FlatToMultiIndex( i, Shape );

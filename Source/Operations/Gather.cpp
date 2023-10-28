@@ -22,22 +22,22 @@ namespace Flow
         result->GatherIndex = index;
         return result;
     }
-}
 
-void Flow::NArrayCore::BackwardGather()
-{
-    /*if (UseCUDA)
+    void NArrayCore::BackwardGather()
     {
-        BackwardGather_CUDA();
-        return;
-    }*/
+        if (UseCUDA)
+        {
+            BackwardGather_CUDA();
+            return;
+        }
 
-    for ( int i = 0; i < GatherIndex->Data.size(); i++ )
-    {
-        vector<int> multiIndex = FlatToMultiIndex( i, GatherIndex->Shape );
-        int indexElement = static_cast<int>(GatherIndex->Data[i]);
-        multiIndex[GatherDim] = indexElement;
-        int flatIndex = MultiToFlatIndex( multiIndex, Operands[0]->Shape );
-        Operands[0]->Gradient->Data[flatIndex] += Gradient->Data[i];
+        for ( int i = 0; i < GatherIndex->Data.size(); i++ )
+        {
+            vector<int> multiIndex = FlatToMultiIndex( i, GatherIndex->Shape );
+            int indexElement = static_cast<int>(GatherIndex->Data[i]);
+            multiIndex[GatherDim] = indexElement;
+            int flatIndex = MultiToFlatIndex( multiIndex, Operands[0]->Shape );
+            Operands[0]->Gradient->Data[flatIndex] += Gradient->Data[i];
+        }
     }
 }

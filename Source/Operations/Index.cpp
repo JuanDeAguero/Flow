@@ -6,6 +6,9 @@ namespace Flow
 {
     NArrayCore* Index( NArrayCore* arr, int dim, NArrayCore* index )
     {
+        if (UseCUDA)
+            return Index_CUDA( arr, dim, index );
+
         vector<int> indices(index->Get().size());
         for ( int i = 0; i < index->Get().size(); i++ )
             indices[i] = static_cast<int>(index->Get()[i]);
@@ -30,6 +33,12 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardIndex()
 {
+    if (UseCUDA)
+    {
+        BackwardIndex_CUDA();
+        return;
+    }
+
     vector<int> indices(Index->Get().size());
     for ( int i = 0; i < Index->Get().size(); i++ )
         indices[i] = static_cast<int>(Index->Get()[i]);

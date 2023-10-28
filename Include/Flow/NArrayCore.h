@@ -129,8 +129,6 @@ namespace Flow
         void BackwardGather_CUDA();
 
         void BackwardUnsqueeze();
-        
-        void BackwardUnsqueeze_CUDA();
 
         void BackwardIndex();
         
@@ -208,8 +206,6 @@ namespace Flow
     NArrayCore* Gather_CUDA( NArrayCore* arr, int dim, NArrayCore* index );
 
     NArrayCore* Unsqueeze( NArrayCore* arr, int dim );
-
-    NArrayCore* Unsqueeze_CUDA( NArrayCore* arr, int dim );
 
     NArrayCore* Index( NArrayCore* arr, int dim, NArrayCore* index );
 

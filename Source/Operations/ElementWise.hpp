@@ -2,7 +2,11 @@
 
 #pragma once
 
+#include <chrono>
+#include <string>
+
 #include "Flow/NArrayCore.h"
+#include "Flow/Print.h"
 
 namespace Flow
 {
@@ -12,7 +16,11 @@ namespace Flow
     {
         if (UseCUDA)
         {
+            auto start = chrono::high_resolution_clock::now();
             ElementWise_CUDA( arr1, arr2, result, op );
+            auto end = chrono::high_resolution_clock::now();
+            auto duration = chrono::duration_cast<chrono::microseconds>( end - start );
+            //Print( to_string(duration.count()) + " E" );
             return;
         }
         

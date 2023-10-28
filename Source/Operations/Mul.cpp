@@ -25,6 +25,12 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardMul()
 {
+    if (UseCUDA)
+    {
+        BackwardMul_CUDA();
+        return;
+    }
+
     for ( int i = 0; i < Data.size(); i++ )
     {
         Operands[0]->Gradient->Data[i] += Operands[1]->Data[i] * Gradient->Data[i];

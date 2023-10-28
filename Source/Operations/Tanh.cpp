@@ -8,6 +8,9 @@ namespace Flow
 {
     NArrayCore* Tanh( NArrayCore* arr )
     {
+        if (UseCUDA)
+            return Tanh_CUDA(arr);
+
         vector<float> resultData = arr->Get();
         for ( float& value : resultData )
             value = tanh(value);
@@ -17,6 +20,12 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardTanh()
 {
+    if (UseCUDA)
+    {
+        BackwardTanh_CUDA();
+        return;
+    }
+
     for ( int i = 0; i < Data.size(); i++ )
     {
         float value = tanh(Operands[0]->Data[i]);

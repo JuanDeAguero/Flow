@@ -41,23 +41,51 @@ namespace Flow
         cudaFree(arr_d);
         cudaFree(arrShape_d);
         cudaFree(index_d);
-        cudaFree(result_d);
+        cudaFree(indexShape_d);
         cudaFree(result_d);
         NArrayCore* result = new NArrayCore( index->GetShape(), resultData, { arr }, NArrayCore::Operation::GATHER );
         result->GatherDim = dim;
         result->GatherIndex = index;
         return result;
     }
-}
 
-__global__
-void BackwardGather_Kernel()
-{
+    __global__
+    void BackwardGather_Kernel( int dim, float* index, int* indexShape, int indexShapeSize, int* operandShape, int operandShapeSize, float* operandGradient, float* gradient )
+    {
+        int i = blockIdx.x;
+        int multiIndex[10];
+        FlatToMultiIndex_Device( i, indexShape, indexShapeSize, multiIndex );
+        int indexElement = static_cast<int>(index[i]);
+        multiIndex[dim] = indexElement;
+        int flatIndex = MultiToFlatIndex_Device( multiIndex, operandShape, operandShapeSize );
+        operandGradient[flatIndex] += gradient[i];
+    }
 
-}
-
-__host__
-void Flow::NArrayCore::BackwardGather_CUDA()
-{
-    
+    __host__
+    void NArrayCore::BackwardGather_CUDA()
+    {
+        int n = GatherIndex->Data.size();
+        float* index_d;
+        int* indexShape_d;
+        int* operandShape_d;
+        float* operandGradient_d;
+        float* gradient_d;
+        cudaMalloc( (void**)&index_d, GatherIndex->Get().size() * sizeof(float) );
+        cudaMalloc( (void**)&indexShape_d, GatherIndex->GetShape().size() * sizeof(int) );
+        cudaMalloc( (void**)&operandShape_d, Operands[0]->GetShape().size() * sizeof(int) );
+        cudaMalloc( (void**)&operandGradient_d, Operands[0]->GetGradient()->Get().size() * sizeof(float) );
+        cudaMalloc( (void**)&gradient_d, Gradient->Get().size() * sizeof(float) );
+        cudaMemcpy( index_d, GatherIndex->GetData(), GatherIndex->Get().size() * sizeof(float), cudaMemcpyHostToDevice );
+        cudaMemcpy( indexShape_d, GatherIndex->GetShape().data(), GatherIndex->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
+        cudaMemcpy( operandShape_d, Operands[0]->GetShape().data(), Operands[0]->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
+        cudaMemcpy( operandGradient_d, Operands[0]->GetGradient()->GetData(), Operands[0]->GetGradient()->Get().size() * sizeof(float), cudaMemcpyHostToDevice );
+        cudaMemcpy( gradient_d, Gradient->GetData(), Gradient->Get().size() * sizeof(float), cudaMemcpyHostToDevice );
+        BackwardGather_Kernel<<< n, 1 >>>( GatherDim, index_d, indexShape_d, GatherIndex->GetShape().size(), operandShape_d, Operands[0]->GetShape().size(), operandGradient_d, gradient_d );
+        cudaMemcpy( Operands[0]->Gradient->GetData(), operandGradient_d, Operands[0]->Gradient->Get().size() * sizeof(float), cudaMemcpyDeviceToHost );
+        cudaFree(index_d);
+        cudaFree(indexShape_d);
+        cudaFree(operandShape_d);
+        cudaFree(operandGradient_d);
+        cudaFree(gradient_d);
+    }
 }

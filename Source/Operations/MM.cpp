@@ -1,8 +1,10 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#include <chrono>
 #include <stdexcept>
 
 #include "Flow/NArrayCore.h"
+#include "Flow/Print.h"
 
 namespace Flow
 {
@@ -12,7 +14,14 @@ namespace Flow
             throw runtime_error("MM only supports 2D x 2D.");
 
         if (UseCUDA)
-            return MM_CUDA( arr1, arr2 );
+        {
+            auto start = chrono::high_resolution_clock::now();
+            NArrayCore* result = MM_CUDA( arr1, arr2 );
+            auto end = chrono::high_resolution_clock::now();
+            auto duration = chrono::duration_cast<chrono::microseconds>( end - start );
+            //Print( to_string(duration.count()) + " MM" );
+            return result;
+        }
 
         int m = arr1->GetShape()[0];
         int n = arr1->GetShape()[1];

@@ -6,6 +6,9 @@ namespace Flow
 {
     NArrayCore* Sum( NArrayCore* arr, int dim )
     {
+        if (UseCUDA)
+            return Sum_CUDA( arr, dim );
+
         vector<int> resultShape = arr->GetShape();
         resultShape[dim] = 1;
         vector<float> resultData( SizeFromShape(resultShape), 0.0f );
@@ -24,6 +27,12 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardSum()
 {
+    if (UseCUDA)
+    {
+        BackwardSum_CUDA();
+        return;
+    }
+
     for ( int i = 0; i < Gradient->Data.size(); i++ )
     {
         vector<int> multiIndex = FlatToMultiIndex( i, Shape );
