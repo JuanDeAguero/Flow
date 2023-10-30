@@ -18,12 +18,6 @@ static vector<float> ReadLabelsMNIST( string filePath );
 
 int main()
 {
-    /*Flow::NArray arr1 = Flow::Random({ 10000, 500 });
-    Flow::NArray arr2 = Flow::Random({ 500, 10000 });
-    Flow::NArray arr3 = Flow::MM( arr1, arr2 );
-    Flow::Print("done");
-    return 0;*/
-
     vector<float> trainImages = ReadImagesMNIST("../train-images-idx3-ubyte");
     vector<float> trainLabels = ReadLabelsMNIST("../train-labels-idx1-ubyte");
     vector<float> testImages = ReadImagesMNIST("../t10k-images-idx3-ubyte");
