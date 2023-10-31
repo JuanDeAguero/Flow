@@ -237,10 +237,15 @@ namespace Flow
         return new NArrayCore( shape, data );
     }
 
+    NArrayCore* ZerosCore( vector<int> shape )
+    {
+        vector<float> data( SizeFromShape(shape), 0.0f );
+        return new NArrayCore( shape, data );
+    }
+
     NArrayCore* OnesCore( vector<int> shape )
     {
-        int size = SizeFromShape(shape);
-        vector<float> data( size, 1.0f );
+        vector<float> data( SizeFromShape(shape), 1.0f );
         return new NArrayCore( shape, data );
     }
 

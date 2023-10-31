@@ -186,6 +186,11 @@ namespace Flow
         return NArray(RandomCore(shape));
     }
 
+    NArray Zeros( vector<int> shape )
+    {
+        return NArray(ZerosCore(shape));
+    }
+
     NArray Ones( vector<int> shape )
     {
         return NArray(OnesCore(shape));

@@ -233,6 +233,8 @@ namespace Flow
 
     NArrayCore* RandomCore( vector<int> shape );
 
+    NArrayCore* ZerosCore( vector<int> shape );
+
     NArrayCore* OnesCore( vector<int> shape );
 
     void Print( NArrayCore* arr );
