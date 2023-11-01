@@ -97,5 +97,7 @@ namespace Flow
 
     NArray Ones( vector<int> shape );
 
+    NArray OneHot( vector<int> integers, int num );
+
     void Print( NArray arr );
 }

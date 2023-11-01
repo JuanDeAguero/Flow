@@ -237,5 +237,7 @@ namespace Flow
 
     NArrayCore* OnesCore( vector<int> shape );
 
+    NArrayCore* OneHotCore( vector<int> integers, int num );
+
     void Print( NArrayCore* arr );
 }

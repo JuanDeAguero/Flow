@@ -249,6 +249,22 @@ namespace Flow
         return new NArrayCore( shape, data );
     }
 
+    NArrayCore* OneHotCore( vector<int> integers, int num )
+    {
+        vector<float> data( integers.size() * num );
+        NArrayCore* arr = new NArrayCore( { (int)integers.size(), num }, data );
+        for ( int i = 0; i < integers.size(); i++ )
+        {
+            for ( int j = 0; j < num; j++ )
+            {
+                float value = 0.0f;
+                if ( integers[i] == j ) value = 1.0f;
+                arr->Set( { i, j }, value );
+            }
+        }
+        return arr;
+    }
+
     void Print( NArrayCore* arr )
     {
         for ( float value : arr->Get() )

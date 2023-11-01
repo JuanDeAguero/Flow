@@ -196,6 +196,11 @@ namespace Flow
         return NArray(OnesCore(shape));
     }
 
+    NArray OneHot( vector<int> integers, int num )
+    {
+        return NArray( OneHotCore( integers, num ) );
+    }
+
     void Print( NArray arr )
     {
         Print(arr.GetCore());
