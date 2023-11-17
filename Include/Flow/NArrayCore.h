@@ -217,7 +217,7 @@ namespace Flow
 
     NArrayCore* Div( NArrayCore* arr1, NArrayCore* arr2 );
 
-    NArrayCore* Mean( NArrayCore* arr );
+    NArrayCore* Mean( NArrayCore* arr, int dim );
 
     NArrayCore* Softmax( NArrayCore* arr );
 

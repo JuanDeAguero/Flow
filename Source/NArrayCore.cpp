@@ -174,9 +174,9 @@ namespace Flow
         return Mul( arr1, Pow( arr2, -1.0f ) );
     }
 
-    NArrayCore* Mean( NArrayCore* arr )
+    NArrayCore* Mean( NArrayCore* arr, int dim )
     {
-        NArrayCore* sum = Sum( arr, 0 );
+        NArrayCore* sum = Sum( arr, dim );
         float numElements = static_cast<float>(arr->Get().size());
         NArrayCore* n = new NArrayCore( { 1 }, { numElements } );
         return Div( sum, n );
@@ -191,7 +191,7 @@ namespace Flow
 
     NArrayCore* CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 )
     {
-        return Neg( Mean( Gather( Softmax(arr1), 1, Unsqueeze( arr2, 1 ) ) ) );
+        return Neg( Mean( Gather( Softmax(arr1), 1, Unsqueeze( arr2, 1 ) ), 0 ) );
     }
 
     int SizeFromShape( vector<int> shape )
@@ -229,7 +229,7 @@ namespace Flow
     {
         random_device randomDevice;
         mt19937 generator(randomDevice());
-        uniform_real_distribution<float> distribution( -1.0f, 1.0f );
+        normal_distribution<float> distribution( 0.0f, 1.0f );
         int size = SizeFromShape(shape);
         vector<float> data( size, 0.0f );
         for ( int i = 0; i < size; i++ )

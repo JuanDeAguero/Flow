@@ -85,7 +85,7 @@ namespace Flow
 
     NArray Div( NArray arr1, NArray arr2 );
 
-    NArray Mean( NArray arr );
+    NArray Mean( NArray arr, int dim );
 
     NArray Softmax( NArray arr );
 

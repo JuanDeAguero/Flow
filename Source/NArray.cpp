@@ -166,9 +166,9 @@ namespace Flow
         return NArray( Div( arr1.GetCore(), arr2.GetCore() ) );
     }
 
-    NArray Mean( NArray arr )
+    NArray Mean( NArray arr, int dim )
     {
-        return NArray( Mean(arr.GetCore()) );
+        return NArray( Mean( arr.GetCore(), dim ) );
     }
 
     NArray Softmax( NArray arr )
