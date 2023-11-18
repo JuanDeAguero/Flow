@@ -33,8 +33,8 @@ int main()
     for ( int epoch = 0; epoch < 10000; epoch++ )
     {
         Flow::NArray a = Tanh( Add( MM( xNorm, w1 ), b1 ) );
-        Flow::NArray yPred = Add( MM( a, w2 ), b2 );
-        Flow::NArray loss = Pow( Sub( yPred, yNorm ), 2.0f );
+        Flow::NArray pred = Add( MM( a, w2 ), b2 );
+        Flow::NArray loss = Pow( Sub( pred, yNorm ), 2.0f );
 
         w1.GetGradient().Reset(0);
         b1.GetGradient().Reset(0);
@@ -51,8 +51,8 @@ int main()
         Flow::Print( loss.Get()[0] + loss.Get()[2] + loss.Get()[2], 20 );
     }
 
-    Flow::NArray xTest = Flow::Create( { 2, 2 }, { 0.6667, 1.0000, 1.0000, 0.6667 } );
-    Flow::NArray a = Tanh( Add( MM( xTest, w1 ), b1 ) );
-    Flow::NArray yPred = Add( MM( a, w2 ), b2 );
-    Flow::Print(yPred);
+    Flow::NArray test = Flow::Create( { 2, 2 }, { 0.6667, 1.0000, 1.0000, 0.6667 } );
+    Flow::NArray a = Tanh( Add( MM( test, w1 ), b1 ) );
+    Flow::NArray pred = Add( MM( a, w2 ), b2 );
+    Flow::Print(pred);
 }

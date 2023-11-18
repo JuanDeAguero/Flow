@@ -177,7 +177,7 @@ namespace Flow
     NArrayCore* Mean( NArrayCore* arr, int dim )
     {
         NArrayCore* sum = Sum( arr, dim );
-        float numElements = static_cast<float>(arr->Get().size());
+        float numElements = (float)arr->GetShape()[dim];
         NArrayCore* n = new NArrayCore( { 1 }, { numElements } );
         return Div( sum, n );
     }
