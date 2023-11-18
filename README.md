@@ -7,7 +7,6 @@ Machine Learning Library in C++
 - GPU acceleration with CUDA
 - Deep neural networks
 ## Example: MNIST classifier
-https://colab.research.google.com/drive/1GwRjaX5Jh4rTxrPH9ChfaPl-YTaznoIn?usp=sharing
 Load the data.
 ```bash
 vector<float> trainImages = ReadImagesMNIST("...");
@@ -81,3 +80,5 @@ Print the loss in every epoch.
     Flow::Print(loss);
 }
 ```
+Equivalent code using pytorch:<br>
+https://colab.research.google.com/drive/1GwRjaX5Jh4rTxrPH9ChfaPl-YTaznoIn?usp=sharing
