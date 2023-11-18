@@ -1,3 +1,6 @@
+# Copyright (c) 2023 Juan M. G. de Agüero
+# https://colab.research.google.com/drive/1GwRjaX5Jh4rTxrPH9ChfaPl-YTaznoIn?usp=sharing
+
 import numpy as np
 import tensorflow.keras as keras
 import torch
@@ -38,14 +41,16 @@ print(y_test[x])
 
 def mean(arr):
   sum = torch.sum(arr, dim=0, keepdim=True)
-  return torch.div(sum, torch.tensor([arr.numel()]))
+  return torch.div(sum, torch.tensor([arr.shape[0]]))
 
 def softmax(logits):
-  max_val = torch.index_select(torch.max(logits, dim=1, keepdim=True).values, dim=1, index=torch.tensor([0]))
-  return torch.sub(logits, torch.sub(max_val, torch.log(torch.sum(torch.exp(torch.sub(logits, max_val)), dim=1, keepdim=True))))
+  max_logits = torch.index_select(torch.max(logits, dim=1, keepdim=True).values, dim=1, index=torch.tensor([0]))
+  exp_logits = torch.exp(torch.sub(logits, max_logits))
+  sum_exp_logits = torch.sum(exp_logits, dim=1, keepdim=True)
+  return torch.div(exp_logits, sum_exp_logits)
 
 def cross_entropy(logits, targets):
-  return torch.neg(mean(torch.gather(softmax(logits), 1, torch.unsqueeze(targets, 1))))
+  return torch.mean(torch.neg(torch.log(torch.gather(softmax(logits), 1, torch.unsqueeze(targets, 1)) + 1e-10)))
 
 w1 = torch.randn(784, 128, requires_grad=True, dtype=torch.float32)
 b1 = torch.randn(128, requires_grad=True, dtype=torch.float32)
