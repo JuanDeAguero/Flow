@@ -23,6 +23,7 @@ namespace Flow
         enum Operation
         {
             NONE,
+
             ADD, MUL,
             MM,
             POW, EXP,
@@ -31,7 +32,9 @@ namespace Flow
             RESHAPE, TRANSPOSE, BROADCAST,
             GATHER, SQUEEZE, UNSQUEEZE,
             INDEX,
-            CROSSENTROPY
+
+            NEG, SUB, DIV,
+            MEAN, SOFTMAX, CROSSENTROPY
         };
 
         NArrayCore( vector<int> shape, vector<float> data, vector<NArrayCore*> operands, Operation op );

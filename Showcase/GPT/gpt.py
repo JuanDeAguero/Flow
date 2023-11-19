@@ -2,6 +2,8 @@
 # https://colab.research.google.com/drive/1JdRdVvtYIRehVCTJoTFPUWw93ajK8Asg?usp=sharing
 
 import torch
+import torch.nn as nn
+from torch.nn import functional as F
 
 with open("input.txt", 'r') as file:
   text = file.read()
@@ -49,7 +51,7 @@ block_size = 8
 print(train_data[: block_size + 1])
 
 torch.manual_seed(1337)
-batch_size = 4
+batch_size = 32
 block_size = 8
 
 def get_batch(split):
@@ -83,15 +85,13 @@ def get_batch(split):
 
   return (x, y)
 
-batch = get_batch("train")
-xb = batch[0]
-yb = batch[1]
+xb, yb = get_batch("train")
 print("inputs:")
 print(xb.shape)
-print(xb)
+print(xb[:8])
 print("targets:")
 print(yb.shape)
-print(yb)
+print(yb[:8])
 
 for b in range(batch_size):
   for t in range(block_size):
@@ -112,23 +112,74 @@ def softmax(logits):
 def cross_entropy(logits, targets):
   return torch.mean(torch.neg(torch.log(torch.gather(softmax(logits), 1, torch.unsqueeze(targets, 1)) + 1e-10)))
 
-torch.manual_seed(1337)
+def multinomial(probs, num_samples):
+  pass
 
-class BiagramLM(nn.Module):
+def create_pattern(block_size, T):
+  return [i for i in range(block_size)] * (T // block_size) + [i for i in range(T % block_size)]
 
-  def __init__(self, vocab_size):
-    super().__init__()
-    self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+num_embedding = 32
+token_embedding_table = torch.randn(vocab_size, num_embedding, requires_grad=True)
+position_embedding_table = torch.randn(block_size, num_embedding, requires_grad=True)
+lm_head_weight = torch.randn(num_embedding, vocab_size, requires_grad=True)
+lm_head_bias = torch.randn(vocab_size, requires_grad=True)
 
-  def forward(self, index, targets):
-    logits = self.token_embedding_table(index)
+def forward(index, targets=None):
+  B, T = index.shape
+  total_elements = index.shape[0] * index.shape[1]
+  token_embedding = torch.reshape(torch.index_select(token_embedding_table, 0, torch.reshape(index, (total_elements,))), (B, T, num_embedding))
+  pattern = create_pattern(block_size, T)
+  position_embedding_indices = torch.tensor(pattern)
+  position_embedding = torch.index_select(position_embedding_table, 0, position_embedding_indices)
+  x = torch.add(token_embedding, position_embedding)
+  logits = torch.add(torch.matmul(x, lm_head_weight), lm_head_bias)
+  if targets is None:
+    loss = None
+  else:
     B, T, C = logits.shape
     logits = logits.reshape(B * T, C)
     targets = targets.reshape(B * T)
     loss = cross_entropy(logits, targets)
-    return logits, loss
+  return logits, loss
 
-m = BiagramLM(vocab_size)
-logits, loss = m(xb, yb)
+def generate(index, max_new_tokens):
+  for _ in range(max_new_tokens):
+    logits, loss = forward(index)
+    logits = logits[:, -1, :]
+    probs = F.softmax(logits, dim=-1)
+    index_next = torch.multinomial(probs, num_samples=1)
+    index = torch.cat((index, index_next), dim=1)
+  return index
+
+logits, loss = forward(xb, yb)
 print(logits.shape)
 print(loss)
+
+index = torch.zeros((1, 1), dtype=torch.long)
+print(decode(generate(index, max_new_tokens=100)[0].tolist()))
+
+learning_rate = 1e-3
+beta1, beta2 = 0.9, 0.999
+epsilon = 1e-8
+weight_decay = 0.01
+m = 0
+v = 0
+t = 0
+
+for step in range(10000):
+  t += 1
+  xb, yb = get_batch("train")
+  _, loss = forward(xb, yb)
+  if token_embedding_table.grad is not None: token_embedding_table.grad.zero_()
+  loss.backward()
+  g = token_embedding_table.grad.detach()
+  m = beta1 * m + (1 - beta1) * g
+  v = beta2 * v + (1 - beta2) * g * g
+  m_hat = m / (1 - beta1 ** t)
+  v_hat = v / (1 - beta2 ** t)
+  token_embedding_table = token_embedding_table.detach() - learning_rate * (m_hat / (v_hat.sqrt() + epsilon) + weight_decay * token_embedding_table.detach())
+  token_embedding_table.requires_grad = True
+
+print(loss.item())
+index = torch.zeros((1, 1), dtype=torch.long)
+print(decode(generate(index, max_new_tokens=500)[0].tolist()))
