@@ -40,4 +40,10 @@ int main()
 
     int numTests = 15;
     Flow::Print( "== FLOW TEST " + std::to_string(numPassed) + "/" + std::to_string(numTests) + " ==" );
+
+    Flow::NArray arr1 = Flow::Create( { 2, 3 }, { 1.5, 0.5, -0.5, -0.5, 1.5, 0.5 } );
+    Flow::NArray arr2 = Flow::Create( { 2 }, { 0, 1 } );
+    Flow::NArray result = Flow::Mul( arr1, arr1 );
+    result.Backpropagate();
+    //Print(arr1.GetGradient());
 }

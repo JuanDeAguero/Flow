@@ -6,11 +6,14 @@ namespace Flow
 {
     NArrayCore* Transpose( NArrayCore* arr, int firstDim, int secondDim )
     {
-        return nullptr;
+        vector<int> shape = arr->GetShape();
+        swap( shape[firstDim], shape[secondDim] );
+        return new NArrayCore( shape, arr->Get(), { arr }, NArrayCore::Operation::RESHAPE );
     }
 }
 
 void Flow::NArrayCore::BackwardTranspose()
 {
-    
+    for ( int i = 0; i < Gradient->Data.size(); i++ )
+        Operands[0]->Gradient->Data[i] += Gradient->Data[i];
 }

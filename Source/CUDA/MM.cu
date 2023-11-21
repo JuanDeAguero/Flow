@@ -8,7 +8,7 @@
 namespace Flow
 {
     __global__
-    void MM_TiledKernel( float* arr1, float* arr2, float* result, int arr1Rows, int arr1Cols, int arr2Cols )
+    void MM_TiledKernel( float* arr1, float* arr2, int arr1Rows, int arr1Cols, int arr2Cols, float* result )
     {
         __shared__ float arr1_s[TILE_SIZE][TILE_SIZE];
         __shared__ float arr2_s[TILE_SIZE][TILE_SIZE];
@@ -52,7 +52,7 @@ namespace Flow
         cudaMemset( result_d, 0, arr1Rows * arr2Cols * sizeof(float) );
         dim3 dimGrid( ceil( arr2Cols / float(TILE_SIZE) ), ceil( arr1Rows / float(TILE_SIZE) ), 1 );
         dim3 dimBlock( TILE_SIZE, TILE_SIZE, 1 );
-        MM_TiledKernel<<< dimGrid, dimBlock >>>( arr1_d, arr2_d, result_d, arr1Rows, arr1Cols, arr2Cols );
+        MM_TiledKernel<<< dimGrid, dimBlock >>>( arr1_d, arr2_d, arr1Rows, arr1Cols, arr2Cols, result_d );
         vector<float> resultData( arr1Rows * arr2Cols );
         cudaMemcpy( resultData.data(), result_d, arr1Rows * arr2Cols * sizeof(float), cudaMemcpyDeviceToHost );
         cudaFree(arr1_d);

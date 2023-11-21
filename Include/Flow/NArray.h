@@ -87,7 +87,7 @@ namespace Flow
 
     NArray Mean( NArray arr, int dim );
 
-    NArray Softmax( NArray arr );
+    NArray Softmax( NArray arr, int dim );
 
     NArray CrossEntropy( NArray arr1, NArray arr2 );
 

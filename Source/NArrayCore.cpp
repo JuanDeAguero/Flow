@@ -182,16 +182,17 @@ namespace Flow
         return Div( sum, n );
     }
 
-    NArrayCore* Softmax( NArrayCore* arr )
+    NArrayCore* Softmax( NArrayCore* arr, int dim )
     {
         NArrayCore* index = new NArrayCore( { 1 }, { 0 } );
-        NArrayCore* max = Index( Max( arr, 1 ), 1, index );
-        return Sub( arr, Sub( max, Log( Sum( Exp( Sub( arr, max ) ), 1 ) ) ) );
+        NArrayCore* exp_logits = Exp( Sub( arr, Index( Max( arr, dim ), dim, index ) ) );
+        return Div( exp_logits, Sum( exp_logits, dim ) );
     }
 
     NArrayCore* CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 )
     {
-        return Neg( Mean( Gather( Softmax(arr1), 1, Unsqueeze( arr2, 1 ) ), 0 ) );
+        NArrayCore* small = new NArrayCore( { 1 }, { 1e-10 } );
+        return Mean( Neg( Log( Add( Gather( Softmax( arr1, 1 ), 1, Unsqueeze( arr2->Copy(), 1 ) ), small ) ) ), 0 );
     }
 
     int SizeFromShape( vector<int> shape )

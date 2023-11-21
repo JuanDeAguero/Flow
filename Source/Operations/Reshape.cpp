@@ -6,11 +6,12 @@ namespace Flow
 {
     NArrayCore* Reshape( NArrayCore* arr, vector<int> shape )
     {
-        return nullptr;
+        return new NArrayCore( shape, arr->Get(), { arr }, NArrayCore::Operation::RESHAPE );
     }
 }
 
 void Flow::NArrayCore::BackwardReshape()
 {
-    
+    for ( int i = 0; i < Gradient->Data.size(); i++ )
+        Operands[0]->Gradient->Data[i] += Gradient->Data[i];
 }

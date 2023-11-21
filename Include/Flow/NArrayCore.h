@@ -222,7 +222,7 @@ namespace Flow
 
     NArrayCore* Mean( NArrayCore* arr, int dim );
 
-    NArrayCore* Softmax( NArrayCore* arr );
+    NArrayCore* Softmax( NArrayCore* arr, int dim );
 
     NArrayCore* CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 );
 

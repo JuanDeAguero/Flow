@@ -43,7 +43,7 @@ int main()
     Flow::NArray w2 = Flow::Random({ 128, 10 });
     Flow::NArray b2 = Flow::Random({ 10 });
     
-    float learningRate = 0.1f;
+    float learningRate = 0.2f;
 
     for ( int epoch = 0; epoch < 100; epoch++ )
     {

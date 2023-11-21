@@ -171,9 +171,9 @@ namespace Flow
         return NArray( Mean( arr.GetCore(), dim ) );
     }
 
-    NArray Softmax( NArray arr )
+    NArray Softmax( NArray arr, int dim )
     {
-        return Softmax(arr.GetCore());
+        return Softmax( arr.GetCore(), dim );
     }
 
     NArray CrossEntropy( NArray arr1, NArray arr2 )

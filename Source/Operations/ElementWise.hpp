@@ -20,7 +20,7 @@ namespace Flow
             ElementWise_CUDA( arr1, arr2, result, op );
             auto end = chrono::high_resolution_clock::now();
             auto duration = chrono::duration_cast<chrono::microseconds>( end - start );
-            //Print( to_string(duration.count()) + " E" );
+            //Print( to_string(duration.count()) );
             return;
         }
         
