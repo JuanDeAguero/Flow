@@ -191,9 +191,11 @@ namespace Flow
 
     NArrayCore* MM( NArrayCore* arr1, NArrayCore* arr2 );
 
+    NArrayCore* Mul( NArrayCore* arr1, NArrayCore* arr2 );
+
     NArrayCore* Mul( NArrayCore* arr, float literal );
 
-    NArrayCore* Mul( NArrayCore* arr1, NArrayCore* arr2 );
+    NArrayCore* Mul_CUDA( NArrayCore* arr1, NArrayCore* arr2 );
 
     NArrayCore* Neg( NArrayCore* arr );
 
@@ -220,6 +222,8 @@ namespace Flow
     NArrayCore* Tanh( NArrayCore* arr );
 
     NArrayCore* Transpose( NArrayCore* arr, int firstDim, int secondDim );
+
+    NArrayCore* Transpose_CUDA( NArrayCore* arr, int firstDim, int secondDim );
     
     NArrayCore* Unsqueeze( NArrayCore* arr, int dim );
 

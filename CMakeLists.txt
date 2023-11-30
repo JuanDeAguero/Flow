@@ -20,6 +20,7 @@ add_library(flow STATIC
     Source/CUDA/ReLU.cu
     Source/CUDA/Sum.cu
     Source/CUDA/Tanh.cu
+    Source/CUDA/Transpose.cu
     Source/NArray.cpp
     Source/NArrayCore.cpp
     Source/Operations/Add.cpp

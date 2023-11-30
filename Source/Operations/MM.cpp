@@ -34,33 +34,10 @@ namespace Flow
 
 void Flow::NArrayCore::BackwardMM()
 {
-    if (UseCUDA)
-    {
-        BackwardMM_CUDA();
-        return;
-    }
-
-    int arr1Rows = Operands[0]->GetShape()[0];
-    int arr1Cols = Operands[0]->GetShape()[1];
-    int arr2Cols = Operands[1]->GetShape()[1];
-    for ( int i = 0; i < arr1Rows; i++ )
-    {
-        for ( int j = 0; j < arr1Cols; j++ )
-        {
-            float sum = 0.0f;
-            for ( int k = 0; k < arr2Cols; k++ )
-                sum += Gradient->Get({ i, k }) * Operands[1]->Get({ j, k });
-            Operands[0]->Gradient->Data[ i * arr1Cols + j ] += sum;
-        }
-    }
-    for ( int i = 0; i < arr1Cols; i++ )
-    {
-        for ( int j = 0; j < arr2Cols; j++ )
-        {
-            float sum = 0.0f;
-            for ( int k = 0; k < arr1Rows; k++ )
-                sum += Operands[0]->Get({ k, i }) * Gradient->Get({ k, j });
-            Operands[1]->Gradient->Data[ i * arr2Cols + j ] += sum;
-        }
-    }
+    NArrayCore* grad1 = Flow::MM( Gradient, Transpose( Operands[1], 0, 1 ) );
+    NArrayCore* grad2 = Flow::MM( Transpose( Operands[0], 0, 1 ), Gradient );
+    Operands[0]->Gradient = grad1;
+    Operands[1]->Gradient = grad2;
+    grad1->Gradient = nullptr;
+    grad2->Gradient = nullptr;
 }

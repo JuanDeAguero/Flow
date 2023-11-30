@@ -9,6 +9,10 @@ namespace Flow
         vector<int> shape = GetShapeForBroadcast( arr1->GetShape(), arr2->GetShape() );
         NArrayCore* arr1B = Broadcast( arr1, shape );
         NArrayCore* arr2B = Broadcast( arr2, shape );
+
+        if (UseCUDA)
+            return Mul_CUDA( arr1B, arr2B );
+
         vector<float> resultData(arr1B->Get().size());
         for ( int i = 0; i < arr1B->Get().size(); i++ )
             resultData[i] = arr1B->Get()[i] * arr2B->Get()[i];
