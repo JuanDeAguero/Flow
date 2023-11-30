@@ -31,13 +31,17 @@ namespace Flow
         int* resultshape_d = HostToDeviceVec<int>(resultShape);
         Max_Kernel<<< n, 1 >>>( arr_d, arrshape_d, arr->GetShape().size(), dim, result_d, resultshape_d, resultShape.size() );
         cudaMemcpy( resultData.data(), result_d, resultData.size() * sizeof(float), cudaMemcpyDeviceToHost );
+        cudaFree(arr_d);
+        cudaFree(arrshape_d);
+        cudaFree(result_d);
+        cudaFree(resultshape_d);
         NArrayCore* result = new NArrayCore( resultShape, resultData, { arr }, NArrayCore::Operation::MAX );
         result->MaxDim = dim;
         return result;
     }
 
     __global__
-    void BackwardMax_Kernel( int dim, float* arr, int* shape, int shapeSize, float* operand, int* operandShape, int operandShapeSize, float* operandGradient, float* gradient )
+    void BackwardMax_Kernel( float* gradient, float* operand, int* operandShape, int operandShapeSize, float* operandGradient, float* arr, int* shape, int shapeSize, int dim )
     {
         int i = blockIdx.x;
         int j = blockIdx.y;
@@ -54,20 +58,20 @@ namespace Flow
     {
         int n = Data.size();
         int maxDimSize = Operands[0]->GetShape()[MaxDim];
-        float* arr_d = HostToDeviceVec<float>(Data);
-        int* shape_d = HostToDeviceVec<int>(Shape);
+        float* gradient_d = HostToDeviceArr(Gradient);
         float* operand_d = HostToDeviceArr(Operands[0]);
         int* operandShape_d = HostToDeviceVec<int>(Operands[0]->GetShape());
         float* operandGradient_d = HostToDeviceArr(Operands[0]->Gradient);
-        float* gradient_d = HostToDeviceArr(Gradient);
+        float* arr_d = HostToDeviceVec<float>(Data);
+        int* shape_d = HostToDeviceVec<int>(Shape);
         dim3 gridDims( n, maxDimSize );
-        BackwardMax_Kernel<<< gridDims, 1 >>>( MaxDim, arr_d, shape_d, Shape.size(), operand_d, operandShape_d, Operands[0]->GetShape().size(), operandGradient_d, gradient_d );
+        BackwardMax_Kernel<<< gridDims, 1 >>>( gradient_d, operand_d, operandShape_d, Operands[0]->GetShape().size(), operandGradient_d, arr_d, shape_d, Shape.size(), MaxDim );
         cudaMemcpy( Operands[0]->Gradient->Data.data(), operandGradient_d, Operands[0]->Gradient->Data.size() * sizeof(float), cudaMemcpyDeviceToHost );
-        cudaFree(arr_d);
-        cudaFree(shape_d);
         cudaFree(gradient_d);
         cudaFree(operand_d);
         cudaFree(operandShape_d);
         cudaFree(operandGradient_d);
+        cudaFree(arr_d);
+        cudaFree(shape_d);
     }
 }

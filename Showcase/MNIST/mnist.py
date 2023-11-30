@@ -43,14 +43,14 @@ def mean(arr):
   sum = torch.sum(arr, dim=0, keepdim=True)
   return torch.div(sum, torch.tensor([arr.shape[0]]))
 
-def softmax(logits):
-  max_logits = torch.index_select(torch.max(logits, dim=1, keepdim=True).values, dim=1, index=torch.tensor([0]))
+def softmax(logits, dim):
+  max_logits = torch.index_select(torch.max(logits, dim=dim, keepdim=True).values, dim=dim, index=torch.tensor([0]))
   exp_logits = torch.exp(torch.sub(logits, max_logits))
-  sum_exp_logits = torch.sum(exp_logits, dim=1, keepdim=True)
+  sum_exp_logits = torch.sum(exp_logits, dim=dim, keepdim=True)
   return torch.div(exp_logits, sum_exp_logits)
 
 def cross_entropy(logits, targets):
-  return torch.mean(torch.neg(torch.log(torch.gather(softmax(logits), 1, torch.unsqueeze(targets, 1)) + 1e-10)))
+  return torch.mean(torch.neg(torch.log(torch.gather(softmax(logits, 1), 1, torch.unsqueeze(targets.to(torch.int64), 1)) + 1e-10)))
 
 w1 = torch.randn(784, 128, requires_grad=True, dtype=torch.float32)
 b1 = torch.randn(128, requires_grad=True, dtype=torch.float32)
@@ -58,8 +58,9 @@ w2 = torch.randn(128, 10, requires_grad=True, dtype=torch.float32)
 b2 = torch.randn(10, requires_grad=True, dtype=torch.float32)
 
 learning_rate = 0.1
+max_epochs = 100
 
-for epoch in range(100):
+for epoch in range(max_epochs):
   a = torch.relu(torch.add(torch.matmul(x_train, w1), b1))
   yPred = torch.add(torch.matmul(a, w2) , b2)
   loss = cross_entropy(yPred, y_train)

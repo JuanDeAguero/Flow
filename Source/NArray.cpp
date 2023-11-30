@@ -126,6 +126,11 @@ namespace Flow
         return NArray( Max( arr.GetCore(), dim ) );
     }
 
+    NArray Reshape( NArray arr, vector<int> shape )
+    {
+        return NArray( Reshape( arr.GetCore(), shape ) );
+    }
+
     NArray Transpose( NArray arr, int firstDim, int secondDim )
     {
         return NArray( Transpose( arr.GetCore(), firstDim, secondDim ) );

@@ -16,4 +16,7 @@ namespace Flow
     void Print( float value, int precision );
 
     void Print( vector<float> vec );
+
+    void Print( vector<int> vec );
+
 }

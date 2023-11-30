@@ -4,6 +4,37 @@
 #include "Flow/NArrayCore.h"
 
 __global__
+void Add_Kernel( float* arr1, float* arr2, float* result )
+{
+    int i = blockIdx.x;
+    result[i] = arr1[i] + arr2[i];
+}
+    
+namespace Flow
+{
+    __host__
+    NArrayCore* Add_CUDA( NArrayCore* arr1, NArrayCore* arr2 )
+    {
+        int n = arr1->Get().size();
+        float* arr1_d;
+        float* arr2_d;
+        float* result_d;
+        cudaMalloc( (void**)&arr1_d, n * sizeof(float) );
+        cudaMalloc( (void**)&arr2_d, n * sizeof(float) );
+        cudaMalloc( (void**)&result_d, n * sizeof(float) );
+        cudaMemcpy( arr1_d, arr1->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
+        cudaMemcpy( arr2_d, arr2->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
+        Add_Kernel<<< n, 1 >>>( arr1_d, arr2_d, result_d );
+        vector<float> resultData(n);
+        cudaMemcpy( resultData.data(), result_d, n * sizeof(float), cudaMemcpyDeviceToHost );
+        cudaFree(arr1_d);
+        cudaFree(arr2_d);
+        cudaFree(result_d);
+        return new NArrayCore( arr1->GetShape(), resultData, { arr1, arr2 }, NArrayCore::Operation::ADD );
+    }
+}
+
+__global__
 void BackwardAdd_Kernel( float* gradient, float* operandGradient1, float* operandGradient2 )
 {
     int i = blockIdx.x;

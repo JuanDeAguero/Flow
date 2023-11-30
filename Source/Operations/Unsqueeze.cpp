@@ -8,9 +8,7 @@ namespace Flow
     {
         vector<int> resultShape = arr->GetShape();
         resultShape.insert( resultShape.begin() + dim, 1 );
-        NArrayCore* result = new NArrayCore( resultShape, arr->Get(), { arr }, NArrayCore::Operation::UNSQUEEZE );
-        result->UnsqueezeDim = dim;
-        return result;
+        return new NArrayCore( resultShape, arr->Get(), { arr }, NArrayCore::Operation::UNSQUEEZE );
     }
 }
 

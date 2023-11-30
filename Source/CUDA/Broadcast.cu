@@ -49,7 +49,7 @@ namespace Flow
 }
 
 __global__
-void BackwardBroadcast_Kernel_A( int* shape, int shapeSize, int* operandShape, int operandShapeSize, float* newOperandGradient, float* gradient )
+void BackwardBroadcast_Kernel_A( float* gradient, int* operandShape, int operandShapeSize, float* newOperandGradient, int* shape, int shapeSize )
 {
     int i = blockIdx.x;
     int position[10];
@@ -77,28 +77,28 @@ void Flow::NArrayCore::BackwardBroadcast_CUDA()
 {
     vector<float> newOperandGradient( Operands[0]->Data.size(), 0.0f );
     int n = Gradient->Data.size();
-    int* shape_d;
+    float* gradient_d;
     int* operandShape_d;
     float* newOperandGradient_d;
-    float* gradient_d;
-    cudaMalloc( (void**)&shape_d, Shape.size() * sizeof(int) );
+    int* shape_d;
+    cudaMalloc( (void**)&gradient_d, Gradient->Get().size() * sizeof(float) );
     cudaMalloc( (void**)&operandShape_d, Operands[0]->Shape.size() * sizeof(int) );
     cudaMalloc( (void**)&newOperandGradient_d, newOperandGradient.size() * sizeof(float) );
-    cudaMalloc( (void**)&gradient_d, Gradient->Get().size() * sizeof(float) );
-    cudaMemcpy( shape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
+    cudaMalloc( (void**)&shape_d, Shape.size() * sizeof(int) );
+    cudaMemcpy( gradient_d, Gradient->GetData(), Gradient->Get().size() * sizeof(float), cudaMemcpyHostToDevice );
     cudaMemcpy( operandShape_d, Operands[0]->GetShapeData(), Operands[0]->Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
     cudaMemcpy( newOperandGradient_d, newOperandGradient.data(), newOperandGradient.size() * sizeof(float), cudaMemcpyHostToDevice );
-    cudaMemcpy( gradient_d, Gradient->GetData(), Gradient->Get().size() * sizeof(float), cudaMemcpyHostToDevice );
-    BackwardBroadcast_Kernel_A<<< n, 1 >>>( shape_d, Shape.size(), operandShape_d, Operands[0]->Shape.size(), newOperandGradient_d, gradient_d );
+    cudaMemcpy( shape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
+    BackwardBroadcast_Kernel_A<<< n, 1 >>>( gradient_d, operandShape_d, Operands[0]->Shape.size(), newOperandGradient_d, shape_d, Shape.size() );
     n = Operands[0]->Gradient->Data.size();
     float* operandGradient_d;
     cudaMalloc( (void**)&operandGradient_d, Operands[0]->Gradient->Get().size() * sizeof(float) );
     cudaMemcpy( operandGradient_d, Operands[0]->Gradient->GetData(), Operands[0]->Gradient->Get().size() * sizeof(float), cudaMemcpyHostToDevice );
     BackwardBroadcast_Kernel_B<<< n, 1 >>>( operandGradient_d, newOperandGradient_d );
     cudaMemcpy( Operands[0]->Gradient->GetData(), operandGradient_d, Operands[0]->Gradient->Get().size() * sizeof(float), cudaMemcpyDeviceToHost );
-    cudaFree(shape_d);
+    cudaFree(gradient_d);
     cudaFree(operandShape_d);
     cudaFree(newOperandGradient_d);
-    cudaFree(gradient_d);
+    cudaFree(shape_d);
     cudaFree(operandGradient_d);
 }

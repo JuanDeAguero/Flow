@@ -35,7 +35,7 @@ namespace Flow
     }
 
     __global__
-    void BackwardSum_Kernel( int dim, float* arr, int* shape, int shapeSize, float* operand, int* operandShape, int operandShapeSize, float* operandGradient, float* gradient )
+    void BackwardSum_Kernel( float* gradient, float* operand, int* operandShape, int operandShapeSize, float* operandGradient, float* arr, int* shape, int shapeSize, int dim )
     {
         int i = blockIdx.x;
         int j = blockIdx.y;
@@ -51,20 +51,20 @@ namespace Flow
     {
         int n = Data.size();
         int maxDimSize = Operands[0]->GetShape()[SumDim];
-        float* arr_d = HostToDeviceVec<float>(Data);
-        int* shape_d = HostToDeviceVec<int>(Shape);
+        float* gradient_d = HostToDeviceArr(Gradient);
         float* operand_d = HostToDeviceArr(Operands[0]);
         int* operandShape_d = HostToDeviceVec<int>(Operands[0]->GetShape());
         float* operandGradient_d = HostToDeviceArr(Operands[0]->Gradient);
-        float* gradient_d = HostToDeviceArr(Gradient);
+        float* arr_d = HostToDeviceVec<float>(Data);
+        int* shape_d = HostToDeviceVec<int>(Shape);
         dim3 gridDims( n, maxDimSize );
-        BackwardSum_Kernel<<< gridDims, 1 >>>( SumDim, arr_d, shape_d, Shape.size(), operand_d, operandShape_d, Operands[0]->GetShape().size(), operandGradient_d, gradient_d );
+        BackwardSum_Kernel<<< gridDims, 1 >>>( gradient_d, operand_d, operandShape_d, Operands[0]->GetShape().size(), operandGradient_d, arr_d, shape_d, Shape.size(), SumDim );
         cudaMemcpy( Operands[0]->Gradient->Data.data(), operandGradient_d, Operands[0]->Gradient->Data.size() * sizeof(float), cudaMemcpyDeviceToHost );
-        cudaFree(arr_d);
-        cudaFree(shape_d);
         cudaFree(gradient_d);
         cudaFree(operand_d);
         cudaFree(operandShape_d);
         cudaFree(operandGradient_d);
+        cudaFree(arr_d);
+        cudaFree(shape_d);
     }
 }

@@ -1,19 +1,22 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
-#include "ElementWise.hpp"
 #include "Flow/NArrayCore.h"
 
 namespace Flow
 {
     NArrayCore* Add( NArrayCore* arr1, NArrayCore* arr2 )
     {
-        auto shape = GetShapeForBroadcast( arr1, arr2 );
-        Flow::NArrayCore* arr1B = Flow::Broadcast( arr1, shape );
-        Flow::NArrayCore* arr2B = Flow::Broadcast( arr2, shape );
-        auto op = NArrayCore::Operation::ADD;
-        NArrayCore* result = new NArrayCore( arr1B->GetShape(), arr1B->Get(), { arr1B, arr2B }, op );
-        ElementWise( arr1B, arr2B, result, op );
-        return result;
+        vector<int> shape = GetShapeForBroadcast( arr1->GetShape(), arr2->GetShape() );
+        NArrayCore* arr1B = Broadcast( arr1, shape );
+        NArrayCore* arr2B = Broadcast( arr2, shape );
+
+        if (UseCUDA)
+            return Add_CUDA( arr1B, arr2B );
+
+        vector<float> resultData(arr1B->Get().size());
+        for ( int i = 0; i < arr1B->Get().size(); i++ )
+            resultData[i] = arr1B->Get()[i] + arr2B->Get()[i];
+        return new NArrayCore( arr1B->GetShape(), resultData, { arr1B, arr2B }, NArrayCore::Operation::ADD );
     }
 }
 

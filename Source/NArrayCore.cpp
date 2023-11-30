@@ -138,21 +138,21 @@ void Flow::NArrayCore::Backward()
     {
         case Operation::NONE:                           break;
         case Operation::ADD:       BackwardAdd();       break;
-        case Operation::MUL:       BackwardMul();       break;
-        case Operation::MM:        BackwardMM();        break;
-        case Operation::POW:       BackwardPow();       break;
-        case Operation::EXP:       BackwardExp();       break;
-        case Operation::TANH:      BackwardTanh();      break;
-        case Operation::RELU:      BackwardReLU();      break;
-        case Operation::LOG:       BackwardLog();       break;
-        case Operation::SUM:       BackwardSum();       break;
-        case Operation::MAX:       BackwardMax();       break;
-        case Operation::RESHAPE:   BackwardReshape();   break;
-        case Operation::TRANSPOSE: BackwardTranspose(); break;
         case Operation::BROADCAST: BackwardBroadcast(); break;
+        case Operation::EXP:       BackwardExp();       break;
         case Operation::GATHER:    BackwardGather();    break;
-        case Operation::UNSQUEEZE: BackwardUnsqueeze(); break;
         case Operation::INDEX:     BackwardIndex();     break;
+        case Operation::LOG:       BackwardLog();       break;
+        case Operation::MAX:       BackwardMax();       break;
+        case Operation::MM:        BackwardMM();        break;
+        case Operation::MUL:       BackwardMul();       break;
+        case Operation::POW:       BackwardPow();       break;
+        case Operation::RELU:      BackwardReLU();      break;
+        case Operation::RESHAPE:   BackwardReshape();   break;
+        case Operation::SUM:       BackwardSum();       break;
+        case Operation::TANH:      BackwardTanh();      break;
+        case Operation::TRANSPOSE: BackwardTranspose(); break;
+        case Operation::UNSQUEEZE: BackwardUnsqueeze(); break;
         default: break;
     }
 }
@@ -192,38 +192,7 @@ namespace Flow
     NArrayCore* CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 )
     {
         NArrayCore* small = new NArrayCore( { 1 }, { 1e-10 } );
-        return Mean( Neg( Log( Add( Gather( Softmax( arr1, 1 ), 1, Unsqueeze( arr2->Copy(), 1 ) ), small ) ) ), 0 );
-    }
-
-    int SizeFromShape( vector<int> shape )
-    {
-        int size = shape[0];
-        for ( int i = 1; i < shape.size(); i++ )
-            size *= shape[i];
-        return size;
-    }
-
-    int MultiToFlatIndex( vector<int> index, vector<int> shape )
-    {
-        int flatIndex = 0;
-        int stride = 1;
-        for ( int i = shape.size() - 1; i >= 0; i-- )
-        {
-            flatIndex += index[i] * stride;
-            stride *= shape[i];
-        }
-        return flatIndex;
-    }
-
-    vector<int> FlatToMultiIndex( int index, vector<int> shape )
-    {
-        vector<int> multiIndex(shape.size());
-        for ( int i = shape.size() - 1; i >= 0; i-- )
-        {
-            multiIndex[i] = index % shape[i];
-            index /= shape[i];
-        }
-        return multiIndex;
+        return Mean( Neg( Log( Add( Gather( Softmax( arr1, 1 ), 1, Unsqueeze( arr2, 1 ) ), small ) ) ), 0 );
     }
 
     NArrayCore* RandomCore( vector<int> shape )
@@ -270,5 +239,42 @@ namespace Flow
     {
         for ( float value : arr->Get() )
             Print(value);
+    }
+
+    void PrintShape( NArrayCore* arr )
+    {
+        for ( int value : arr->GetShape() )
+            Print((float)value);
+    }
+
+    int SizeFromShape( vector<int> shape )
+    {
+        int size = shape[0];
+        for ( int i = 1; i < shape.size(); i++ )
+            size *= shape[i];
+        return size;
+    }
+
+    int MultiToFlatIndex( vector<int> index, vector<int> shape )
+    {
+        int flatIndex = 0;
+        int stride = 1;
+        for ( int i = shape.size() - 1; i >= 0; i-- )
+        {
+            flatIndex += index[i] * stride;
+            stride *= shape[i];
+        }
+        return flatIndex;
+    }
+
+    vector<int> FlatToMultiIndex( int index, vector<int> shape )
+    {
+        vector<int> multiIndex(shape.size());
+        for ( int i = shape.size() - 1; i >= 0; i-- )
+        {
+            multiIndex[i] = index % shape[i];
+            index /= shape[i];
+        }
+        return multiIndex;
     }
 }

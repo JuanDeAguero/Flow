@@ -8,7 +8,7 @@
 namespace Flow
 {
     __global__
-    void MM_TiledKernel( float* arr1, float* arr2, int arr1Rows, int arr1Cols, int arr2Cols, float* result )
+    void MM_TiledKernel( float* arr1, float* arr2, float* result, int arr1Rows, int arr1Cols, int arr2Cols )
     {
         __shared__ float arr1_s[TILE_SIZE][TILE_SIZE];
         __shared__ float arr2_s[TILE_SIZE][TILE_SIZE];
@@ -36,7 +36,7 @@ namespace Flow
 
 
     __host__
-    NArrayCore* MM_CUDA(NArrayCore* arr1, NArrayCore* arr2)
+    NArrayCore* MM_CUDA( NArrayCore* arr1, NArrayCore* arr2 )
     {
         int arr1Rows = arr1->GetShape()[0];
         int arr1Cols = arr1->GetShape()[1];
@@ -52,7 +52,7 @@ namespace Flow
         cudaMemset( result_d, 0, arr1Rows * arr2Cols * sizeof(float) );
         dim3 dimGrid( ceil( arr2Cols / float(TILE_SIZE) ), ceil( arr1Rows / float(TILE_SIZE) ), 1 );
         dim3 dimBlock( TILE_SIZE, TILE_SIZE, 1 );
-        MM_TiledKernel<<< dimGrid, dimBlock >>>( arr1_d, arr2_d, arr1Rows, arr1Cols, arr2Cols, result_d );
+        MM_TiledKernel<<< dimGrid, dimBlock >>>( arr1_d, arr2_d, result_d, arr1Rows, arr1Cols, arr2Cols );
         vector<float> resultData( arr1Rows * arr2Cols );
         cudaMemcpy( resultData.data(), result_d, arr1Rows * arr2Cols * sizeof(float), cudaMemcpyDeviceToHost );
         cudaFree(arr1_d);
@@ -64,7 +64,7 @@ namespace Flow
 }
 
 __global__
-void BackwardMM_Kernel_1( float* operandGradient1, float* gradient, float* operand2, int arr1Cols, int arr2Cols )
+void BackwardMM_Kernel_1( float* gradient, float* operand2, float* operandGradient1, int arr1Cols, int arr2Cols )
 {
     int i = blockIdx.x;
     int j = blockIdx.y;
@@ -73,7 +73,7 @@ void BackwardMM_Kernel_1( float* operandGradient1, float* gradient, float* opera
 }
 
 __global__
-void BackwardMM_Kernel_2( float* operandGradient2, float* gradient, float* operand1, int arr1Rows, int arr1Cols, int arr2Cols )
+void BackwardMM_Kernel_2( float* gradient, float* operand1, float* operandGradient2, int arr1Rows, int arr1Cols, int arr2Cols )
 {
     int i = blockIdx.x;
     int j = blockIdx.y;
@@ -87,30 +87,30 @@ void Flow::NArrayCore::BackwardMM_CUDA()
     int arr1Rows = Operands[0]->GetShape()[0];
     int arr1Cols = Operands[0]->GetShape()[1];
     int arr2Cols = Operands[1]->GetShape()[1];
+    float* gradient_d;
     float* operand1_d;
     float* operand2_d;
-    float* gradient_d;
     float* operandGradient1_d;
     float* operandGradient2_d;
+    cudaMalloc( &gradient_d, arr1Rows * arr2Cols * sizeof(float) );
     cudaMalloc( &operand1_d, arr1Rows * arr1Cols * sizeof(float) );
     cudaMalloc( &operand2_d, arr1Cols * arr2Cols * sizeof(float) );
-    cudaMalloc( &gradient_d, arr1Rows * arr2Cols * sizeof(float) );
     cudaMalloc( &operandGradient1_d, arr1Rows * arr1Cols * sizeof(float) );
     cudaMalloc( &operandGradient2_d, arr1Cols * arr2Cols * sizeof(float) );
+    cudaMemcpy( gradient_d, Gradient->GetData(), arr1Rows * arr2Cols * sizeof(float), cudaMemcpyHostToDevice );
     cudaMemcpy( operand1_d, Operands[0]->GetData(), arr1Rows * arr1Cols * sizeof(float), cudaMemcpyHostToDevice );
     cudaMemcpy( operand2_d, Operands[1]->GetData(), arr1Cols * arr2Cols * sizeof(float), cudaMemcpyHostToDevice );
-    cudaMemcpy( gradient_d, Gradient->GetData(), arr1Rows * arr2Cols * sizeof(float), cudaMemcpyHostToDevice );
     cudaMemset( operandGradient1_d, 0, arr1Rows * arr1Cols * sizeof(float) );
     cudaMemset( operandGradient2_d, 0, arr1Cols * arr2Cols * sizeof(float) );
     dim3 gridDimA( arr1Rows, arr1Cols, arr2Cols );
     dim3 gridDimB( arr1Cols, arr2Cols, arr1Rows );
-    BackwardMM_Kernel_1<<< gridDimA, 1 >>>( operandGradient1_d, gradient_d, operand2_d, arr1Cols, arr2Cols );
-    BackwardMM_Kernel_2<<< gridDimB, 1 >>>( operandGradient2_d, gradient_d, operand1_d, arr1Rows, arr1Cols, arr2Cols );
+    BackwardMM_Kernel_1<<< gridDimA, 1 >>>( gradient_d, operand2_d, operandGradient1_d, arr1Cols, arr2Cols );
+    BackwardMM_Kernel_2<<< gridDimB, 1 >>>( gradient_d, operand1_d, operandGradient2_d, arr1Rows, arr1Cols, arr2Cols );
     cudaMemcpy( Operands[0]->Gradient->Data.data(), operandGradient1_d, arr1Rows * arr1Cols * sizeof(float), cudaMemcpyDeviceToHost );
     cudaMemcpy( Operands[1]->Gradient->Data.data(), operandGradient2_d, arr1Cols * arr2Cols * sizeof(float), cudaMemcpyDeviceToHost );
+    cudaFree(gradient_d);
     cudaFree(operand1_d);
     cudaFree(operand2_d);
-    cudaFree(gradient_d);
     cudaFree(operandGradient1_d);
     cudaFree(operandGradient2_d);
 }

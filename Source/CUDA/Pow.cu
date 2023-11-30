@@ -32,7 +32,7 @@ namespace Flow
 }
 
 __global__
-void BackwardPow_Kernel( float exponent, float* gradient, float* operand, float* operandGradient )
+void BackwardPow_Kernel( float* gradient, float* operand, float* operandGradient, float exponent )
 {
     int i = blockIdx.x;
     float grad = gradient[i] * exponent * pow( operand[i], exponent - 1);
@@ -52,7 +52,7 @@ void Flow::NArrayCore::BackwardPow_CUDA()
     cudaMemcpy( gradient_d, Gradient->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
     cudaMemcpy( operand_d, Operands[0]->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
     cudaMemcpy( operandGradient_d, Operands[0]->GetGradient()->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
-    BackwardPow_Kernel<<< n, 1 >>>( Exponent, gradient_d, operand_d, operandGradient_d );
+    BackwardPow_Kernel<<< n, 1 >>>( gradient_d, operand_d, operandGradient_d, Exponent );
     cudaMemcpy( Operands[0]->Gradient->GetData(), operandGradient_d, n * sizeof(float), cudaMemcpyDeviceToHost );
     cudaFree(gradient_d);
     cudaFree(operand_d);

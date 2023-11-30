@@ -29,3 +29,9 @@ void Flow::Print( vector<float> vec )
     for ( float value : vec )
         Print(value);
 }
+
+void Flow::Print( vector<int> vec )
+{
+    for ( int value : vec )
+        Print(value);
+}

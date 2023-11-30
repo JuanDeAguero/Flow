@@ -6,9 +6,9 @@ namespace Flow
 {
     NArrayCore* Transpose( NArrayCore* arr, int firstDim, int secondDim )
     {
-        vector<int> shape = arr->GetShape();
-        swap( shape[firstDim], shape[secondDim] );
-        return new NArrayCore( shape, arr->Get(), { arr }, NArrayCore::Operation::RESHAPE );
+        vector<int> resultShape = arr->GetShape();
+        swap( resultShape[firstDim], resultShape[secondDim] );
+        return new NArrayCore( resultShape, arr->Get(), { arr }, NArrayCore::Operation::RESHAPE );
     }
 }
 

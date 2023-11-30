@@ -48,48 +48,50 @@ namespace Flow
     NArray Create( vector<int> shape, vector<float> data );
 
     NArray Add( NArray arr1, NArray arr2 );
-
-    NArray Mul( NArray arr1, NArray arr2 );
-
-    NArray Mul( NArray arr, float literal );
-
-    NArray MM( NArray arr1, NArray arr2 );
-
-    NArray Pow( NArray arr, float exponent );
-
-    NArray Exp( NArray arr );
-
-    NArray Tanh( NArray arr );
-
-    NArray ReLU( NArray arr );
-
-    NArray Log( NArray arr );
-
-    NArray Sum( NArray arr, int dim );
-
-    NArray Max( NArray arr, int dim );
-
-    NArray Transpose( NArray arr, int firstDim, int secondDim );
-
+    
     NArray Broadcast( NArray arr, vector<int> shape );
-
-    NArray Gather( NArray arr, int dim, NArray index );
-
-    NArray Unsqueeze( NArray arr, int dim );
-
-    NArray Index( NArray arr, int dim, NArray index );
-
-    NArray Neg( NArray arr );
-
-    NArray Sub( NArray arr1, NArray arr2 );
-
-    NArray Div( NArray arr1, NArray arr2 );
-
-    NArray Mean( NArray arr, int dim );
-
-    NArray Softmax( NArray arr, int dim );
-
+    
     NArray CrossEntropy( NArray arr1, NArray arr2 );
+    
+    NArray Div( NArray arr1, NArray arr2 );
+    
+    NArray Exp( NArray arr );
+    
+    NArray Gather( NArray arr, int dim, NArray index );
+    
+    NArray Index( NArray arr, int dim, NArray index );
+    
+    NArray Log( NArray arr );
+    
+    NArray Max( NArray arr, int dim );
+    
+    NArray Mean( NArray arr, int dim );
+    
+    NArray MM( NArray arr1, NArray arr2 );
+    
+    NArray Mul( NArray arr, float literal );
+    
+    NArray Mul( NArray arr1, NArray arr2 );
+    
+    NArray Neg( NArray arr );
+    
+    NArray Pow( NArray arr, float exponent );
+    
+    NArray ReLU( NArray arr );
+    
+    NArray Reshape( NArray arr, vector<int> shape );
+    
+    NArray Softmax( NArray arr, int dim );
+    
+    NArray Sub( NArray arr1, NArray arr2 );
+    
+    NArray Sum( NArray arr, int dim );
+    
+    NArray Tanh( NArray arr );
+    
+    NArray Transpose( NArray arr, int firstDim, int secondDim );
+    
+    NArray Unsqueeze( NArray arr, int dim );
 
     NArray Random( vector<int> shape );
 

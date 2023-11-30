@@ -2,6 +2,6 @@
 
 import torch
 
-state = torch.load("llama.pth")
+state = torch.load("llama2.pth")
 for key in state:
   print(key, state[key])

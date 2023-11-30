@@ -29,8 +29,9 @@ int main()
     Flow::NArray b2 = Flow::Random({ 1 });
 
     float learningRate = 0.1f;
+    int maxEpochs = 1000;
 
-    for ( int epoch = 0; epoch < 10000; epoch++ )
+    for ( int epoch = 0; epoch < maxEpochs; epoch++ )
     {
         Flow::NArray a = Tanh( Add( MM( xNorm, w1 ), b1 ) );
         Flow::NArray pred = Add( MM( a, w2 ), b2 );

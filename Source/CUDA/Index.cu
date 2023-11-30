@@ -57,7 +57,7 @@ namespace Flow
     }
 
     __global__
-    void BackwardIndex_Kernel( int dim, int* indices, int* shape, int shapeSize, float* operandGradient, int* operandShape, int operandShapeSize, float* gradient )
+    void BackwardIndex_Kernel( float* gradient, int* operandShape, int operandShapeSize, float* operandGradient, int dim, int* indices, int* shape, int shapeSize )
     {
         int i = blockIdx.x;
         int multiIndex[10];
@@ -74,17 +74,17 @@ namespace Flow
         for ( int i = 0; i < Index->Get().size(); i++ )
             indices[i] = static_cast<int>(Index->Get()[i]);
         int n = Gradient->Data.size();
+        float* gradient_d = HostToDeviceArr(Gradient);
+        int* operandShape_d = HostToDeviceVec<int>(Operands[0]->GetShape());
+        float* operandGradient_d = HostToDeviceArr(Operands[0]->Gradient);
         int* indices_d = HostToDeviceVec<int>(indices);
         int* shape_d = HostToDeviceVec<int>(Shape);
-        float* operandGradient_d = HostToDeviceArr(Operands[0]->Gradient);
-        int* operandShape_d = HostToDeviceVec<int>(Operands[0]->GetShape());
-        float* gradient_d = HostToDeviceArr(Gradient);
-        BackwardIndex_Kernel<<< n, 1 >>>( IndexDim, indices_d, shape_d, Shape.size(), operandGradient_d, operandShape_d, Operands[0]->GetShape().size(), gradient_d );
+        BackwardIndex_Kernel<<< n, 1 >>>( gradient_d, operandShape_d, Operands[0]->GetShape().size(), operandGradient_d, IndexDim, indices_d, shape_d, Shape.size() );
         cudaMemcpy( Operands[0]->Gradient->GetData(), operandGradient_d, Operands[0]->Gradient->Get().size() * sizeof(float), cudaMemcpyDeviceToHost );
+        cudaFree(gradient_d);
+        cudaFree(operandShape_d);
+        cudaFree(operandGradient_d);
         cudaFree(indices_d);
         cudaFree(shape_d);
-        cudaFree(operandGradient_d);
-        cudaFree(operandShape_d);
-        cudaFree(gradient_d);
     }
 }

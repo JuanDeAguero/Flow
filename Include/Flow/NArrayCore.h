@@ -23,18 +23,13 @@ namespace Flow
         enum Operation
         {
             NONE,
-
-            ADD, MUL,
-            MM,
-            POW, EXP,
-            TANH, RELU, LOG,
-            SUM, MAX,
-            RESHAPE, TRANSPOSE, BROADCAST,
-            GATHER, SQUEEZE, UNSQUEEZE,
-            INDEX,
-
-            NEG, SUB, DIV,
-            MEAN, SOFTMAX, CROSSENTROPY
+            ADD,     BMM,     BROADCAST, CROSSENTROPY,
+            DIV,     DOT,     EXP,       GATHER,
+            INDEX,   LOG,     MATMUL,    MAX,
+            MEAN,    MM,      MUL,       MV,
+            NEG,     POW,     PROD,      RELU,
+            RESHAPE, SOFTMAX, SQUEEZE,   SUB,
+            SUM,     TANH,    TRANSPOSE, UNSQUEEZE
         };
 
         NArrayCore( vector<int> shape, vector<float> data, vector<NArrayCore*> operands, Operation op );
@@ -79,79 +74,77 @@ namespace Flow
 
         void Backward();
 
-        void BackwardAdd();
-
         void BackwardAdd_CUDA();
 
-        void BackwardMul();
-
-        void BackwardMul_CUDA();
-
-        void BackwardMM();
-        
-        void BackwardMM_CUDA();
-
-        void BackwardPow();
-        
-        void BackwardPow_CUDA();
-
-        void BackwardExp();
-        
-        void BackwardExp_CUDA();
-
-        void BackwardTanh();
-        
-        void BackwardTanh_CUDA();
-
-        void BackwardReLU();
-        
-        void BackwardReLU_CUDA();
-
-        void BackwardLog();
-        
-        void BackwardLog_CUDA();
-
-        void BackwardSum();
-        
-        void BackwardSum_CUDA();
-
-        void BackwardMax();
-        
-        void BackwardMax_CUDA();
-
-        void BackwardReshape();
-
-        void BackwardTranspose();
-
-        void BackwardBroadcast();
+        void BackwardAdd();
         
         void BackwardBroadcast_CUDA();
-
-        void BackwardGather();
+        
+        void BackwardBroadcast();
+        
+        void BackwardExp_CUDA();
+        
+        void BackwardExp();
         
         void BackwardGather_CUDA();
-
-        void BackwardUnsqueeze();
-
-        void BackwardIndex();
+        
+        void BackwardGather();
         
         void BackwardIndex_CUDA();
+        
+        void BackwardIndex();
+        
+        void BackwardLog_CUDA();
+        
+        void BackwardLog();
+        
+        void BackwardMax_CUDA();
+        
+        void BackwardMax();
+        
+        void BackwardMM_CUDA();
+        
+        void BackwardMM();
+        
+        void BackwardMul_CUDA();
+        
+        void BackwardMul();
+        
+        void BackwardPow_CUDA();
+        
+        void BackwardPow();
+        
+        void BackwardReLU_CUDA();
+        
+        void BackwardReLU();
+        
+        void BackwardReshape();
+        
+        void BackwardSum_CUDA();
+        
+        void BackwardSum();
+        
+        void BackwardTanh_CUDA();
+        
+        void BackwardTanh();
+        
+        void BackwardTranspose();
+        
+        void BackwardUnsqueeze();
 
     public:
 
         float Exponent;
-
-        int SumDim;
         
-        int MaxDim;
-
-        int TransposeFirstDim, TransposeSecondDim;
-
         int GatherDim;
 
         NArrayCore* GatherIndex;
-
-        int UnsqueezeDim;
+        
+        int MaxDim;
+        
+        int SumDim;
+        
+        int TransposeFirstDim, TransposeSecondDim;
 
         int IndexDim;
 
@@ -160,79 +153,75 @@ namespace Flow
 
     NArrayCore* Add( NArrayCore* arr1, NArrayCore* arr2 );
 
-    NArrayCore* Mul( NArrayCore* arr1, NArrayCore* arr2 );
-
-    NArrayCore* Mul( NArrayCore* arr, float literal );
-
-    NArrayCore* MM( NArrayCore* arr1, NArrayCore* arr2 );
-
-    NArrayCore* MM_CUDA( NArrayCore* arr1, NArrayCore* arr2 );
-
-    NArrayCore* Pow( NArrayCore* arr, float exponent );
-
-    NArrayCore* Pow_CUDA( NArrayCore* arr, float exponent );
-
-    NArrayCore* Exp( NArrayCore* arr );
-
-    NArrayCore* Exp_CUDA( NArrayCore* arr );
-
-    NArrayCore* Tanh( NArrayCore* arr );
-
-    NArrayCore* Tanh_CUDA( NArrayCore* arr );
-
-    NArrayCore* ReLU( NArrayCore* arr );
-
-    NArrayCore* ReLU_CUDA( NArrayCore* arr );
-
-    NArrayCore* Log( NArrayCore* arr );
-
-    NArrayCore* Log_CUDA( NArrayCore* arr );
-
-    NArrayCore* Sum( NArrayCore* arr, int dim );
-
-    NArrayCore* Sum_CUDA( NArrayCore* arr, int dim );
-
-    NArrayCore* Max( NArrayCore* arr, int dim );
-
-    NArrayCore* Max_CUDA( NArrayCore* arr, int dim );
-
-    NArrayCore* Reshape( NArrayCore* arr, vector<int> shape );
-
-    NArrayCore* Transpose( NArrayCore* arr, int firstDim, int secondDim );
-
-    NArrayCore* Broadcast( NArrayCore* arr, vector<int> shape );
+    NArrayCore* Add_CUDA( NArrayCore* arr1, NArrayCore* arr2 );
 
     NArrayCore* Broadcast_CUDA( NArrayCore* arr, vector<int> shape );
 
-    NArrayCore* Gather( NArrayCore* arr, int dim, NArrayCore* index );
-
-    NArrayCore* Gather_CUDA( NArrayCore* arr, int dim, NArrayCore* index );
-
-    NArrayCore* Unsqueeze( NArrayCore* arr, int dim );
-
-    NArrayCore* Index( NArrayCore* arr, int dim, NArrayCore* index );
-
-    NArrayCore* Index_CUDA( NArrayCore* arr, int dim, NArrayCore* index );
-
-    NArrayCore* Neg( NArrayCore* arr );
-
-    NArrayCore* Sub( NArrayCore* arr1, NArrayCore* arr2 );
-
-    NArrayCore* Div( NArrayCore* arr1, NArrayCore* arr2 );
-
-    NArrayCore* Mean( NArrayCore* arr, int dim );
-
-    NArrayCore* Softmax( NArrayCore* arr, int dim );
+    NArrayCore* Broadcast( NArrayCore* arr, vector<int> shape );
 
     NArrayCore* CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 );
 
-    int SizeFromShape( vector<int> shape );
+    NArrayCore* Div( NArrayCore* arr1, NArrayCore* arr2 );
 
-    int MultiToFlatIndex( vector<int> index, vector<int> shape );
+    NArrayCore* Exp_CUDA( NArrayCore* arr );
 
-    vector<int> FlatToMultiIndex( int index, vector<int> shape );
+    NArrayCore* Exp( NArrayCore* arr );
 
-    vector<int> GetShapeForBroadcast( NArrayCore* arr1, NArrayCore* arr2 );
+    NArrayCore* Gather_CUDA( NArrayCore* arr, int dim, NArrayCore* index );
+
+    NArrayCore* Gather( NArrayCore* arr, int dim, NArrayCore* index );
+
+    NArrayCore* Index_CUDA( NArrayCore* arr, int dim, NArrayCore* index );
+
+    NArrayCore* Index( NArrayCore* arr, int dim, NArrayCore* index );
+
+    NArrayCore* Log_CUDA( NArrayCore* arr );
+
+    NArrayCore* Log( NArrayCore* arr );
+
+    NArrayCore* Matmul( NArrayCore* arr1, NArrayCore* arr2 );
+
+    NArrayCore* Max_CUDA( NArrayCore* arr, int dim );
+
+    NArrayCore* Max( NArrayCore* arr, int dim );
+
+    NArrayCore* Mean( NArrayCore* arr, int dim );
+
+    NArrayCore* MM_CUDA( NArrayCore* arr1, NArrayCore* arr2 );
+
+    NArrayCore* MM( NArrayCore* arr1, NArrayCore* arr2 );
+
+    NArrayCore* Mul( NArrayCore* arr, float literal );
+
+    NArrayCore* Mul( NArrayCore* arr1, NArrayCore* arr2 );
+
+    NArrayCore* Neg( NArrayCore* arr );
+
+    NArrayCore* Pow_CUDA( NArrayCore* arr, float exponent );
+    
+    NArrayCore* Pow( NArrayCore* arr, float exponent );
+
+    NArrayCore* ReLU_CUDA( NArrayCore* arr );
+
+    NArrayCore* ReLU( NArrayCore* arr );
+
+    NArrayCore* Reshape( NArrayCore* arr, vector<int> shape );
+
+    NArrayCore* Softmax( NArrayCore* arr, int dim );
+
+    NArrayCore* Sub( NArrayCore* arr1, NArrayCore* arr2 );
+
+    NArrayCore* Sum_CUDA( NArrayCore* arr, int dim );
+
+    NArrayCore* Sum( NArrayCore* arr, int dim );
+
+    NArrayCore* Tanh_CUDA( NArrayCore* arr );
+
+    NArrayCore* Tanh( NArrayCore* arr );
+
+    NArrayCore* Transpose( NArrayCore* arr, int firstDim, int secondDim );
+    
+    NArrayCore* Unsqueeze( NArrayCore* arr, int dim );
 
     NArrayCore* RandomCore( vector<int> shape );
 
@@ -243,4 +232,14 @@ namespace Flow
     NArrayCore* OneHotCore( vector<int> integers, int num );
 
     void Print( NArrayCore* arr );
+
+    void PrintShape( NArrayCore* arr );
+
+    int SizeFromShape( vector<int> shape );
+
+    int MultiToFlatIndex( vector<int> index, vector<int> shape );
+
+    vector<int> FlatToMultiIndex( int index, vector<int> shape );
+
+    vector<int> GetShapeForBroadcast( vector<int> shape1, vector<int> shape2 );
 }

@@ -4,10 +4,8 @@
 
 namespace Flow
 {
-    vector<int> GetShapeForBroadcast( NArrayCore* arr1, NArrayCore* arr2 )
+    vector<int> GetShapeForBroadcast( vector<int> shape1, vector<int> shape2 )
     {
-        vector<int> shape1 = arr1->GetShape();
-        vector<int> shape2 = arr2->GetShape();
         int maxDims = max( shape1.size(), shape2.size() );
         while ( shape1.size() < maxDims ) shape1.insert( shape1.begin(), 1 );
         while ( shape2.size() < maxDims ) shape2.insert( shape2.begin(), 1 );

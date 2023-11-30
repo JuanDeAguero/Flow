@@ -44,8 +44,9 @@ int main()
     Flow::NArray b2 = Flow::Random({ 10 });
     
     float learningRate = 0.2f;
+    int maxEpochs = 100;
 
-    for ( int epoch = 0; epoch < 100; epoch++ )
+    for ( int epoch = 0; epoch < maxEpochs; epoch++ )
     {
         Flow::NArray a = ReLU( Add( MM( xTrain, w1 ), b1 ) );
         Flow::NArray yPred = Add( MM( a, w2 ), b2 );

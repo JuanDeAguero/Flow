@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <vector>
-
 #include "Flow/NArray.h"
 #include "Flow/Print.h"
 #include "Test.hpp"
@@ -13,11 +11,6 @@ static bool Test_Add()
     int numPassed = 0;
     int numTests = 17;
     Flow::NArrayCore::Operation op = Flow::NArrayCore::Operation::ADD;
-
-    std::vector<float> data( 100000, 123 );
-    Flow::NArray arr1 = Flow::Create( { 100000 }, data );
-    Flow::NArray arr2 = Flow::Create( { 100000 }, data );
-    Flow::NArray result = Flow::Add( arr1, arr2 );
 
     Test( 1, numPassed,
         Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ),
