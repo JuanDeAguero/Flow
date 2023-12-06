@@ -33,6 +33,11 @@ vector<float> Flow::NArray::Get()
     return Array->Get();
 }
 
+float* Flow::NArray::GetData()
+{
+    return Array->GetData();
+}
+
 vector<int> Flow::NArray::GetShape()
 {
     return Array->GetShape();

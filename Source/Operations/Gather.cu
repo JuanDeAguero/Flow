@@ -17,9 +17,11 @@ namespace Flow
     }
 
     __host__
-    NArrayCore* Gather_CUDA( NArrayCore* arr, int dim, NArrayCore* index )
+    NArrayCore* Gather( NArrayCore* arr, int dim, NArrayCore* index )
     {
-        int n = index->Get().size();
+        return nullptr;
+
+        /*int n = index->Get().size();
         float* arr_d;
         int* arrShape_d;
         float* index_d;
@@ -46,7 +48,7 @@ namespace Flow
         NArrayCore* result = new NArrayCore( index->GetShape(), resultData, { arr }, NArrayCore::Operation::GATHER );
         result->GatherDim = dim;
         result->GatherIndex = index;
-        return result;
+        return result;*/
     }
 
     __global__
@@ -62,9 +64,9 @@ namespace Flow
     }
 
     __host__
-    void NArrayCore::BackwardGather_CUDA()
+    void NArrayCore::BackwardGather()
     {
-        int n = GatherIndex->Data.size();
+        /*int n = GatherIndex->Data.size();
         float* gradient_d;
         int* operandShape_d;
         float* operandGradient_d;
@@ -86,6 +88,6 @@ namespace Flow
         cudaFree(operandShape_d);
         cudaFree(operandGradient_d);
         cudaFree(index_d);
-        cudaFree(indexShape_d);
+        cudaFree(indexShape_d);*/
     }
 }

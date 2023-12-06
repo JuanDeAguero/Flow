@@ -4,6 +4,7 @@
 
 #include "Flow/NArray.h"
 #include "Flow/Print.h"
+#include "Flow/Vector.h"
 #include "Test.hpp"
 
 static bool Test_MM()

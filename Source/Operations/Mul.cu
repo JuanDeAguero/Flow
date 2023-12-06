@@ -12,10 +12,11 @@ void Mul_Kernel( float* arr1, float* arr2, float* result )
     
 namespace Flow
 {
-    __host__
-    NArrayCore* Mul_CUDA( NArrayCore* arr1, NArrayCore* arr2 )
+    NArrayCore* Mul( NArrayCore* arr1, NArrayCore* arr2 )
     {
-        int n = arr1->Get().size();
+        return nullptr;
+        
+        /*int n = arr1->Get().size();
         float* arr1_d;
         float* arr2_d;
         float* result_d;
@@ -30,7 +31,12 @@ namespace Flow
         cudaFree(arr1_d);
         cudaFree(arr2_d);
         cudaFree(result_d);
-        return new NArrayCore( arr1->GetShape(), resultData, { arr1, arr2 }, NArrayCore::Operation::MUL );
+        return new NArrayCore( arr1->GetShape(), resultData, { arr1, arr2 }, NArrayCore::Operation::MUL );*/
+    }
+
+    NArrayCore* Mul( NArrayCore* arr1, float literal )
+    {
+        return nullptr;
     }
 }
 
@@ -42,10 +48,9 @@ void BackwardMul_Kernel( float* gradient, float* operand1, float* operandGradien
     operandGradient2[i] += operand1[i] * gradient[i];
 }
 
-__host__
-void Flow::NArrayCore::BackwardMul_CUDA()
+void Flow::NArrayCore::BackwardMul()
 {
-    int n = Gradient->Data.size();
+    /*int n = Gradient->Data.size();
     float* gradient_d;
     float* operand1_d;
     float* operandGradient1_d;
@@ -68,5 +73,5 @@ void Flow::NArrayCore::BackwardMul_CUDA()
     cudaFree(operand1_d);
     cudaFree(operandGradient1_d);
     cudaFree(operand2_d);
-    cudaFree(operandGradient2_d);
+    cudaFree(operandGradient2_d);*/
 }

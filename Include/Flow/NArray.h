@@ -27,6 +27,8 @@ namespace Flow
 
         vector<float> Get();
 
+        float* GetData();
+
         vector<int> GetShape();
 
         NArray GetGradient();

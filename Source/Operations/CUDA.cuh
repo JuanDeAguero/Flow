@@ -45,21 +45,4 @@ namespace Flow
         while ( assumed != old );
         return __int_as_float(old);
     }
-
-    template< class T >
-    inline T* HostToDeviceVec( std::vector<T> vec )
-    {
-        T* ptr;
-        cudaMalloc( (void**)&ptr, vec.size() * sizeof(T) );
-        cudaMemcpy( ptr, vec.data(), vec.size() * sizeof(T), cudaMemcpyHostToDevice );
-        return ptr;
-    }
-
-    inline float* HostToDeviceArr( NArrayCore* arr )
-    {
-        float* ptr;
-        cudaMalloc( (void**)&ptr, arr->Get().size() * sizeof(float) );
-        cudaMemcpy( ptr, arr->GetData(), arr->Get().size() * sizeof(float), cudaMemcpyHostToDevice );
-        return ptr;
-    }
 }

@@ -17,9 +17,11 @@ namespace Flow
     }
 
     __host__
-    NArrayCore* Index_CUDA( NArrayCore* arr, int dim, NArrayCore* index )
+    NArrayCore* Index( NArrayCore* arr, int dim, NArrayCore* index )
     {
-        vector<int> indices(index->Get().size());
+        return nullptr;
+
+        /*vector<int> indices(index->Get().size());
         for ( int i = 0; i < index->Get().size(); i++ )
             indices[i] = static_cast<int>(index->Get()[i]);
         vector<int> resultShape = arr->GetShape();
@@ -53,7 +55,7 @@ namespace Flow
         NArrayCore* result = new NArrayCore( resultShape, resultData, { arr, index }, NArrayCore::Operation::INDEX );
         result->IndexDim = dim;
         result->Index = index;
-        return result;
+        return result;*/
     }
 
     __global__
@@ -68,9 +70,9 @@ namespace Flow
     }
 
     __host__
-    void NArrayCore::BackwardIndex_CUDA()
+    void NArrayCore::BackwardIndex()
     {
-        vector<int> indices(Index->Get().size());
+        /*vector<int> indices(Index->Get().size());
         for ( int i = 0; i < Index->Get().size(); i++ )
             indices[i] = static_cast<int>(Index->Get()[i]);
         int n = Gradient->Data.size();
@@ -85,6 +87,6 @@ namespace Flow
         cudaFree(operandShape_d);
         cudaFree(operandGradient_d);
         cudaFree(indices_d);
-        cudaFree(shape_d);
+        cudaFree(shape_d);*/
     }
 }

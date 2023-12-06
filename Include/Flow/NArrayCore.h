@@ -32,7 +32,7 @@ namespace Flow
             SUM,     TANH,    TRANSPOSE, UNSQUEEZE
         };
 
-        NArrayCore( vector<int> shape, vector<float> data, vector<NArrayCore*> operands, Operation op );
+        NArrayCore( vector<int> shape, float* deviceData, vector<NArrayCore*> operands, Operation op );
 
         float Get( vector<int> coordinates );
 
@@ -56,7 +56,7 @@ namespace Flow
 
     private:
 
-        vector<float> Data;
+        float* Data;
 
         vector<int> Shape;
 
@@ -74,57 +74,31 @@ namespace Flow
 
         void Backward();
 
-        void BackwardAdd_CUDA();
-
         void BackwardAdd();
-        
-        void BackwardBroadcast_CUDA();
         
         void BackwardBroadcast();
         
-        void BackwardExp_CUDA();
-        
         void BackwardExp();
-        
-        void BackwardGather_CUDA();
         
         void BackwardGather();
         
-        void BackwardIndex_CUDA();
-        
         void BackwardIndex();
-        
-        void BackwardLog_CUDA();
         
         void BackwardLog();
         
-        void BackwardMax_CUDA();
-        
         void BackwardMax();
-        
-        void BackwardMM_CUDA();
         
         void BackwardMM();
         
-        void BackwardMul_CUDA();
-        
         void BackwardMul();
         
-        void BackwardPow_CUDA();
-        
         void BackwardPow();
-        
-        void BackwardReLU_CUDA();
         
         void BackwardReLU();
         
         void BackwardReshape();
         
-        void BackwardSum_CUDA();
-        
         void BackwardSum();
-        
-        void BackwardTanh_CUDA();
         
         void BackwardTanh();
         
@@ -153,41 +127,25 @@ namespace Flow
 
     NArrayCore* Add( NArrayCore* arr1, NArrayCore* arr2 );
 
-    NArrayCore* Add_CUDA( NArrayCore* arr1, NArrayCore* arr2 );
-
-    NArrayCore* Broadcast_CUDA( NArrayCore* arr, vector<int> shape );
-
     NArrayCore* Broadcast( NArrayCore* arr, vector<int> shape );
 
     NArrayCore* CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 );
 
     NArrayCore* Div( NArrayCore* arr1, NArrayCore* arr2 );
 
-    NArrayCore* Exp_CUDA( NArrayCore* arr );
-
     NArrayCore* Exp( NArrayCore* arr );
-
-    NArrayCore* Gather_CUDA( NArrayCore* arr, int dim, NArrayCore* index );
 
     NArrayCore* Gather( NArrayCore* arr, int dim, NArrayCore* index );
 
-    NArrayCore* Index_CUDA( NArrayCore* arr, int dim, NArrayCore* index );
-
     NArrayCore* Index( NArrayCore* arr, int dim, NArrayCore* index );
-
-    NArrayCore* Log_CUDA( NArrayCore* arr );
 
     NArrayCore* Log( NArrayCore* arr );
 
     NArrayCore* Matmul( NArrayCore* arr1, NArrayCore* arr2 );
 
-    NArrayCore* Max_CUDA( NArrayCore* arr, int dim );
-
     NArrayCore* Max( NArrayCore* arr, int dim );
 
     NArrayCore* Mean( NArrayCore* arr, int dim );
-
-    NArrayCore* MM_CUDA( NArrayCore* arr1, NArrayCore* arr2 );
 
     NArrayCore* MM( NArrayCore* arr1, NArrayCore* arr2 );
 
@@ -195,15 +153,9 @@ namespace Flow
 
     NArrayCore* Mul( NArrayCore* arr, float literal );
 
-    NArrayCore* Mul_CUDA( NArrayCore* arr1, NArrayCore* arr2 );
-
     NArrayCore* Neg( NArrayCore* arr );
-
-    NArrayCore* Pow_CUDA( NArrayCore* arr, float exponent );
     
     NArrayCore* Pow( NArrayCore* arr, float exponent );
-
-    NArrayCore* ReLU_CUDA( NArrayCore* arr );
 
     NArrayCore* ReLU( NArrayCore* arr );
 
@@ -213,17 +165,11 @@ namespace Flow
 
     NArrayCore* Sub( NArrayCore* arr1, NArrayCore* arr2 );
 
-    NArrayCore* Sum_CUDA( NArrayCore* arr, int dim );
-
     NArrayCore* Sum( NArrayCore* arr, int dim );
-
-    NArrayCore* Tanh_CUDA( NArrayCore* arr );
 
     NArrayCore* Tanh( NArrayCore* arr );
 
     NArrayCore* Transpose( NArrayCore* arr, int firstDim, int secondDim );
-
-    NArrayCore* Transpose_CUDA( NArrayCore* arr, int firstDim, int secondDim );
     
     NArrayCore* Unsqueeze( NArrayCore* arr, int dim );
 
@@ -245,5 +191,5 @@ namespace Flow
 
     vector<int> FlatToMultiIndex( int index, vector<int> shape );
 
-    vector<int> GetShapeForBroadcast( vector<int> shape1, vector<int> shape2 );
+    vector<int> BroadcastShapes( vector<int> shape1, vector<int> shape2 );
 }

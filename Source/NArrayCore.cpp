@@ -7,6 +7,8 @@
 #include <random>
 #include <sstream>
 
+#include <cuda_runtime.h>
+
 #include "Flow/NArrayCore.h"
 #include "Flow/Print.h"
 
@@ -14,19 +16,18 @@ using namespace std;
 
 Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data )
 {
-    Data = data;
+    cudaMalloc( (void**)&Data, data.size() * sizeof(float) );
+    cudaMemcpy( Data, data.data(), data.size() * sizeof(float), cudaMemcpyHostToDevice );
     Shape = shape;
-    vector<float> gradientData( data.size(), 0.0f );
-    Gradient = new NArrayCore( shape, gradientData, true );
+    Gradient = new NArrayCore( shape, {}, true );
     Op = Operation::NONE;
 }
 
-Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data, vector<NArrayCore*> operands, Operation op )
+Flow::NArrayCore::NArrayCore( vector<int> shape, float* deviceData, vector<NArrayCore*> operands, Operation op )
 {
-    Data = data;
+    Data = deviceData;
     Shape = shape;
-    vector<float> gradientData( data.size(), 0.0f );
-    Gradient = new NArrayCore( shape, gradientData, true );
+    Gradient = new NArrayCore( shape, {}, true );
     Operands = operands;
     Op = op;
 }
@@ -34,18 +35,25 @@ Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data, vector<NArr
 float Flow::NArrayCore::Get( vector<int> coordinates )
 {
     int index = MultiToFlatIndex( coordinates, Shape );
-    if ( index >= 0 && index < Data.size() )
-        return Data[index];
+    if ( index >= 0 && index < SizeFromShape(Shape) )
+    {
+        float value;
+        cudaMemcpy( &value, &Data[index], sizeof(float), cudaMemcpyDeviceToHost );
+        return value;
+    }
 }
 
 vector<float> Flow::NArrayCore::Get()
 {
-    return Data;
+    int size = SizeFromShape(Shape);
+    vector<float> data(size);
+    cudaMemcpy( data.data(), Data, size * sizeof(float), cudaMemcpyDeviceToHost );
+    return data;
 }
 
 float* Flow::NArrayCore::GetData()
 {
-    return Data.data();
+    return Data;
 }
 
 vector<int> Flow::NArrayCore::GetShape()
@@ -63,19 +71,6 @@ Flow::NArrayCore* Flow::NArrayCore::GetGradient()
     return Gradient;
 }
 
-void Flow::NArrayCore::Set( vector<int> coordinates, float value )
-{
-    int index = MultiToFlatIndex( coordinates, Shape );
-    if ( index >= 0 && index < Data.size() )
-        Data[index] = value;
-}
-
-void Flow::NArrayCore::Reset( float value )
-{
-    for ( int i = 0; i < Data.size(); i++ )
-        Data[i] = value;
-}
-
 void Flow::NArrayCore::Backpropagate()
 {
     if ( Operands.size() == 0 )
@@ -88,18 +83,19 @@ void Flow::NArrayCore::Backpropagate()
 
 Flow::NArrayCore* Flow::NArrayCore::Copy()
 {
-    return new NArrayCore( Shape, Data );
+    int size = SizeFromShape(Shape);
+    vector<float> data(size);
+    cudaMemcpy( data.data(), Data, size * sizeof(float), cudaMemcpyDeviceToHost );
+    return new NArrayCore( Shape, data );
 }
 
 Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data, bool isGradient )
 {
-    Data = data;
+    cudaMalloc( (void**)&Data, SizeFromShape(shape) * sizeof(float) );
+    cudaMemset( Data, 0, SizeFromShape(shape) * sizeof(float) );
     Shape = shape;
     if (!isGradient)
-    {
-        vector<float> gradientData( data.size(), 0.0f );
-        Gradient = new NArrayCore( shape, gradientData, true );
-    }
+        Gradient = new NArrayCore( shape, {}, true );
     Op = Operation::NONE;
 }
 
@@ -237,7 +233,9 @@ namespace Flow
 
     void Print( NArrayCore* arr )
     {
-        for ( float value : arr->Get() )
+        vector<float> data( SizeFromShape(arr->GetShape()) );
+        cudaMemcpy( data.data(), arr->GetData(), SizeFromShape(arr->GetShape()) * sizeof(float), cudaMemcpyDeviceToHost );
+        for ( float value : data )
             Print(value);
     }
 

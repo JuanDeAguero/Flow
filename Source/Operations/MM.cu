@@ -2,13 +2,14 @@
 
 #include "CUDA.cuh"
 #include "Flow/NArrayCore.h"
+#include "Flow/Vector.h"
 
-#define TILE_SIZE 16
+#define TILE_SIZE 32
 
 namespace Flow
 {
     __global__
-    void MM_TiledKernel( float* arr1, float* arr2, float* result, int arr1Rows, int arr1Cols, int arr2Cols )
+    void MM_Kernel( float* arr1, float* arr2, float* result, int arr1Rows, int arr1Cols, int arr2Cols )
     {
         __shared__ float arr1_s[TILE_SIZE][TILE_SIZE];
         __shared__ float arr2_s[TILE_SIZE][TILE_SIZE];
@@ -34,30 +35,44 @@ namespace Flow
             result[ row * arr2Cols + col ] = sum;
     }
 
-
     __host__
-    NArrayCore* MM_CUDA( NArrayCore* arr1, NArrayCore* arr2 )
+    NArrayCore* MM( NArrayCore* arr1, NArrayCore* arr2 )
     {
+        return nullptr;
+        
+        /*auto start = chrono::high_resolution_clock::now();
+
         int arr1Rows = arr1->GetShape()[0];
         int arr1Cols = arr1->GetShape()[1];
         int arr2Cols = arr2->GetShape()[1];
-        float* arr1_d;
-        float* arr2_d;
         float* result_d;
-        cudaMalloc( (void**)&arr1_d, arr1Rows * arr1Cols * sizeof(float) );
-        cudaMalloc( (void**)&arr2_d, arr1Cols * arr2Cols * sizeof(float) );
         cudaMalloc( (void**)&result_d, arr1Rows * arr2Cols * sizeof(float) );
-        cudaMemcpy( arr1_d, arr1->GetData(), arr1Rows * arr1Cols * sizeof(float), cudaMemcpyHostToDevice );
-        cudaMemcpy( arr2_d, arr2->GetData(), arr1Cols * arr2Cols * sizeof(float), cudaMemcpyHostToDevice );
-        cudaMemset( result_d, 0, arr1Rows * arr2Cols * sizeof(float) );
         dim3 dimGrid( ceil( arr2Cols / float(TILE_SIZE) ), ceil( arr1Rows / float(TILE_SIZE) ), 1 );
         dim3 dimBlock( TILE_SIZE, TILE_SIZE, 1 );
-        MM_TiledKernel<<< dimGrid, dimBlock >>>( arr1_d, arr2_d, result_d, arr1Rows, arr1Cols, arr2Cols );
-        vector<float> resultData( arr1Rows * arr2Cols );
-        cudaMemcpy( resultData.data(), result_d, arr1Rows * arr2Cols * sizeof(float), cudaMemcpyDeviceToHost );
-        cudaFree(arr1_d);
-        cudaFree(arr2_d);
-        cudaFree(result_d);
-        return new NArrayCore( { arr1Rows, arr2Cols }, resultData, { arr1, arr2 }, NArrayCore::Operation::MM );
+        MM_Kernel<<< dimGrid, dimBlock >>>( arr1->GetData(), arr2->DeviceData, result_d, arr1Rows, arr1Cols, arr2Cols );
+        NArrayCore* result = new NArrayCore( { arr1Rows, arr2Cols }, {}, { arr1, arr2 }, NArrayCore::Operation::MM );
+        result->DeviceData = result_d;  
+
+        auto end = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<chrono::nanoseconds>( end - start );
+        //Print( to_string(duration.count()) + " MM" );
+
+        return result;*/
     }
+}
+
+void Flow::NArrayCore::BackwardMM()
+{
+    /*auto start = chrono::high_resolution_clock::now();
+
+    NArrayCore* grad1 = Flow::MM( Gradient->Copy(), Transpose( Operands[1], 0, 1 ) );
+    NArrayCore* grad2 = Flow::MM( Transpose( Operands[0], 0, 1 ), Gradient->Copy() );
+    Operands[0]->Gradient = grad1;
+    Operands[1]->Gradient = grad2;
+    grad1->Gradient = nullptr;
+    grad2->Gradient = nullptr;
+
+    auto end = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::nanoseconds>( end - start );
+    //Print( to_string(duration.count()) + " BackwardMM" );*/
 }

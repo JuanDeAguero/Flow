@@ -6,41 +6,44 @@
 #include "Flow/NArrayCore.h"
 
 __global__
-void Log_Kernel( float* result )
+void Tanh_Kernel( float* result )
 {
     int i = blockIdx.x;
-    result[i] = log(result[i]);
+    result[i] = tanh(result[i]);
 }
 
 namespace Flow
 {
     __host__
-    NArrayCore* Log_CUDA( NArrayCore* arr )
+    NArrayCore* Tanh( NArrayCore* arr )
     {
-        int n = arr->Get().size();
+        return nullptr;
+        
+        /*int n = arr->Get().size();
         float* result_d;
         cudaMalloc( (void**)&result_d, n * sizeof(float) );
         cudaMemcpy( result_d, arr->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
-        Log_Kernel<<< n, 1 >>>(result_d);
+        Tanh_Kernel<<< n, 1 >>>(result_d);
         vector<float> resultData(n);
         cudaMemcpy( resultData.data(), result_d, n * sizeof(float), cudaMemcpyDeviceToHost );
         cudaFree(result_d);
-        return new NArrayCore( arr->GetShape(), resultData, { arr }, NArrayCore::Operation::LOG );
+        return new NArrayCore( arr->GetShape(), resultData, { arr }, NArrayCore::Operation::TANH );*/
     }
 }
 
 __global__
-void BackwardLog_Kernel( float* gradient, float* operand, float* operandGradient )
+void BackwardTanh_Kernel( float* gradient, float* operand, float* operandGradient )
 {
     int i = blockIdx.x;
-    float grad = gradient[i] / operand[i];
+    float value = tanh(operand[i]);
+    float grad = gradient[i] * ( 1 - value * value );
     operandGradient[i] += grad;
 }
 
 __host__
-void Flow::NArrayCore::BackwardLog_CUDA()
+void Flow::NArrayCore::BackwardTanh()
 {
-    int n = Data.size();
+    /*int n = Data.size();
     float* gradient_d;
     float* operand_d;
     float* operandGradient_d;
@@ -50,9 +53,9 @@ void Flow::NArrayCore::BackwardLog_CUDA()
     cudaMemcpy( gradient_d, Gradient->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
     cudaMemcpy( operand_d, Operands[0]->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
     cudaMemcpy( operandGradient_d, Operands[0]->GetGradient()->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
-    BackwardLog_Kernel<<< n, 1 >>>( gradient_d, operand_d, operandGradient_d );
+    BackwardTanh_Kernel<<< n, 1 >>>( gradient_d, operand_d, operandGradient_d );
     cudaMemcpy( Operands[0]->Gradient->GetData(), operandGradient_d, n * sizeof(float), cudaMemcpyDeviceToHost );
     cudaFree(gradient_d);
     cudaFree(operand_d);
-    cudaFree(operandGradient_d);
+    cudaFree(operandGradient_d);*/
 }

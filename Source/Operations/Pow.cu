@@ -6,41 +6,45 @@
 #include "Flow/NArrayCore.h"
 
 __global__
-void Exp_Kernel( float* result )
+void Pow_Kernel( float* result, float exponent )
 {
     int i = blockIdx.x;
-    result[i] = exp(result[i]);
+    result[i] = pow( result[i], exponent );
 }
 
 namespace Flow
 {
     __host__
-    NArrayCore* Exp_CUDA( NArrayCore* arr )
+    NArrayCore* Pow( NArrayCore* arr, float exponent )
     {
-        int n = arr->Get().size();
+        return nullptr;
+        
+        /*int n = arr->Get().size();
         float* result_d;
         cudaMalloc( (void**)&result_d, n * sizeof(float) );
         cudaMemcpy( result_d, arr->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
-        Exp_Kernel<<< n, 1 >>>(result_d);
+        Pow_Kernel<<< n, 1 >>>( result_d, exponent );
         vector<float> resultData(n);
         cudaMemcpy( resultData.data(), result_d, n * sizeof(float), cudaMemcpyDeviceToHost );
         cudaFree(result_d);
-        return new NArrayCore( arr->GetShape(), resultData, { arr }, NArrayCore::Operation::EXP );
+        NArrayCore* result = new NArrayCore( arr->GetShape(), resultData, { arr }, NArrayCore::Operation::POW );
+        result->Exponent = exponent;
+        return result;*/
     }
 }
 
 __global__
-void BackwardExp_Kernel( float* gradient, float* operand, float* operandGradient )
+void BackwardPow_Kernel( float* gradient, float* operand, float* operandGradient, float exponent )
 {
     int i = blockIdx.x;
-    float grad = gradient[i] * exp(operand[i]);
+    float grad = gradient[i] * exponent * pow( operand[i], exponent - 1);
     operandGradient[i] += grad;
 }
 
 __host__
-void Flow::NArrayCore::BackwardExp_CUDA()
+void Flow::NArrayCore::BackwardPow()
 {
-    int n = Data.size();
+    /*int n = Data.size();
     float* gradient_d;
     float* operand_d;
     float* operandGradient_d;
@@ -50,9 +54,9 @@ void Flow::NArrayCore::BackwardExp_CUDA()
     cudaMemcpy( gradient_d, Gradient->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
     cudaMemcpy( operand_d, Operands[0]->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
     cudaMemcpy( operandGradient_d, Operands[0]->GetGradient()->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
-    BackwardExp_Kernel<<< n, 1 >>>( gradient_d, operand_d, operandGradient_d );
+    BackwardPow_Kernel<<< n, 1 >>>( gradient_d, operand_d, operandGradient_d, Exponent );
     cudaMemcpy( Operands[0]->Gradient->GetData(), operandGradient_d, n * sizeof(float), cudaMemcpyDeviceToHost );
     cudaFree(gradient_d);
     cudaFree(operand_d);
-    cudaFree(operandGradient_d);
+    cudaFree(operandGradient_d);*/
 }

@@ -19,9 +19,11 @@ namespace Flow
     }
 
     __host__
-    NArrayCore* Max_CUDA( NArrayCore* arr, int dim )
+    NArrayCore* Max( NArrayCore* arr, int dim )
     {
-        vector<int> resultShape = arr->GetShape();
+        return nullptr;
+        
+        /*vector<int> resultShape = arr->GetShape();
         resultShape[dim] = 1;
         vector<float> resultData( SizeFromShape(resultShape), numeric_limits<float>::min() );
         int n = arr->Get().size();
@@ -37,7 +39,7 @@ namespace Flow
         cudaFree(resultshape_d);
         NArrayCore* result = new NArrayCore( resultShape, resultData, { arr }, NArrayCore::Operation::MAX );
         result->MaxDim = dim;
-        return result;
+        return result;*/
     }
 
     __global__
@@ -54,9 +56,9 @@ namespace Flow
     }
 
     __host__
-    void Flow::NArrayCore::BackwardMax_CUDA()
+    void Flow::NArrayCore::BackwardMax()
     {
-        int n = Data.size();
+        /*int n = Data.size();
         int maxDimSize = Operands[0]->GetShape()[MaxDim];
         float* gradient_d = HostToDeviceArr(Gradient);
         float* operand_d = HostToDeviceArr(Operands[0]);
@@ -72,6 +74,6 @@ namespace Flow
         cudaFree(operandShape_d);
         cudaFree(operandGradient_d);
         cudaFree(arr_d);
-        cudaFree(shape_d);
+        cudaFree(shape_d);*/
     }
 }

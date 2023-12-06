@@ -17,9 +17,11 @@ namespace Flow
     }
 
     __host__
-    NArrayCore* Sum_CUDA( NArrayCore* arr, int dim )
+    NArrayCore* Sum( NArrayCore* arr, int dim )
     {
-        vector<int> resultShape = arr->GetShape();
+        return nullptr;
+        
+        /*vector<int> resultShape = arr->GetShape();
         resultShape[dim] = 1;
         vector<float> resultData( SizeFromShape(resultShape), numeric_limits<float>::min() );
         int n = arr->Get().size();
@@ -31,7 +33,7 @@ namespace Flow
         cudaMemcpy( resultData.data(), result_d, resultData.size() * sizeof(float), cudaMemcpyDeviceToHost );
         NArrayCore* result = new NArrayCore( resultShape, resultData, { arr }, NArrayCore::Operation::SUM );
         result->SumDim = dim;
-        return result;
+        return result;*/
     }
 
     __global__
@@ -47,9 +49,9 @@ namespace Flow
     }
 
     __host__
-    void Flow::NArrayCore::BackwardSum_CUDA()
+    void Flow::NArrayCore::BackwardSum()
     {
-        int n = Data.size();
+        /*int n = Data.size();
         int maxDimSize = Operands[0]->GetShape()[SumDim];
         float* gradient_d = HostToDeviceArr(Gradient);
         float* operand_d = HostToDeviceArr(Operands[0]);
@@ -65,6 +67,6 @@ namespace Flow
         cudaFree(operandShape_d);
         cudaFree(operandGradient_d);
         cudaFree(arr_d);
-        cudaFree(shape_d);
+        cudaFree(shape_d);*/
     }
 }

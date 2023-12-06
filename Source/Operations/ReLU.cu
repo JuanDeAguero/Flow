@@ -6,42 +6,43 @@
 #include "Flow/NArrayCore.h"
 
 __global__
-void Tanh_Kernel( float* result )
+void ReLU_Kernel( float* result )
 {
     int i = blockIdx.x;
-    result[i] = tanh(result[i]);
+    Flow::AtomicMax_Device( &result[i], 0.0f );
 }
 
 namespace Flow
 {
     __host__
-    NArrayCore* Tanh_CUDA( NArrayCore* arr )
+    NArrayCore* ReLU( NArrayCore* arr )
     {
-        int n = arr->Get().size();
+        return nullptr;
+        
+        /*int n = arr->Get().size();
         float* result_d;
         cudaMalloc( (void**)&result_d, n * sizeof(float) );
         cudaMemcpy( result_d, arr->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
-        Tanh_Kernel<<< n, 1 >>>(result_d);
+        ReLU_Kernel<<< n, 1 >>>(result_d);
         vector<float> resultData(n);
         cudaMemcpy( resultData.data(), result_d, n * sizeof(float), cudaMemcpyDeviceToHost );
         cudaFree(result_d);
-        return new NArrayCore( arr->GetShape(), resultData, { arr }, NArrayCore::Operation::TANH );
+        return new NArrayCore( arr->GetShape(), resultData, { arr }, NArrayCore::Operation::RELU );*/
     }
 }
 
 __global__
-void BackwardTanh_Kernel( float* gradient, float* operand, float* operandGradient )
+void BackwardReLU_Kernel( float* gradient, float* operand, float* operandGradient )
 {
     int i = blockIdx.x;
-    float value = tanh(operand[i]);
-    float grad = gradient[i] * ( 1 - value * value );
+    float grad = ( operand[i] > 0.0f ) ? gradient[i] : 0.0f;
     operandGradient[i] += grad;
 }
 
 __host__
-void Flow::NArrayCore::BackwardTanh_CUDA()
+void Flow::NArrayCore::BackwardReLU()
 {
-    int n = Data.size();
+    /*int n = Data.size();
     float* gradient_d;
     float* operand_d;
     float* operandGradient_d;
@@ -51,9 +52,9 @@ void Flow::NArrayCore::BackwardTanh_CUDA()
     cudaMemcpy( gradient_d, Gradient->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
     cudaMemcpy( operand_d, Operands[0]->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
     cudaMemcpy( operandGradient_d, Operands[0]->GetGradient()->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
-    BackwardTanh_Kernel<<< n, 1 >>>( gradient_d, operand_d, operandGradient_d );
+    BackwardReLU_Kernel<<< n, 1 >>>( gradient_d, operand_d, operandGradient_d );
     cudaMemcpy( Operands[0]->Gradient->GetData(), operandGradient_d, n * sizeof(float), cudaMemcpyDeviceToHost );
     cudaFree(gradient_d);
     cudaFree(operand_d);
-    cudaFree(operandGradient_d);
+    cudaFree(operandGradient_d);*/
 }
