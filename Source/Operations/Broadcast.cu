@@ -3,14 +3,12 @@
 #include "CUDA.cuh"
 #include "Flow/NArrayCore.h"
 
-using namespace std;
-
-vector<int> Flow::BroadcastShapes( vector<int> shape1, vector<int> shape2 )
+std::vector<int> Flow::BroadcastShapes( vector<int> shape1, vector<int> shape2 )
 {
     int maxDims = max( shape1.size(), shape2.size() );
     while ( shape1.size() < maxDims ) shape1.insert( shape1.begin(), 1 );
     while ( shape2.size() < maxDims ) shape2.insert( shape2.begin(), 1 );
-    vector<int> shape(maxDims);
+    std::vector<int> shape(maxDims);
     for ( int i = 0; i < maxDims; i++ )
     {
         if ( shape1[i] == shape2[i] ) shape[i] = shape1[i];

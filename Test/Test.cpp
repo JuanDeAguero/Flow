@@ -24,10 +24,10 @@ int main()
 
     if (Test_Add())          numPassed++;
     if (Test_Broadcast())    numPassed++;
-    /*if (Test_CrossEntropy()) numPassed++;
+    //if (Test_CrossEntropy()) numPassed++;
     if (Test_Exp())          numPassed++;
     if (Test_Gather())       numPassed++;
-    if (Test_Index())        numPassed++;
+    /*if (Test_Index())        numPassed++;
     if (Test_Log())          numPassed++;
     if (Test_Max())          numPassed++;
     if (Test_MM())           numPassed++;

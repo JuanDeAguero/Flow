@@ -41,11 +41,11 @@ static bool Test_Exp()
         { 1, 4 }, {}, {} );
 
     Test( 5, numPassed,
-        Flow::Create( { 2, 2, 2, 2 }, { 0, 1, -1, 2, 1.5, -1.5, 2.5, -2.5 } ), Flow::NArray(), {}, {}, {}, {}, op,
+        Flow::Create( { 2, 2, 2 }, { 0, 1, -1, 2, 1.5, -1.5, 2.5, -2.5 } ), Flow::NArray(), {}, {}, {}, {}, op,
         { 1.0, 2.7183, 0.3679, 7.3891, 4.4817, 0.2231, 12.1825, 0.0821 },
-        { 2, 2, 2, 2 },
+        { 2, 2, 2 },
         { 1.0, 2.7183, 0.3679, 7.3891, 4.4817, 0.2231, 12.1825, 0.0821 },
-        { 2, 2, 2, 2 }, {}, {} );
+        { 2, 2, 2 }, {}, {} );
 
     Flow::Print( "Test_Exp " + std::to_string(numPassed) + "/" + std::to_string(numTests) );
     if ( numPassed == numTests ) return true;

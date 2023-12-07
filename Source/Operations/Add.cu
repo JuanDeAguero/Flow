@@ -3,9 +3,6 @@
 #include "CUDA.cuh"
 #include "Flow/NArrayCore.h"
 
-#include <chrono>
-#include "Flow/Print.h"
-
 __global__
 void Add_Kernel( float* arr1, float* arr2, float* result )
 {
