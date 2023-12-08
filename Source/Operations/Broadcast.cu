@@ -51,7 +51,7 @@ Flow::NArrayCore* Flow::Broadcast( NArrayCore* arr, vector<int> shape )
 }
 
 __global__
-void BackwardBroadcast_Kernel_A( float* gradient, int* operandShape, int operandShapeSize, float* newOperandGradient, int* shape, int shapeSize )
+void BackwardBroadcast_Kernel_A( int* shape, int shapeSize, float* gradient, int* operandShape, int operandShapeSize, float* gradientIncrement )
 {
     int i = blockIdx.x;
     int position[10];
@@ -64,14 +64,14 @@ void BackwardBroadcast_Kernel_A( float* gradient, int* operandShape, int operand
         operandCoords[j] = coord;
     }
     int operandIndex = Flow::MultiToFlatIndex_Device( operandCoords, operandShape, operandShapeSize );
-    atomicAdd( &newOperandGradient[operandIndex], gradient[i] );
+    atomicAdd( &gradientIncrement[operandIndex], gradient[i] );
 }
 
 __global__
-void BackwardBroadcast_Kernel_B( float* operandGradient, float* newOperandGradient )
+void BackwardBroadcast_Kernel_B( float* operandGradient, float* gradientIncrement )
 {
     int i = blockIdx.x;
-    operandGradient[i] += newOperandGradient[i];
+    operandGradient[i] += gradientIncrement[i];
 }
 
 __host__
@@ -79,15 +79,15 @@ void Flow::NArrayCore::BackwardBroadcast()
 {
     int n = SizeFromShape(Gradient->GetShape());
     int* operandShape_d;
-    float* operandGradient_d;
+    float* gradientIncrement_d;
     int* shape_d;
     cudaMalloc( (void**)&operandShape_d, Operands[0]->Shape.size() * sizeof(int) );
-    cudaMalloc( (void**)&operandGradient_d, SizeFromShape(Operands[0]->GetShape()) * sizeof(float) );
+    cudaMalloc( (void**)&gradientIncrement_d, SizeFromShape(Operands[0]->GetShape()) * sizeof(float) );
     cudaMalloc( (void**)&shape_d, Shape.size() * sizeof(int) );
     cudaMemcpy( operandShape_d, Operands[0]->GetShapeData(), Operands[0]->Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
-    cudaMemset( operandGradient_d, SizeFromShape(Operands[0]->GetShape()) * sizeof(float), 0.0f );
+    cudaMemset( gradientIncrement_d, SizeFromShape(Operands[0]->GetShape()) * sizeof(float), 0.0f );
     cudaMemcpy( shape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
-    BackwardBroadcast_Kernel_A<<< n, 1 >>>( Gradient->GetData(), operandShape_d, Operands[0]->Shape.size(), operandGradient_d, shape_d, Shape.size() );
+    BackwardBroadcast_Kernel_A<<< n, 1 >>>( shape_d, Shape.size(), Gradient->GetData(), operandShape_d, Operands[0]->Shape.size(), gradientIncrement_d );
     n = SizeFromShape(Operands[0]->GetGradient()->GetShape());
-    BackwardBroadcast_Kernel_B<<< n, 1 >>>( Operands[0]->Gradient->GetData(), operandGradient_d );
+    BackwardBroadcast_Kernel_B<<< n, 1 >>>( Operands[0]->Gradient->GetData(), gradientIncrement_d );
 }

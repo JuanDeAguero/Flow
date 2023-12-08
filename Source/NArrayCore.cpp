@@ -73,12 +73,10 @@ Flow::NArrayCore* Flow::NArrayCore::GetGradient()
 
 void Flow::NArrayCore::Backpropagate()
 {
-    if ( Operands.size() == 0 )
-        return;
+    if ( Operands.size() == 0 ) return;
     Gradient->Reset(1.0f);
     TopologicalSort();
-    for ( Flow::NArrayCore* arr : TopologicalSort() )
-        arr->Backward();
+    for ( Flow::NArrayCore* arr : TopologicalSort() ) arr->Backward();
 }
 
 Flow::NArrayCore* Flow::NArrayCore::Copy()
@@ -94,8 +92,7 @@ Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data, bool isGrad
     cudaMalloc( (void**)&Data, SizeFromShape(shape) * sizeof(float) );
     cudaMemset( Data, 0, SizeFromShape(shape) * sizeof(float) );
     Shape = shape;
-    if (!isGradient)
-        Gradient = new NArrayCore( shape, {}, true );
+    if (!isGradient) Gradient = new NArrayCore( shape, {}, true );
     Op = Operation::NONE;
 }
 
@@ -110,8 +107,7 @@ vector<Flow::NArrayCore*> Flow::NArrayCore::TopologicalSort()
 
 void Flow::NArrayCore::BuildTopo( NArrayCore* current, unordered_set<NArrayCore*>& visited, vector<NArrayCore*>& topo )
 {
-    if ( visited.find(current) != visited.end() || current->Operands.size() == 0 )
-        return;
+    if ( visited.find(current) != visited.end() || current->Operands.size() == 0 ) return;
     visited.insert(current);
     NArrayCore* first = current->Operands[0];
     if (first)
@@ -128,8 +124,7 @@ void Flow::NArrayCore::BuildTopo( NArrayCore* current, unordered_set<NArrayCore*
 
 void Flow::NArrayCore::Backward()
 {
-    if ( Operands.size() == 0 )
-        return;
+    if ( Operands.size() == 0 ) return;
     switch (Op)
     {
         case Operation::NONE:                           break;
@@ -153,126 +148,119 @@ void Flow::NArrayCore::Backward()
     }
 }
 
-namespace Flow
+Flow::NArrayCore* Flow::Neg( NArrayCore* arr )
 {
-    NArrayCore* Neg( NArrayCore* arr )
-    {
-        return Mul( arr, -1.0f );
-    }
+    return Mul( arr, -1.0f );
+}
 
-    NArrayCore* Sub( NArrayCore* arr1, NArrayCore* arr2 )
-    {
-        return Add( arr1, Neg(arr2) );
-    }
+Flow::NArrayCore* Flow::Sub( NArrayCore* arr1, NArrayCore* arr2 )
+{
+    return Add( arr1, Neg(arr2) );
+}
 
-    NArrayCore* Div( NArrayCore* arr1, NArrayCore* arr2 )
-    {
-        return Mul( arr1, Pow( arr2, -1.0f ) );
-    }
+Flow::NArrayCore* Flow::Div( NArrayCore* arr1, NArrayCore* arr2 )
+{
+    return Mul( arr1, Pow( arr2, -1.0f ) );
+}
 
-    NArrayCore* Mean( NArrayCore* arr, int dim )
-    {
-        NArrayCore* sum = Sum( arr, dim );
-        float numElements = (float)arr->GetShape()[dim];
-        NArrayCore* n = new NArrayCore( { 1 }, { numElements } );
-        return Div( sum, n );
-    }
+Flow::NArrayCore* Flow::Mean( NArrayCore* arr, int dim )
+{
+    NArrayCore* sum = Sum( arr, dim );
+    float numElements = (float)arr->GetShape()[dim];
+    NArrayCore* n = new NArrayCore( { 1 }, { numElements } );
+    return Div( sum, n );
+}
 
-    NArrayCore* Softmax( NArrayCore* arr, int dim )
-    {
-        NArrayCore* index = new NArrayCore( { 1 }, { 0 } );
-        NArrayCore* exp_logits = Exp( Sub( arr, Index( Max( arr, dim ), dim, index ) ) );
-        return Div( exp_logits, Sum( exp_logits, dim ) );
-    }
+Flow::NArrayCore* Flow::Softmax( NArrayCore* arr, int dim )
+{
+    NArrayCore* index = new NArrayCore( { 1 }, { 0 } );
+    NArrayCore* exp_logits = Exp( Sub( arr, Index( Max( arr, dim ), dim, index ) ) );
+    return Div( exp_logits, Sum( exp_logits, dim ) );
+}
 
-    NArrayCore* CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 )
-    {
-        NArrayCore* small = new NArrayCore( { 1 }, { 1e-10 } );
-        return Mean( Neg( Log( Add( Gather( Softmax( arr1, 1 ), 1, Unsqueeze( arr2, 1 ) ), small ) ) ), 0 );
-    }
+Flow::NArrayCore* Flow::CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 )
+{
+    NArrayCore* small = new NArrayCore( { 1 }, { 1e-10 } );
+    return Mean( Neg( Log( Add( Gather( Softmax( arr1, 1 ), 1, Unsqueeze( arr2, 1 ) ), small ) ) ), 0 );
+}
 
-    NArrayCore* RandomCore( vector<int> shape )
-    {
-        random_device randomDevice;
-        mt19937 generator(randomDevice());
-        normal_distribution<float> distribution( 0.0f, 1.0f );
-        int size = SizeFromShape(shape);
-        vector<float> data( size, 0.0f );
-        for ( int i = 0; i < size; i++ )
-            data[i] = distribution(generator);
-        return new NArrayCore( shape, data );
-    }
+Flow::NArrayCore* Flow::RandomCore( vector<int> shape )
+{
+    random_device randomDevice;
+    mt19937 generator(randomDevice());
+    normal_distribution<float> distribution( 0.0f, 1.0f );
+    int size = SizeFromShape(shape);
+    vector<float> data( size, 0.0f );
+    for ( int i = 0; i < size; i++ ) data[i] = distribution(generator);
+    return new NArrayCore( shape, data );
+}
 
-    NArrayCore* ZerosCore( vector<int> shape )
-    {
-        vector<float> data( SizeFromShape(shape), 0.0f );
-        return new NArrayCore( shape, data );
-    }
+Flow::NArrayCore* Flow::ZerosCore( vector<int> shape )
+{
+    vector<float> data( SizeFromShape(shape), 0.0f );
+    return new NArrayCore( shape, data );
+}
 
-    NArrayCore* OnesCore( vector<int> shape )
-    {
-        vector<float> data( SizeFromShape(shape), 1.0f );
-        return new NArrayCore( shape, data );
-    }
+Flow::NArrayCore* Flow::OnesCore( vector<int> shape )
+{
+    vector<float> data( SizeFromShape(shape), 1.0f );
+    return new NArrayCore( shape, data );
+}
 
-    NArrayCore* OneHotCore( vector<int> integers, int num )
+Flow::NArrayCore* Flow::OneHotCore( vector<int> integers, int num )
+{
+    vector<float> data( integers.size() * num );
+    NArrayCore* arr = new NArrayCore( { (int)integers.size(), num }, data );
+    for ( int i = 0; i < integers.size(); i++ )
     {
-        vector<float> data( integers.size() * num );
-        NArrayCore* arr = new NArrayCore( { (int)integers.size(), num }, data );
-        for ( int i = 0; i < integers.size(); i++ )
+        for ( int j = 0; j < num; j++ )
         {
-            for ( int j = 0; j < num; j++ )
-            {
-                float value = 0.0f;
-                if ( integers[i] == j ) value = 1.0f;
-                arr->Set( { i, j }, value );
-            }
+            float value = 0.0f;
+            if ( integers[i] == j ) value = 1.0f;
+            arr->Set( { i, j }, value );
         }
-        return arr;
     }
+    return arr;
+}
 
-    void Print( NArrayCore* arr )
-    {
-        vector<float> data( SizeFromShape(arr->GetShape()) );
-        cudaMemcpy( data.data(), arr->GetData(), SizeFromShape(arr->GetShape()) * sizeof(float), cudaMemcpyDeviceToHost );
-        for ( float value : data )
-            Print(value);
-    }
+void Flow::Print( NArrayCore* arr )
+{
+    vector<float> data( SizeFromShape(arr->GetShape()) );
+    cudaMemcpy( data.data(), arr->GetData(), SizeFromShape(arr->GetShape()) * sizeof(float), cudaMemcpyDeviceToHost );
+    for ( float value : data ) Print(value);
+}
 
-    void PrintShape( NArrayCore* arr )
-    {
-        for ( int value : arr->GetShape() )
-            Print((float)value);
-    }
+void Flow::PrintShape( NArrayCore* arr )
+{
+    for ( int value : arr->GetShape() ) Print((float)value);
+}
 
-    int SizeFromShape( vector<int> shape )
-    {
-        int size = shape[0];
-        for ( int i = 1; i < shape.size(); i++ )
-            size *= shape[i];
-        return size;
-    }
+int Flow::SizeFromShape( vector<int> shape )
+{
+    int size = shape[0];
+    for ( int i = 1; i < shape.size(); i++ ) size *= shape[i];
+    return size;
+}
 
-    int MultiToFlatIndex( vector<int> index, vector<int> shape )
+int Flow::MultiToFlatIndex( vector<int> index, vector<int> shape )
+{
+    int flatIndex = 0;
+    int stride = 1;
+    for ( int i = shape.size() - 1; i >= 0; i-- )
     {
-        int flatIndex = 0;
-        int stride = 1;
-        for ( int i = shape.size() - 1; i >= 0; i-- )
-        {
-            flatIndex += index[i] * stride;
-            stride *= shape[i];
-        }
-        return flatIndex;
+        flatIndex += index[i] * stride;
+        stride *= shape[i];
     }
+    return flatIndex;
+}
 
-    vector<int> FlatToMultiIndex( int index, vector<int> shape )
+vector<int> Flow::FlatToMultiIndex( int index, vector<int> shape )
+{
+    vector<int> multiIndex(shape.size());
+    for ( int i = shape.size() - 1; i >= 0; i-- )
     {
-        vector<int> multiIndex(shape.size());
-        for ( int i = shape.size() - 1; i >= 0; i-- )
-        {
-            multiIndex[i] = index % shape[i];
-            index /= shape[i];
-        }
-        return multiIndex;
+        multiIndex[i] = index % shape[i];
+        index /= shape[i];
     }
+    return multiIndex;
 }
