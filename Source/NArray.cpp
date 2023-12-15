@@ -3,14 +3,13 @@
 #include "Flow/NArray.h"
 #include "Flow/Print.h"
 
+#include <memory>
+
 using namespace std;
 
 Flow::NArray::NArray() {}
 
-Flow::NArray::NArray( NArrayCore* arr )
-{
-    Array = arr;
-}
+Flow::NArray::NArray( NArrayCore* arr ) { Array = arr; }
 
 bool Flow::NArray::IsValid()
 {
@@ -18,55 +17,25 @@ bool Flow::NArray::IsValid()
     else return false;
 }
 
-Flow::NArrayCore* Flow::NArray::GetCore()
-{
-    return Array;
-}
+Flow::NArrayCore* Flow::NArray::GetCore() { return Array; }
 
-float Flow::NArray::Get( vector<int> coordinates )
-{
-    return Array->Get(coordinates);
-}
+float Flow::NArray::Get( vector<int> coordinates ) { return Array->Get(coordinates); }
 
-vector<float> Flow::NArray::Get()
-{
-    return Array->Get();
-}
+vector<float> Flow::NArray::Get() { return Array->Get(); }
 
-float* Flow::NArray::GetData()
-{
-    return Array->GetData();
-}
+float* Flow::NArray::GetData() { return Array->GetData(); }
 
-vector<int> Flow::NArray::GetShape()
-{
-    return Array->GetShape();
-}
+vector<int> Flow::NArray::GetShape() { return Array->GetShape(); }
 
-Flow::NArray Flow::NArray::GetGradient()
-{
-    return NArray(Array->GetGradient());
-}
+Flow::NArray Flow::NArray::GetGradient() { return NArray(Array->GetGradient()); }
 
-void Flow::NArray::Set( vector<int> coordinates, float value )
-{
-    Array->Set( coordinates, value );
-}
+void Flow::NArray::Set( vector<int> coordinates, float value ) { Array->Set( coordinates, value ); }
 
-void Flow::NArray::Reset( float value )
-{
-    Array->Reset(value);
-}
+void Flow::NArray::Reset( float value ) { Array->Reset(value); }
 
-void Flow::NArray::Backpropagate()
-{
-    Array->Backpropagate();
-}
+void Flow::NArray::Backpropagate() { Array->Backpropagate(); }
 
-Flow::NArray Flow::NArray::Copy()
-{
-    return NArray(Array->Copy());
-}
+Flow::NArray Flow::NArray::Copy() { return NArray(Array->Copy()); }
 
 Flow::NArray Flow::Create( vector<int> shape, vector<float> data )
 {

@@ -7,6 +7,8 @@
 
 #include "NArrayCore.h"
 
+#define MAX_DIMS 100
+
 namespace Flow
 {
     __device__

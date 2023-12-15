@@ -9,7 +9,7 @@
 static bool Test_Mul()
 {
     int numPassed = 0;
-    int numTests = 1;
+    int numTests = 2;
     Flow::NArrayCore::Operation op = Flow::NArrayCore::Operation::MUL;
 
     Test( 1, numPassed,
@@ -21,6 +21,16 @@ static bool Test_Mul()
         { 3, 3 },
         { 9, 12, 15 },
         { 3 } );
+
+    Test( 2, numPassed,
+        Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ),
+        Flow::Create( { 1 }, { 2 } ), {}, {}, {}, {}, op,
+        { 0, 2, 4, 6, 8, 10, 12, 14, 16 },
+        { 3, 3 },
+        { 2, 2, 2, 2, 2, 2, 2, 2, 2 },
+        { 3, 3 },
+        { 36 },
+        { 1 } );
 
     Flow::Print( "Test_Mul " + std::to_string(numPassed) + "/" + std::to_string(numTests) );
     if ( numPassed == numTests ) return true;

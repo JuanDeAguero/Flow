@@ -66,6 +66,8 @@ int main()
 
         Flow::Print(loss);
     }
+    
+    Flow::Print("done");
 
     int numCorrect = 0;
     n = 100;

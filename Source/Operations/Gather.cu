@@ -7,9 +7,9 @@ __global__
 void Gather_Kernel( float* arr, int* arrShape, int arrShapeSize, int dim, float* index, int* indexShape, int indexShapeSize, float* result )
 {
     int i = blockIdx.x;
-    int multiIndex[10];
+    int multiIndex[MAX_DIMS];
     Flow::FlatToMultiIndex_Device( i, indexShape, indexShapeSize, multiIndex );
-    multiIndex[dim] = static_cast<int>(index[i]);
+    multiIndex[dim] = (int)index[i];
     int flatIndex = Flow::MultiToFlatIndex_Device( multiIndex, arrShape, arrShapeSize );
     result[i] = arr[flatIndex];
 }
@@ -37,9 +37,9 @@ __global__
 void BackwardGather_Kernel( float* gradient, int* operandShape, int operandShapeSize, float* operandGradient, int dim, float* index, int* indexShape, int indexShapeSize )
 {
     int i = blockIdx.x;
-    int multiIndex[10];
+    int multiIndex[MAX_DIMS];
     Flow::FlatToMultiIndex_Device( i, indexShape, indexShapeSize, multiIndex );
-    int indexElement = static_cast<int>(index[i]);
+    int indexElement = (int)index[i];
     multiIndex[dim] = indexElement;
     int flatIndex = Flow::MultiToFlatIndex_Device( multiIndex, operandShape, operandShapeSize );
     operandGradient[flatIndex] += gradient[i];

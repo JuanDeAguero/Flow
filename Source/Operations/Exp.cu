@@ -17,7 +17,7 @@ Flow::NArrayCore* Flow::Exp( NArrayCore* arr )
     int n = SizeFromShape(arr->GetShape());
     float* result_d;
     cudaMalloc( (void**)&result_d, n * sizeof(float) );
-    cudaMemcpy( result_d, arr->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
+    cudaMemcpy( result_d, arr->GetData(), n * sizeof(float), cudaMemcpyDeviceToDevice );
     Exp_Kernel<<< n, 1 >>>(result_d);
     return new NArrayCore( arr->GetShape(), result_d, { arr }, NArrayCore::Operation::EXP );
 }

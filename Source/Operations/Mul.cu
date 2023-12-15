@@ -10,34 +10,22 @@ void Mul_Kernel( float* arr1, float* arr2, float* result )
     result[i] = arr1[i] * arr2[i];
 }
     
-namespace Flow
+Flow::NArrayCore* Flow::Mul( NArrayCore* arr1, NArrayCore* arr2 )
 {
-    NArrayCore* Mul( NArrayCore* arr1, NArrayCore* arr2 )
-    {
-        return nullptr;
-        
-        /*int n = arr1->Get().size();
-        float* arr1_d;
-        float* arr2_d;
-        float* result_d;
-        cudaMalloc( (void**)&arr1_d, n * sizeof(float) );
-        cudaMalloc( (void**)&arr2_d, n * sizeof(float) );
-        cudaMalloc( (void**)&result_d, n * sizeof(float) );
-        cudaMemcpy( arr1_d, arr1->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
-        cudaMemcpy( arr2_d, arr2->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
-        Mul_Kernel<<< n, 1 >>>( arr1_d, arr2_d, result_d );
-        vector<float> resultData(n);
-        cudaMemcpy( resultData.data(), result_d, n * sizeof(float), cudaMemcpyDeviceToHost );
-        cudaFree(arr1_d);
-        cudaFree(arr2_d);
-        cudaFree(result_d);
-        return new NArrayCore( arr1->GetShape(), resultData, { arr1, arr2 }, NArrayCore::Operation::MUL );*/
-    }
+    vector<int> shape = BroadcastShapes( arr1->GetShape(), arr2->GetShape() );
+    NArrayCore* arr1B = Broadcast( arr1, shape );
+    NArrayCore* arr2B = Broadcast( arr2, shape );
+    int n = SizeFromShape(arr1B->GetShape());
+    float* result_d;
+    cudaMalloc( (void**)&result_d, n * sizeof(float) );
+    Mul_Kernel<<< n, 1 >>>( arr1B->GetData(), arr2B->GetData(), result_d );
+    return new NArrayCore( arr1B->GetShape(), result_d, { arr1B, arr2B }, NArrayCore::Operation::MUL );
+}
 
-    NArrayCore* Mul( NArrayCore* arr1, float literal )
-    {
-        return nullptr;
-    }
+Flow::NArrayCore* Flow::Mul( NArrayCore* arr, float literal )
+{
+    NArrayCore* arrLiteral = new NArrayCore( { 1 }, { literal } );
+    return Mul( arr, arrLiteral );
 }
 
 __global__
@@ -50,28 +38,6 @@ void BackwardMul_Kernel( float* gradient, float* operand1, float* operandGradien
 
 void Flow::NArrayCore::BackwardMul()
 {
-    /*int n = Gradient->Data.size();
-    float* gradient_d;
-    float* operand1_d;
-    float* operandGradient1_d;
-    float* operand2_d;
-    float* operandGradient2_d;
-    cudaMalloc( (void**)&gradient_d, n * sizeof(float) );
-    cudaMalloc( (void**)&operandGradient1_d, n * sizeof(float) );
-    cudaMalloc( (void**)&operand1_d, n * sizeof(float) );
-    cudaMalloc( (void**)&operandGradient2_d, n * sizeof(float) );
-    cudaMalloc( (void**)&operand2_d, n * sizeof(float) );
-    cudaMemcpy( gradient_d, Gradient->Data.data(), n * sizeof(float), cudaMemcpyHostToDevice );
-    cudaMemcpy( operandGradient1_d, Operands[0]->Gradient->Data.data(), n * sizeof(float), cudaMemcpyHostToDevice );
-    cudaMemcpy( operand1_d, Operands[0]->Data.data(), n * sizeof(float), cudaMemcpyHostToDevice );
-    cudaMemcpy( operandGradient2_d, Operands[1]->Gradient->Data.data(), n * sizeof(float), cudaMemcpyHostToDevice );
-    cudaMemcpy( operand2_d, Operands[1]->Data.data(), n * sizeof(float), cudaMemcpyHostToDevice );
-    BackwardMul_Kernel<<< n, 1 >>>( gradient_d, operand1_d, operandGradient1_d, operand2_d, operandGradient2_d );
-    cudaMemcpy( Operands[0]->Gradient->Data.data(), operandGradient1_d, n * sizeof(float), cudaMemcpyDeviceToHost );
-    cudaMemcpy( Operands[1]->Gradient->Data.data(), operandGradient2_d, n * sizeof(float), cudaMemcpyDeviceToHost );
-    cudaFree(gradient_d);
-    cudaFree(operand1_d);
-    cudaFree(operandGradient1_d);
-    cudaFree(operand2_d);
-    cudaFree(operandGradient2_d);*/
+    int n = SizeFromShape(Gradient->GetShape());
+    BackwardMul_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetData(), Operands[0]->GetGradient()->GetData(), Operands[1]->GetData(), Operands[1]->GetGradient()->GetData() );
 }

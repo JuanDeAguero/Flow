@@ -22,9 +22,9 @@ __global__
 void Broadcast_Kernel( float* arr, int* arrShape, int arrShapeSize, int* shape, int shapeSize, float* result )
 {
     int i = blockIdx.x;
-    int position[10];
+    int position[MAX_DIMS];
     Flow::FlatToMultiIndex_Device( i, shape, shapeSize, position );
-    int originalCoords[10];
+    int originalCoords[MAX_DIMS];
     for ( int j = 0; j < arrShapeSize; j++ )
     {
         int coord = position[ shapeSize - arrShapeSize + j ];
@@ -54,9 +54,9 @@ __global__
 void BackwardBroadcast_Kernel_A( int* shape, int shapeSize, float* gradient, int* operandShape, int operandShapeSize, float* gradientIncrement )
 {
     int i = blockIdx.x;
-    int position[10];
+    int position[MAX_DIMS];
     Flow::FlatToMultiIndex_Device( i, shape, shapeSize, position );
-    int operandCoords[10];
+    int operandCoords[MAX_DIMS];
     for ( int j = 0; j < operandShapeSize; j++ )
     {
         int coord = position[ shapeSize - operandShapeSize + j ];
@@ -78,15 +78,15 @@ __host__
 void Flow::NArrayCore::BackwardBroadcast()
 {
     int n = SizeFromShape(Gradient->GetShape());
+    int* shape_d;
     int* operandShape_d;
     float* gradientIncrement_d;
-    int* shape_d;
+    cudaMalloc( (void**)&shape_d, Shape.size() * sizeof(int) );
     cudaMalloc( (void**)&operandShape_d, Operands[0]->Shape.size() * sizeof(int) );
     cudaMalloc( (void**)&gradientIncrement_d, SizeFromShape(Operands[0]->GetShape()) * sizeof(float) );
-    cudaMalloc( (void**)&shape_d, Shape.size() * sizeof(int) );
+    cudaMemcpy( shape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
     cudaMemcpy( operandShape_d, Operands[0]->GetShapeData(), Operands[0]->Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
     cudaMemset( gradientIncrement_d, SizeFromShape(Operands[0]->GetShape()) * sizeof(float), 0.0f );
-    cudaMemcpy( shape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
     BackwardBroadcast_Kernel_A<<< n, 1 >>>( shape_d, Shape.size(), Gradient->GetData(), operandShape_d, Operands[0]->Shape.size(), gradientIncrement_d );
     n = SizeFromShape(Operands[0]->GetGradient()->GetShape());
     BackwardBroadcast_Kernel_B<<< n, 1 >>>( Operands[0]->Gradient->GetData(), gradientIncrement_d );
