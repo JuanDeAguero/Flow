@@ -19,6 +19,12 @@ namespace Flow
 
         NArray( NArrayCore* arr );
 
+        NArray( const NArray& other );
+
+        NArray& operator=( const NArray& other );
+
+        NArray( NArray&& other );
+
         ~NArray();
 
         bool IsValid();

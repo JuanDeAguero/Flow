@@ -7,11 +7,38 @@
 
 using namespace std;
 
-Flow::NArray::NArray() { NArray::NArray( new NArrayCore( { 1 }, { 0.0f } ) ); }
+Flow::NArray::NArray()
+    : Array( new NArrayCore( { 1 }, { 0.0f } ) )
+{
 
-Flow::NArray::NArray( NArrayCore* arr ) : Array(arr) {}
+}
 
-Flow::NArray::~NArray() {}
+Flow::NArray::NArray( NArrayCore* arr ) : Array(arr)
+{
+
+}
+
+Flow::NArray::NArray( const NArray& other ) : Array(other.Array)
+{
+    
+}
+
+Flow::NArray& Flow::NArray::operator=( const NArray& other )
+{
+    if ( this == &other ) return *this;
+    Array = other.Array;
+    return *this;
+}
+
+Flow::NArray::NArray( NArray&& other ) : Array(other.Array)
+{
+
+}
+
+Flow::NArray::~NArray()
+{
+    
+}
 
 bool Flow::NArray::IsValid()
 {
