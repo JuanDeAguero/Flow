@@ -264,3 +264,11 @@ vector<int> Flow::FlatToMultiIndex( int index, vector<int> shape )
     }
     return multiIndex;
 }
+
+float Flow::GetCUDAFreeMemory()
+{
+    size_t freeByte;
+    size_t totalByte;
+    cudaError_t cuda_status = cudaMemGetInfo( &freeByte, &totalByte );
+    return freeByte / 1024.0f / 1024.0f;
+}

@@ -44,7 +44,7 @@ int main()
     Flow::NArray b2 = Flow::Random({ 10 });
     
     float learningRate = 0.5f;
-    int maxEpochs = 100;
+    int maxEpochs = 300;
 
     for ( int epoch = 0; epoch < maxEpochs; epoch++ )
     {
@@ -65,6 +65,8 @@ int main()
         b2 = Sub( b2.Copy(), Mul( b2.GetGradient().Copy(), learningRate ) );
 
         Flow::Print(loss);
+
+        Flow::CleanUp({ xTrain, yTrain, xTest, yTest, w1, b1, w2, b2 });
     }
     
     Flow::Print("done");
@@ -79,9 +81,11 @@ int main()
             for ( int k = 0; k < 28; k++ )
                 testData.push_back( xTest.Get({ i, j * 28 + k }) );
         }
+
         Flow::NArray test = Flow::Create( { 1, 784 }, testData );
         Flow::NArray a = ReLU( Add( MM( test, w1 ), b1 ) );
         Flow::NArray yPred = Add( MM( a, w2 ), b2 );
+
         float max = 0.0f;
         int maxIndex = 0;
         for ( int j = 0; j < yPred.Get().size(); j++ )
@@ -93,8 +97,9 @@ int main()
                 maxIndex = j;
             }
         }
-        if ( yTest.Get({ i }) == maxIndex )
-            numCorrect++;
+        if ( yTest.Get({ i }) == maxIndex ) numCorrect++;
+
+        Flow::CleanUp({ xTrain, yTrain, xTest, yTest, w1, b1, w2, b2 });
     }
     float accuracy = ( static_cast<float>(numCorrect) / static_cast<float>(n) ) * 100.0f;
     Flow::Print( to_string(accuracy) + "%" );
