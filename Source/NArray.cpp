@@ -1,15 +1,17 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#include <cuda_runtime.h>
+
 #include "Flow/NArray.h"
 #include "Flow/Print.h"
 
-#include <memory>
-
 using namespace std;
 
-Flow::NArray::NArray() {}
+Flow::NArray::NArray() { NArray::NArray( new NArrayCore( { 1 }, { 0.0f } ) ); }
 
-Flow::NArray::NArray( NArrayCore* arr ) { Array = arr; }
+Flow::NArray::NArray( NArrayCore* arr ) : Array(arr) {}
+
+Flow::NArray::~NArray() {}
 
 bool Flow::NArray::IsValid()
 {
@@ -41,6 +43,18 @@ Flow::NArray Flow::Create( vector<int> shape, vector<float> data )
 {
     NArrayCore* arr = new NArrayCore( shape, data );
     return NArray(arr);
+}
+
+void Flow::CleanUp( vector<reference_wrapper<NArray>> savedArrays )
+{
+    if ( GetCUDAFreeMemory() < 5000.0f )
+    {
+        vector<vector<float>> copyData;
+        for ( NArray& arr : savedArrays ) copyData.push_back(arr.Get());
+        cudaDeviceReset();
+        for ( int i = 0; i < savedArrays.size(); i++ )
+            savedArrays[i].get() = Create( savedArrays[i].get().GetShape(), copyData[i] );
+    }
 }
 
 Flow::NArray Flow::Add( NArray arr1, NArray arr2 ) { return NArray( Add( arr1.GetCore(), arr2.GetCore() ) ); }

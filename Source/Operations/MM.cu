@@ -34,14 +34,6 @@ void MM_Kernel( float* arr1, float* arr2, float* result, int arr1Rows, int arr1C
 
 Flow::NArrayCore* Flow::MM( NArrayCore* arr1, NArrayCore* arr2 )
 {
-    size_t free_byte;
-    size_t total_byte;
-    cudaError_t cuda_status = cudaMemGetInfo(&free_byte, &total_byte);
-    double free_db = (double)free_byte;
-    double total_db = (double)total_byte;
-    double used_db = total_db - free_db;
-    printf("GPU memory usage: used = %.2f, free = %.2f MB, total = %.2f MB\n", used_db / 1024.0 / 1024.0, free_db / 1024.0 / 1024.0, total_db / 1024.0 / 1024.0);
-
     int arr1Rows = arr1->GetShape()[0];
     int arr1Cols = arr1->GetShape()[1];
     int arr2Cols = arr2->GetShape()[1];

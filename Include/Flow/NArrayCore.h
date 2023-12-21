@@ -192,4 +192,6 @@ namespace Flow
     vector<int> FlatToMultiIndex( int index, vector<int> shape );
 
     vector<int> BroadcastShapes( vector<int> shape1, vector<int> shape2 );
+
+    float GetCUDAFreeMemory();
 }
