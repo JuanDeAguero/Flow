@@ -39,22 +39,25 @@ void Flow::NArray::Backpropagate() { Array->Backpropagate(); }
 
 Flow::NArray Flow::NArray::Copy() { return NArray(Array->Copy()); }
 
-Flow::NArray Flow::Create( vector<int> shape, vector<float> data )
-{
-    NArrayCore* arr = new NArrayCore( shape, data );
-    return NArray(arr);
-}
+Flow::NArray Flow::Create( vector<int> shape, vector<float> data ) { return NArray( new NArrayCore( shape, data ) ); }
 
-void Flow::CleanUp( vector<reference_wrapper<NArray>> savedArrays )
+vector<reference_wrapper<Flow::NArray>> Flow::SavedArrays;
+
+void Flow::CleanUp()
 {
     if ( GetCUDAFreeMemory() < 5000.0f )
     {
         vector<vector<float>> copyData;
-        for ( NArray& arr : savedArrays ) copyData.push_back(arr.Get());
+        for ( NArray& arr : SavedArrays ) copyData.push_back(arr.Get());
         cudaDeviceReset();
-        for ( int i = 0; i < savedArrays.size(); i++ )
-            savedArrays[i].get() = Create( savedArrays[i].get().GetShape(), copyData[i] );
+        for ( int i = 0; i < SavedArrays.size(); i++ )
+            SavedArrays[i].get() = Create( SavedArrays[i].get().GetShape(), copyData[i] );
     }
+}
+
+void Flow::Save( vector<reference_wrapper<NArray>> savedArrays )
+{
+    for ( auto arr : savedArrays ) SavedArrays.push_back(arr);
 }
 
 Flow::NArray Flow::Add( NArray arr1, NArray arr2 ) { return NArray( Add( arr1.GetCore(), arr2.GetCore() ) ); }

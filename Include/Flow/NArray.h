@@ -51,7 +51,11 @@ namespace Flow
 
     NArray Create( vector<int> shape, vector<float> data );
 
-    void CleanUp( vector<reference_wrapper<NArray>> savedArrays );
+    extern vector<reference_wrapper<NArray>> SavedArrays;
+
+    void CleanUp();
+
+    void Save( vector<reference_wrapper<NArray>> arrays );
 
     NArray Add( NArray arr1, NArray arr2 );
     

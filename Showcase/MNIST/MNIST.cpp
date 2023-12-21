@@ -35,6 +35,8 @@ int main()
     Flow::NArray xTest = Flow::Create( { n, 784 }, testImages );
     Flow::NArray yTest = Flow::Create( { n }, testLabels );
 
+    Flow::Save({ xTrain, yTrain, xTest, yTest });
+
     xTrain = Flow::Div( xTrain.Copy(), Flow::Create( { 1 }, { 255 } ) );
     xTest = Flow::Div( xTest.Copy(), Flow::Create( { 1 }, { 255 } ) );
 
@@ -42,6 +44,8 @@ int main()
     Flow::NArray b1 = Flow::Random({ 128 });
     Flow::NArray w2 = Flow::Random({ 128, 10 });
     Flow::NArray b2 = Flow::Random({ 10 });
+
+    Flow::Save({ w1, b1, w2, b2 });
     
     float learningRate = 0.5f;
     int maxEpochs = 300;
@@ -66,7 +70,7 @@ int main()
 
         Flow::Print(loss);
 
-        Flow::CleanUp({ xTrain, yTrain, xTest, yTest, w1, b1, w2, b2 });
+        Flow::CleanUp();
     }
     
     Flow::Print("done");
@@ -99,7 +103,7 @@ int main()
         }
         if ( yTest.Get({ i }) == maxIndex ) numCorrect++;
 
-        Flow::CleanUp({ xTrain, yTrain, xTest, yTest, w1, b1, w2, b2 });
+        Flow::CleanUp();
     }
     float accuracy = ( static_cast<float>(numCorrect) / static_cast<float>(n) ) * 100.0f;
     Flow::Print( to_string(accuracy) + "%" );

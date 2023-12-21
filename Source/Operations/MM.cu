@@ -49,8 +49,12 @@ void Flow::NArrayCore::BackwardMM()
 {
     NArrayCore* grad1 = Flow::MM( Gradient->Copy(), Transpose( Operands[1], 0, 1 ) );
     NArrayCore* grad2 = Flow::MM( Transpose( Operands[0], 0, 1 ), Gradient->Copy() );
-    Operands[0]->Gradient = grad1;
-    Operands[1]->Gradient = grad2;
     grad1->Gradient = nullptr;
     grad2->Gradient = nullptr;
+    grad1->Operands = {};
+    grad2->Operands = {};
+    grad1->Op = NArrayCore::Operation::NONE;
+    grad2->Op = NArrayCore::Operation::NONE;
+    Operands[0]->Gradient = grad1;
+    Operands[1]->Gradient = grad2;
 }
