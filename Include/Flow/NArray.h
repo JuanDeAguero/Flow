@@ -19,14 +19,6 @@ namespace Flow
 
         NArray( NArrayCore* arr );
 
-        NArray( const NArray& other );
-
-        NArray& operator=( const NArray& other );
-
-        NArray( NArray&& other );
-
-        ~NArray();
-
         bool IsValid();
 
         NArrayCore* GetCore();
@@ -56,8 +48,6 @@ namespace Flow
     };
 
     NArray Create( vector<int> shape, vector<float> data );
-
-    void CleanUp( vector<reference_wrapper<NArray>> savedArrays );
 
     NArray Add( NArray arr1, NArray arr2 );
     

@@ -40,6 +40,7 @@ float learningRate = 0.1f;
 100 iterations.
 ```bash
 for ( int epoch = 0; epoch < 100; epoch++ )
+{
 ```
 Simple two-layer network. 784 -> 128 -> 10<br>
 ReLU is the activation function.<br>
@@ -77,6 +78,7 @@ Modify the weights and biases using their gradients and the learning rate.
 Print the loss in every epoch.
 ```bash
     Flow::Print(loss);
+}
 ```
 Equivalent code using pytorch:<br>
 https://colab.research.google.com/drive/1GwRjaX5Jh4rTxrPH9ChfaPl-YTaznoIn?usp=sharing

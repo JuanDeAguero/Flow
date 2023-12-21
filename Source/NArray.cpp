@@ -1,44 +1,15 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
-#include <cuda_runtime.h>
-
 #include "Flow/NArray.h"
 #include "Flow/Print.h"
 
+#include <memory>
+
 using namespace std;
 
-Flow::NArray::NArray()
-    : Array( new NArrayCore( { 1 }, { 0.0f } ) )
-{
+Flow::NArray::NArray() {}
 
-}
-
-Flow::NArray::NArray( NArrayCore* arr ) : Array(arr)
-{
-
-}
-
-Flow::NArray::NArray( const NArray& other ) : Array(other.Array)
-{
-    
-}
-
-Flow::NArray& Flow::NArray::operator=( const NArray& other )
-{
-    if ( this == &other ) return *this;
-    Array = other.Array;
-    return *this;
-}
-
-Flow::NArray::NArray( NArray&& other ) : Array(other.Array)
-{
-
-}
-
-Flow::NArray::~NArray()
-{
-    
-}
+Flow::NArray::NArray( NArrayCore* arr ) { Array = arr; }
 
 bool Flow::NArray::IsValid()
 {
@@ -70,18 +41,6 @@ Flow::NArray Flow::Create( vector<int> shape, vector<float> data )
 {
     NArrayCore* arr = new NArrayCore( shape, data );
     return NArray(arr);
-}
-
-void Flow::CleanUp( vector<reference_wrapper<NArray>> savedArrays )
-{
-    if ( GetCUDAFreeMemory() < 5000.0f )
-    {
-        vector<vector<float>> copyData;
-        for ( NArray& arr : savedArrays ) copyData.push_back(arr.Get());
-        cudaDeviceReset();
-        for ( int i = 0; i < savedArrays.size(); i++ )
-            savedArrays[i].get() = Create( savedArrays[i].get().GetShape(), copyData[i] );
-    }
 }
 
 Flow::NArray Flow::Add( NArray arr1, NArray arr2 ) { return NArray( Add( arr1.GetCore(), arr2.GetCore() ) ); }
