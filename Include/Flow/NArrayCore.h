@@ -11,14 +11,12 @@ namespace Flow
 {
     using namespace std;
 
-    static bool UseCUDA = true;
-
     class NArrayCore
     {
 
     public:
 
-        NArrayCore( vector<int> shape, vector<float> data );
+        NArrayCore( vector<int> shape, const vector<float>& data );
 
         enum Operation
         {
@@ -33,6 +31,8 @@ namespace Flow
         };
 
         NArrayCore( vector<int> shape, float* deviceData, vector<NArrayCore*> operands, Operation op );
+
+        ~NArrayCore();
 
         float Get( vector<int> coordinates );
 
@@ -123,6 +123,7 @@ namespace Flow
         int IndexDim;
 
         NArrayCore* Index;
+
     };
 
     NArrayCore* Add( NArrayCore* arr1, NArrayCore* arr2 );

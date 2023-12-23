@@ -40,7 +40,6 @@ float learningRate = 0.1f;
 100 iterations.
 ```bash
 for ( int epoch = 0; epoch < 100; epoch++ )
-{
 ```
 Simple two-layer network. 784 -> 128 -> 10<br>
 ReLU is the activation function.<br>
@@ -53,32 +52,29 @@ a &= \text{ReLU}(\text{xTrain} \cdot w1 + b1) \\
 \end{align*}
 ```
 ```bash
-    Flow::NArray a = ReLU( Add( MM( xTrain, w1 ), b1 ) );
-    Flow::NArray yPred = Add( MM( a, w2 ), b2 );
-    Flow::NArray loss = CrossEntropy( yPred, yTrain );
+  Flow::NArray a = ReLU( Add( MM( xTrain, w1 ), b1 ) );
+  Flow::NArray yPred = Add( MM( a, w2 ), b2 );
+  Flow::NArray loss = CrossEntropy( yPred, yTrain );
 ```
 Reset the gradients and backpropagate the loss.<br>
 The autograd will do its magic.
 ```bash
-    w1.GetGradient().Reset(0);
-    b1.GetGradient().Reset(0);
-    w2.GetGradient().Reset(0);
-    b2.GetGradient().Reset(0);
+  w1.GetGradient().Reset(0);
+  b1.GetGradient().Reset(0);
+  w2.GetGradient().Reset(0);
+  b2.GetGradient().Reset(0);
 
-    loss.Backpropagate();
+  loss.Backpropagate();
 ```
 Gradient descent.<br>
 Modify the weights and biases using their gradients and the learning rate.
 ```bash
-    w1 = Sub( w1.Copy(), Mul( w1.GetGradient().Copy(), learningRate ) );
-    b1 = Sub( b1.Copy(), Mul( b1.GetGradient().Copy(), learningRate ) );
-    w2 = Sub( w2.Copy(), Mul( w2.GetGradient().Copy(), learningRate ) );
-    b2 = Sub( b2.Copy(), Mul( b2.GetGradient().Copy(), learningRate ) );
+  w1 = Sub( w1.Copy(), Mul( w1.GetGradient().Copy(), learningRate ) );
+  b1 = Sub( b1.Copy(), Mul( b1.GetGradient().Copy(), learningRate ) );
+  w2 = Sub( w2.Copy(), Mul( w2.GetGradient().Copy(), learningRate ) );
+  b2 = Sub( b2.Copy(), Mul( b2.GetGradient().Copy(), learningRate ) );
 ```
 Print the loss in every epoch.
 ```bash
-    Flow::Print(loss);
-}
+  Flow::Print(loss);
 ```
-Equivalent code using pytorch:<br>
-https://colab.research.google.com/drive/1GwRjaX5Jh4rTxrPH9ChfaPl-YTaznoIn?usp=sharing

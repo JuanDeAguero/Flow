@@ -39,7 +39,7 @@ void Flow::NArray::Backpropagate() { Array->Backpropagate(); }
 
 Flow::NArray Flow::NArray::Copy() { return NArray(Array->Copy()); }
 
-Flow::NArray Flow::Create( vector<int> shape, vector<float> data ) { return NArray( new NArrayCore( shape, data ) ); }
+Flow::NArray Flow::Create( vector<int> shape, const vector<float>& data ) { return NArray( new NArrayCore( shape, data ) ); }
 
 vector<reference_wrapper<Flow::NArray>> Flow::SavedArrays;
 
@@ -64,7 +64,7 @@ Flow::NArray Flow::Add( NArray arr1, NArray arr2 ) { return NArray( Add( arr1.Ge
 
 Flow::NArray Flow::Broadcast( NArray arr, vector<int> shape ) { return NArray( Broadcast( arr.GetCore(), shape ) ); }
 
-Flow::NArray Flow::CrossEntropy( NArray arr1, NArray arr2 ) { return CrossEntropy( arr1.GetCore(), arr2.GetCore() ); }
+Flow::NArray Flow::CrossEntropy( NArray arr1, NArray arr2 ) { return NArray( CrossEntropy( arr1.GetCore(), arr2.GetCore() ) ); }
 
 Flow::NArray Flow::Div( NArray arr1, NArray arr2 ) { return NArray( Div( arr1.GetCore(), arr2.GetCore() ) ); }
 
@@ -94,7 +94,7 @@ Flow::NArray Flow::ReLU( NArray arr ) { return NArray( ReLU(arr.GetCore()) ); }
 
 Flow::NArray Flow::Reshape( NArray arr, vector<int> shape ) { return NArray( Reshape( arr.GetCore(), shape ) ); }
 
-Flow::NArray Flow::Softmax( NArray arr, int dim ) { return Softmax( arr.GetCore(), dim ); }
+Flow::NArray Flow::Softmax( NArray arr, int dim ) { return NArray( Softmax( arr.GetCore(), dim ) ); }
 
 Flow::NArray Flow::Sub( NArray arr1, NArray arr2 ) { return NArray( Sub( arr1.GetCore(), arr2.GetCore() ) ); }
 

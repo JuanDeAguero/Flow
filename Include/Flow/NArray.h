@@ -49,7 +49,7 @@ namespace Flow
 
     };
 
-    NArray Create( vector<int> shape, vector<float> data );
+    NArray Create( vector<int> shape, const vector<float>& data );
 
     extern vector<reference_wrapper<NArray>> SavedArrays;
 

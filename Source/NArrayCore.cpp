@@ -14,7 +14,7 @@
 
 using namespace std;
 
-Flow::NArrayCore::NArrayCore( vector<int> shape, vector<float> data )
+Flow::NArrayCore::NArrayCore( vector<int> shape, const vector<float>& data )
 {
     cudaMalloc( (void**)&Data, data.size() * sizeof(float) );
     cudaMemcpy( Data, data.data(), data.size() * sizeof(float), cudaMemcpyHostToDevice );
@@ -31,6 +31,8 @@ Flow::NArrayCore::NArrayCore( vector<int> shape, float* deviceData, vector<NArra
     Operands = operands;
     Op = op;
 }
+
+Flow::NArrayCore::~NArrayCore() {}
 
 float Flow::NArrayCore::Get( vector<int> coordinates )
 {
@@ -110,13 +112,13 @@ void Flow::NArrayCore::BuildTopo( NArrayCore* current, unordered_set<NArrayCore*
     if ( visited.find(current) != visited.end() || current->Operands.size() == 0 ) return;
     visited.insert(current);
     NArrayCore* first = current->Operands[0];
-    if (first)
+    if ( first && first->GetData() )
     {
         BuildTopo( first, visited, topo );
         if ( current->Operands.size() != 1 )
         {
             NArrayCore* second = current->Operands[1];
-            if (second) BuildTopo( second, visited, topo );
+            if ( second && second->GetData() ) BuildTopo( second, visited, topo );
         }
     }
     topo.push_back(current);
@@ -125,6 +127,8 @@ void Flow::NArrayCore::BuildTopo( NArrayCore* current, unordered_set<NArrayCore*
 void Flow::NArrayCore::Backward()
 {
     if ( Operands.size() == 0 ) return;
+    if ( Operands.size() == 1 && !Operands[0]->GetData() ) return;
+    if ( Operands.size() == 2 && ( !Operands[0]->GetData() || !Operands[1]->GetData() ) ) return;
     switch (Op)
     {
         case Operation::NONE:                           break;

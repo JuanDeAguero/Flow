@@ -5,6 +5,8 @@
 
 #define TILE_SIZE 32
 
+using namespace std;
+
 __global__
 void MM_Kernel( float* arr1, float* arr2, float* result, int arr1Rows, int arr1Cols, int arr2Cols )
 {
@@ -32,29 +34,44 @@ void MM_Kernel( float* arr1, float* arr2, float* result, int arr1Rows, int arr1C
         result[ row * arr2Cols + col ] = sum;
 }
 
-Flow::NArrayCore* Flow::MM( NArrayCore* arr1, NArrayCore* arr2 )
+pair< vector<int>, float* > Flow::MMRaw( pair< vector<int>, float* > arr1, pair< vector<int>, float* > arr2 )
 {
-    int arr1Rows = arr1->GetShape()[0];
-    int arr1Cols = arr1->GetShape()[1];
-    int arr2Cols = arr2->GetShape()[1];
+    int arr1Rows = arr1.first[0];
+    int arr1Cols = arr1.first[1];
+    int arr2Cols = arr2.first[1];
     float* result_d;
     cudaMalloc( (void**)&result_d, arr1Rows * arr2Cols * sizeof(float) );
     dim3 dimGrid( ceil( arr2Cols / float(TILE_SIZE) ), ceil( arr1Rows / float(TILE_SIZE) ), 1 );
     dim3 dimBlock( TILE_SIZE, TILE_SIZE, 1 );
-    MM_Kernel<<< dimGrid, dimBlock >>>( arr1->GetData(), arr2->GetData(), result_d, arr1Rows, arr1Cols, arr2Cols );
-    return new NArrayCore( { arr1Rows, arr2Cols }, result_d, { arr1, arr2 }, NArrayCore::Operation::MM );
+    MM_Kernel<<< dimGrid, dimBlock >>>( arr1.second, arr2.second, result_d, arr1Rows, arr1Cols, arr2Cols );
+    return { { arr1Rows, arr2Cols }, result_d };
+}
+
+pair< vector<int>, float* > Flow::MMRaw( NArrayCore* arr1, NArrayCore* arr2 )
+{
+    return MMRaw( { arr1->GetShape(), arr1->GetData() }, { arr2->GetShape(), arr2->GetData() } );
+}
+
+pair< vector<int>, float* > Flow::MMRaw( pair< vector<int>, float* > arr1, NArrayCore* arr2 )
+{
+    return MMRaw( arr1, { arr2->GetShape(), arr2->GetData() } );
+}
+
+pair< vector<int>, float* > Flow::MMRaw( NArrayCore* arr1, pair< vector<int>, float* > arr2 )
+{
+    return MMRaw( { arr1->GetShape(), arr1->GetData() }, arr2 );
+}
+
+Flow::NArrayCore* Flow::MM( NArrayCore* arr1, NArrayCore* arr2 )
+{
+    auto mm = MMRaw( arr1, arr2 );
+    return new NArrayCore( mm.first, mm.second, { arr1, arr2 }, NArrayCore::Operation::MM );
 }
 
 void Flow::NArrayCore::BackwardMM()
 {
-    NArrayCore* grad1 = Flow::MM( Gradient->Copy(), Transpose( Operands[1], 0, 1 ) );
-    NArrayCore* grad2 = Flow::MM( Transpose( Operands[0], 0, 1 ), Gradient->Copy() );
-    grad1->Gradient = nullptr;
-    grad2->Gradient = nullptr;
-    grad1->Operands = {};
-    grad2->Operands = {};
-    grad1->Op = NArrayCore::Operation::NONE;
-    grad2->Op = NArrayCore::Operation::NONE;
-    Operands[0]->Gradient = grad1;
-    Operands[1]->Gradient = grad2;
+    auto grad1 = MMRaw( Gradient, TransposeRaw( Operands[1], 0, 1 ) );
+    auto grad2 = MMRaw( TransposeRaw( Operands[0], 0, 1 ), Gradient );
+    Operands[0]->Gradient->Data = grad1.second;
+    Operands[1]->Gradient->Data = grad2.second;
 }

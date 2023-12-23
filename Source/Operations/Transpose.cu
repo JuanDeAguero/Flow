@@ -1,5 +1,7 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#include <stdexcept>
+
 #include "CUDA.cuh"
 #include "Flow/NArrayCore.h"
 
@@ -16,10 +18,10 @@ void Transpose_Kernel( float* arr, int* arrShape, int arrShapeSize, int firstDim
     result[flatIndex] = arr[i];
 }
 
-Flow::NArrayCore* Flow::Transpose( NArrayCore* arr, int firstDim, int secondDim )
+std::pair< std::vector<int>, float* > Flow::TransposeRaw( NArrayCore* arr, int firstDim, int secondDim )
 {
     int n = SizeFromShape(arr->GetShape());
-    vector<int> resultShape = arr->GetShape();
+    std::vector<int> resultShape = arr->GetShape();
     int temp = resultShape[firstDim];
     resultShape[firstDim] = resultShape[secondDim];
     resultShape[secondDim] = temp;
@@ -32,10 +34,16 @@ Flow::NArrayCore* Flow::Transpose( NArrayCore* arr, int firstDim, int secondDim 
     cudaMemcpy( arrShape_d, arr->GetShapeData(), arr->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
     cudaMemcpy( resultShape_d, resultShape.data(), resultShape.size() * sizeof(int), cudaMemcpyHostToDevice );
     Transpose_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), firstDim, secondDim, result_d, resultShape_d, resultShape.size() );
-    return new NArrayCore( resultShape, result_d, { arr }, NArrayCore::Operation::TRANSPOSE );
+    return { resultShape, result_d };
+}
+
+Flow::NArrayCore* Flow::Transpose( NArrayCore* arr, int firstDim, int secondDim )
+{
+    auto transpose = TransposeRaw( arr, firstDim, secondDim );
+    return new NArrayCore( transpose.first, transpose.second, { arr }, NArrayCore::Operation::TRANSPOSE );
 }
 
 void Flow::NArrayCore::BackwardTranspose()
 {
-
+    throw runtime_error("Backward transpose not implemented!");
 }

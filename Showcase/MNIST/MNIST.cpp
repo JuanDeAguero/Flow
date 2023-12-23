@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <cuda_runtime.h>
+
 #include "Flow.h"
 
 using namespace std;
@@ -48,7 +50,7 @@ int main()
     Flow::Save({ w1, b1, w2, b2 });
     
     float learningRate = 0.5f;
-    int maxEpochs = 300;
+    int maxEpochs = 500;
 
     for ( int epoch = 0; epoch < maxEpochs; epoch++ )
     {
@@ -68,8 +70,8 @@ int main()
         w2 = Sub( w2.Copy(), Mul( w2.GetGradient().Copy(), learningRate ) );
         b2 = Sub( b2.Copy(), Mul( b2.GetGradient().Copy(), learningRate ) );
 
-        Flow::Print(loss);
-
+        Flow::Print( "epoch: " + to_string( epoch + 1 ) + "  loss: " + to_string(loss.Get()[0]) + "  free: " + to_string(Flow::GetCUDAFreeMemory()) );
+        
         Flow::CleanUp();
     }
     

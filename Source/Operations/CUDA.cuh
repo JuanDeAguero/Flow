@@ -11,6 +11,8 @@
 
 namespace Flow
 {
+    using namespace std;
+
     __device__
     inline int MultiToFlatIndex_Device( int* index, int* shape, int shapeSize )
     {
@@ -47,4 +49,14 @@ namespace Flow
         while ( assumed != old );
         return __int_as_float(old);
     }
+
+    pair< vector<int>, float* > MMRaw( pair< vector<int>, float* > arr1, pair< vector<int>, float* > arr2 );
+
+    pair< vector<int>, float* > MMRaw( NArrayCore* arr1, NArrayCore* arr2 );
+
+    pair< vector<int>, float* > MMRaw( pair< vector<int>, float* > arr1, NArrayCore* arr2 );
+
+    pair< vector<int>, float* > MMRaw( NArrayCore* arr1, pair< vector<int>, float* > arr2 );
+
+    pair< vector<int>, float* > TransposeRaw( NArrayCore* arr, int firstDim, int secondDim );
 }
