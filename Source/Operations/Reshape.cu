@@ -15,11 +15,12 @@ __global__
 void BackwardReshape_Kernel( float* gradient, float* operandGradient )
 {
     int i = blockIdx.x;
-    operandGradient[i] += gradient[i];
+    atomicAdd( &operandGradient[i], gradient[i] );
 }
 
 void Flow::NArrayCore::BackwardReshape()
 {
     int n = SizeFromShape(Shape);
     BackwardReshape_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetGradient()->GetData() );   
+    cudaDeviceSynchronize();
 }

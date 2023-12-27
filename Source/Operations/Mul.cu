@@ -19,6 +19,7 @@ Flow::NArrayCore* Flow::Mul( NArrayCore* arr1, NArrayCore* arr2 )
     float* result_d;
     cudaMalloc( (void**)&result_d, n * sizeof(float) );
     Mul_Kernel<<< n, 1 >>>( arr1B->GetData(), arr2B->GetData(), result_d );
+    cudaDeviceSynchronize();
     return new NArrayCore( arr1B->GetShape(), result_d, { arr1B, arr2B }, NArrayCore::Operation::MUL );
 }
 
@@ -32,12 +33,13 @@ __global__
 void BackwardMul_Kernel( float* gradient, float* operand1, float* operandGradient1, float* operand2, float* operandGradient2 )
 {
     int i = blockIdx.x;
-    operandGradient1[i] += operand2[i] * gradient[i];
-    operandGradient2[i] += operand1[i] * gradient[i];
+    atomicAdd( &operandGradient1[i], operand2[i] * gradient[i] );
+    atomicAdd( &operandGradient2[i], operand1[i] * gradient[i] );
 }
 
 void Flow::NArrayCore::BackwardMul()
 {
     int n = SizeFromShape(Gradient->GetShape());
     BackwardMul_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetData(), Operands[0]->GetGradient()->GetData(), Operands[1]->GetData(), Operands[1]->GetGradient()->GetData() );
+    cudaDeviceSynchronize();
 }

@@ -19,6 +19,7 @@ Flow::NArrayCore* Flow::Add( NArrayCore* arr1, NArrayCore* arr2 )
     float* result_d;
     cudaMalloc( (void**)&result_d, n * sizeof(float) );
     Add_Kernel<<< n, 1 >>>( arr1B->GetData(), arr2B->GetData(), result_d );
+    cudaDeviceSynchronize();
     return new NArrayCore( arr1B->GetShape(), result_d, { arr1B, arr2B }, NArrayCore::Operation::ADD );
 }
 
@@ -26,12 +27,13 @@ __global__
 void BackwardAdd_Kernel( float* gradient, float* operandGradient1, float* operandGradient2 )
 {
     int i = blockIdx.x;
-    operandGradient1[i] += gradient[i];
-    operandGradient2[i] += gradient[i];
+    atomicAdd( &operandGradient1[i], gradient[i] );
+    atomicAdd( &operandGradient2[i], gradient[i] );
 }
 
 void Flow::NArrayCore::BackwardAdd()
 {
     int n = SizeFromShape(Gradient->GetShape());
     BackwardAdd_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetGradient()->GetData(), Operands[1]->GetGradient()->GetData() );
+    cudaDeviceSynchronize();
 }

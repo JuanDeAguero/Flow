@@ -13,7 +13,10 @@ void Flow::NArrayCore::Set( vector<int> coordinates, float value )
 {
     int index = MultiToFlatIndex( coordinates, Shape );
     if ( index >= 0 && index < SizeFromShape(Shape) )
+    {
         Set_Kernel<<< 1, 1 >>>( Data, index, value );
+        cudaDeviceSynchronize();
+    }
 }
 
 __global__
@@ -27,4 +30,5 @@ void Flow::NArrayCore::Reset( float value )
 {
     int n = SizeFromShape(Shape);
     Reset_Kernel<<< n, 1 >>>( Data, value );
+    cudaDeviceSynchronize();
 }

@@ -3,10 +3,13 @@
 #include "CUDA.cuh"
 #include "Flow/NArrayCore.h"
 
+#include "Flow/Print.h"
+
 __global__
 void Gather_Kernel( float* arr, int* arrShape, int arrShapeSize, int dim, float* index, int* indexShape, int indexShapeSize, float* result )
 {
     int i = blockIdx.x;
+    if ((int)index[i] < 0 || (int)index[i] >= arrShape[dim]) printf("huh");
     int multiIndex[MAX_DIMS];
     Flow::FlatToMultiIndex_Device( i, indexShape, indexShapeSize, multiIndex );
     multiIndex[dim] = (int)index[i];
@@ -16,6 +19,7 @@ void Gather_Kernel( float* arr, int* arrShape, int arrShapeSize, int dim, float*
 
 Flow::NArrayCore* Flow::Gather( NArrayCore* arr, int dim, NArrayCore* index )
 {
+    if (!arr->GetData()) Print("gatherrr");
     int n = SizeFromShape(arr->GetShape());
     int* arrShape_d;
     int* indexShape_d;
@@ -27,6 +31,9 @@ Flow::NArrayCore* Flow::Gather( NArrayCore* arr, int dim, NArrayCore* index )
     cudaMemcpy( indexShape_d, index->GetShapeData(), index->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
     cudaMemcpy( result_d, arr->GetData(), n * sizeof(float), cudaMemcpyHostToDevice );
     Gather_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), dim, index->GetData(), indexShape_d, index->GetShape().size(), result_d );
+    cudaDeviceSynchronize();
+    cudaFree(arrShape_d);
+    cudaFree(indexShape_d);
     NArrayCore* result = new NArrayCore( index->GetShape(), result_d, { arr }, NArrayCore::Operation::GATHER );
     result->GatherDim = dim;
     result->GatherIndex = index;
@@ -42,7 +49,7 @@ void BackwardGather_Kernel( float* gradient, int* operandShape, int operandShape
     int indexElement = (int)index[i];
     multiIndex[dim] = indexElement;
     int flatIndex = Flow::MultiToFlatIndex_Device( multiIndex, operandShape, operandShapeSize );
-    operandGradient[flatIndex] += gradient[i];
+    atomicAdd( &operandGradient[flatIndex], gradient[i] );
 }
 
 void Flow::NArrayCore::BackwardGather()
@@ -55,4 +62,7 @@ void Flow::NArrayCore::BackwardGather()
     cudaMemcpy( operandShape_d, Operands[0]->GetShape().data(), Operands[0]->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
     cudaMemcpy( indexShape_d, GatherIndex->GetShape().data(), GatherIndex->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
     BackwardGather_Kernel<<< n, 1 >>>( Gradient->GetData(), operandShape_d, Operands[0]->GetShape().size(), Operands[0]->GetGradient()->GetData(), GatherDim, GatherIndex->GetData(), indexShape_d, GatherIndex->GetShape().size() );
+    cudaDeviceSynchronize();
+    cudaFree(operandShape_d);
+    cudaFree(indexShape_d);
 }

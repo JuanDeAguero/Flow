@@ -32,6 +32,9 @@ Flow::NArrayCore* Flow::Sum( NArrayCore* arr, int dim )
     cudaMemcpy( result_d, resultData.data(), SizeFromShape(resultShape) * sizeof(int), cudaMemcpyHostToDevice );
     cudaMemcpy( resultShape_d, resultShape.data(), resultShape.size() * sizeof(int), cudaMemcpyHostToDevice );
     Sum_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), dim, result_d, resultShape_d, resultShape.size() );
+    cudaDeviceSynchronize();
+    cudaFree(arrShape_d);
+    cudaFree(resultShape_d);
     NArrayCore* result = new NArrayCore( resultShape, result_d, { arr }, NArrayCore::Operation::SUM );
     result->SumDim = dim;
     return result;
@@ -61,4 +64,7 @@ void Flow::NArrayCore::BackwardSum()
     int maxDimSize = Operands[0]->GetShape()[SumDim];
     dim3 gridDims( n, maxDimSize );
     BackwardSum_Kernel<<< gridDims, 1 >>>( GetData(), shape_d, Shape.size(), Gradient->GetData(), Operands[0]->GetData(), operandShape_d, Operands[0]->GetShape().size(), Operands[0]->GetGradient()->GetData(), SumDim );
+    cudaDeviceSynchronize();
+    cudaFree(shape_d);
+    cudaFree(operandShape_d);
 }

@@ -28,6 +28,9 @@ Flow::NArrayCore* Flow::Index( NArrayCore* arr, int dim, NArrayCore* index )
     cudaMemcpy( arrShape_d, arr->GetShapeData(), arr->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
     cudaMemcpy( resultShape_d, resultShape.data(), resultShape.size() * sizeof(int), cudaMemcpyHostToDevice );
     Index_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), dim, index->GetData(), result_d, resultShape_d, resultShape.size() );
+    cudaDeviceSynchronize();
+    cudaFree(arrShape_d);
+    cudaFree(resultShape_d);
     NArrayCore* result = new NArrayCore( resultShape, result_d, { arr, index }, NArrayCore::Operation::INDEX );
     result->IndexDim = dim;
     result->Index = index;
@@ -42,7 +45,7 @@ void BackwardIndex_Kernel( int* shape, int shapeSize, float* gradient, int* oper
     Flow::FlatToMultiIndex_Device( i, shape, shapeSize, multiIndex );
     multiIndex[dim] = index[multiIndex[dim]];
     int flatIndex = Flow::MultiToFlatIndex_Device( multiIndex, operandShape, operandShapeSize );
-    operandGradient[flatIndex] += gradient[i];
+    atomicAdd( &operandGradient[flatIndex], gradient[i] );
 }
 
 void Flow::NArrayCore::BackwardIndex()
@@ -55,4 +58,7 @@ void Flow::NArrayCore::BackwardIndex()
     cudaMemcpy( shape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
     cudaMemcpy( operandShape_d, Operands[0]->GetShapeData(), Operands[0]->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
     BackwardIndex_Kernel<<< n, 1 >>>( shape_d, Shape.size(), Gradient->GetData(), operandShape_d, Operands[0]->GetShape().size(), Operands[0]->GetGradient()->GetData(), IndexDim, Index->GetData() );
+    cudaDeviceSynchronize();
+    cudaFree(shape_d);
+    cudaFree(operandShape_d);
 }

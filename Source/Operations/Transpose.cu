@@ -9,7 +9,7 @@ __global__
 void Transpose_Kernel( float* arr, int* arrShape, int arrShapeSize, int firstDim, int secondDim, float* result, int* resultShape, int resultShapeSize )
 {
     int i = blockIdx.x;
-    int multiIndex[10];
+    int multiIndex[MAX_DIMS];
     Flow::FlatToMultiIndex_Device( i, arrShape, arrShapeSize, multiIndex );
     int temp = multiIndex[firstDim];
     multiIndex[firstDim] = multiIndex[secondDim];
@@ -34,6 +34,9 @@ std::pair< std::vector<int>, float* > Flow::TransposeRaw( NArrayCore* arr, int f
     cudaMemcpy( arrShape_d, arr->GetShapeData(), arr->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
     cudaMemcpy( resultShape_d, resultShape.data(), resultShape.size() * sizeof(int), cudaMemcpyHostToDevice );
     Transpose_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), firstDim, secondDim, result_d, resultShape_d, resultShape.size() );
+    cudaDeviceSynchronize();
+    cudaFree(arrShape_d);
+    cudaFree(resultShape_d);
     return { resultShape, result_d };
 }
 

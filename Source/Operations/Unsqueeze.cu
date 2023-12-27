@@ -17,11 +17,12 @@ __global__
 void BackwardUnsqueeze_Kernel( float* gradient, float* operandGradient )
 {
     int i = blockIdx.x;
-    operandGradient[i] += gradient[i];
+    atomicAdd( &operandGradient[i], gradient[i] );
 }
 
 void Flow::NArrayCore::BackwardUnsqueeze()
 {
     int n = SizeFromShape(Shape);
-    BackwardUnsqueeze_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetGradient()->GetData() );        
+    BackwardUnsqueeze_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetGradient()->GetData() );
+    cudaDeviceSynchronize();
 }

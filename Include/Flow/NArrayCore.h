@@ -11,6 +11,8 @@ namespace Flow
 {
     using namespace std;
 
+    class NArray;
+
     class NArrayCore
     {
 
@@ -54,7 +56,11 @@ namespace Flow
 
         NArrayCore* Copy();
 
+        void Destroy();
+
     private:
+
+        friend class NArray;
 
         float* Data;
 
@@ -66,7 +72,11 @@ namespace Flow
         
         Operation Op;
 
-        NArrayCore( vector<int> shape, vector<float> data, bool isGradient );
+        bool Saved;
+
+        float Exponent;
+
+        NArrayCore( vector<int> shape );  // contructor for gradients
 
         vector<NArrayCore*> TopologicalSort();
 
@@ -106,9 +116,9 @@ namespace Flow
         
         void BackwardUnsqueeze();
 
-    public:
+        friend NArrayCore* Pow( NArrayCore* arr, float exponent );
 
-        float Exponent;
+    public:
         
         int GatherDim;
 
@@ -174,13 +184,13 @@ namespace Flow
     
     NArrayCore* Unsqueeze( NArrayCore* arr, int dim );
 
-    NArrayCore* RandomCore( vector<int> shape );
+    NArrayCore* Random( vector<int> shape );
 
-    NArrayCore* ZerosCore( vector<int> shape );
+    NArrayCore* Zeros( vector<int> shape );
 
-    NArrayCore* OnesCore( vector<int> shape );
+    NArrayCore* Ones( vector<int> shape );
 
-    NArrayCore* OneHotCore( vector<int> integers, int num );
+    NArrayCore* OneHot( vector<int> integers, int num );
 
     void Print( NArrayCore* arr );
 

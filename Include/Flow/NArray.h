@@ -19,9 +19,15 @@ namespace Flow
 
         NArray( NArrayCore* arr );
 
-        ~NArray();
+        NArray( const NArray& arr ) = delete;
 
-        bool IsValid();
+        NArray& operator=( const NArray& arr ) = delete;
+
+        NArray( NArray&& arr ) = delete;
+
+        NArray& operator=( NArray&& arr ) = delete;
+
+        ~NArray();
 
         NArrayCore* GetCore();
 
@@ -33,7 +39,7 @@ namespace Flow
 
         vector<int> GetShape();
 
-        NArray GetGradient();
+        NArrayCore* GetGradient();
         
         void Set( vector<int> coordinates, float value );
 
@@ -41,7 +47,9 @@ namespace Flow
 
         void Backpropagate();
 
-        NArray Copy();
+        NArrayCore* Copy();
+
+        void Assign( NArrayCore* arr );
 
     private:
 
@@ -49,67 +57,55 @@ namespace Flow
 
     };
 
-    NArray Create( vector<int> shape, const vector<float>& data );
+    NArrayCore* Create( vector<int> shape, const vector<float>& data );
 
-    extern vector<reference_wrapper<NArray>> SavedArrays;
+    NArrayCore* Add( NArray& arr1, NArray& arr2 );
 
-    void CleanUp();
+    NArrayCore* Add( NArrayCore* arr1, NArray& arr2 );
+    
+    NArrayCore* Broadcast( NArray& arr, vector<int> shape );
+    
+    NArrayCore* CrossEntropy( NArray& arr1, NArray& arr2 );
+    
+    NArrayCore* Div( NArray& arr1, NArray& arr2 );
+    
+    NArrayCore* Exp( NArray& arr );
+    
+    NArrayCore* Gather( NArray& arr, int dim, NArray& index );
+    
+    NArrayCore* Index( NArray& arr, int dim, NArray& index );
+    
+    NArrayCore* Log( NArray& arr );
+    
+    NArrayCore* Max( NArray& arr, int dim );
+    
+    NArrayCore* Mean( NArray& arr, int dim );
+    
+    NArrayCore* MM( NArray& arr1, NArray& arr2 );
+    
+    NArrayCore* Mul( NArray& arr, float literal );
+    
+    NArrayCore* Mul( NArray& arr1, NArray& arr2 );
+    
+    NArrayCore* Neg( NArray& arr );
+    
+    NArrayCore* Pow( NArray& arr, float exponent );
+    
+    NArrayCore* ReLU( NArray& arr );
+    
+    NArrayCore* Reshape( NArray& arr, vector<int> shape );
+    
+    NArrayCore* Softmax( NArray& arr, int dim );
+    
+    NArrayCore* Sub( NArray& arr1, NArray& arr2 );
+    
+    NArrayCore* Sum( NArray& arr, int dim );
+    
+    NArrayCore* Tanh( NArray& arr );
+    
+    NArrayCore* Transpose( NArray& arr, int firstDim, int secondDim );
+    
+    NArrayCore* Unsqueeze( NArray& arr, int dim );
 
-    void Save( vector<reference_wrapper<NArray>> arrays );
-
-    NArray Add( NArray arr1, NArray arr2 );
-    
-    NArray Broadcast( NArray arr, vector<int> shape );
-    
-    NArray CrossEntropy( NArray arr1, NArray arr2 );
-    
-    NArray Div( NArray arr1, NArray arr2 );
-    
-    NArray Exp( NArray arr );
-    
-    NArray Gather( NArray arr, int dim, NArray index );
-    
-    NArray Index( NArray arr, int dim, NArray index );
-    
-    NArray Log( NArray arr );
-    
-    NArray Max( NArray arr, int dim );
-    
-    NArray Mean( NArray arr, int dim );
-    
-    NArray MM( NArray arr1, NArray arr2 );
-    
-    NArray Mul( NArray arr, float literal );
-    
-    NArray Mul( NArray arr1, NArray arr2 );
-    
-    NArray Neg( NArray arr );
-    
-    NArray Pow( NArray arr, float exponent );
-    
-    NArray ReLU( NArray arr );
-    
-    NArray Reshape( NArray arr, vector<int> shape );
-    
-    NArray Softmax( NArray arr, int dim );
-    
-    NArray Sub( NArray arr1, NArray arr2 );
-    
-    NArray Sum( NArray arr, int dim );
-    
-    NArray Tanh( NArray arr );
-    
-    NArray Transpose( NArray arr, int firstDim, int secondDim );
-    
-    NArray Unsqueeze( NArray arr, int dim );
-
-    NArray Random( vector<int> shape );
-
-    NArray Zeros( vector<int> shape );
-
-    NArray Ones( vector<int> shape );
-
-    NArray OneHot( vector<int> integers, int num );
-
-    void Print( NArray arr );
+    void Print( NArray& arr );
 }

@@ -44,6 +44,7 @@ pair< vector<int>, float* > Flow::MMRaw( pair< vector<int>, float* > arr1, pair<
     dim3 dimGrid( ceil( arr2Cols / float(TILE_SIZE) ), ceil( arr1Rows / float(TILE_SIZE) ), 1 );
     dim3 dimBlock( TILE_SIZE, TILE_SIZE, 1 );
     MM_Kernel<<< dimGrid, dimBlock >>>( arr1.second, arr2.second, result_d, arr1Rows, arr1Cols, arr2Cols );
+    cudaDeviceSynchronize();
     return { { arr1Rows, arr2Cols }, result_d };
 }
 
@@ -70,8 +71,14 @@ Flow::NArrayCore* Flow::MM( NArrayCore* arr1, NArrayCore* arr2 )
 
 void Flow::NArrayCore::BackwardMM()
 {
-    auto grad1 = MMRaw( Gradient, TransposeRaw( Operands[1], 0, 1 ) );
-    auto grad2 = MMRaw( TransposeRaw( Operands[0], 0, 1 ), Gradient );
-    Operands[0]->Gradient->Data = grad1.second;
-    Operands[1]->Gradient->Data = grad2.second;
+    auto transpose1 = TransposeRaw( Operands[0], 0, 1 );
+    auto transpose2 = TransposeRaw( Operands[1], 0, 1 );
+    auto grad1 = MMRaw( Gradient, transpose2 );
+    auto grad2 = MMRaw( transpose1, Gradient );
+    cudaMemcpy( Operands[0]->Gradient->Data, grad1.second, SizeFromShape(grad1.first) * sizeof(float), cudaMemcpyDeviceToDevice );
+    cudaMemcpy( Operands[1]->Gradient->Data, grad2.second, SizeFromShape(grad2.first) * sizeof(float), cudaMemcpyDeviceToDevice );
+    cudaFree(grad1.second);
+    cudaFree(grad2.second);
+    cudaFree(transpose1.second);
+    cudaFree(transpose2.second);
 }
