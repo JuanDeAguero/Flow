@@ -45,9 +45,13 @@ namespace Flow
 
         void Reset( float value );
 
+        void ResetGradient( float value );
+
         void Backpropagate();
 
         NArrayCore* Copy();
+
+        NArrayCore* CopyGradient();
 
         void Assign( NArrayCore* arr );
 

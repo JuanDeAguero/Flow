@@ -16,4 +16,12 @@ mkdir build
 cd build
 cmake ..
 cmake --build .
+cd ..
+cd ..
+cd ..
+cd test
+mkdir build
+cd build
+cmake ..
+cmake --build .
 pause

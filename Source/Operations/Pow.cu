@@ -29,7 +29,7 @@ __global__
 void BackwardPow_Kernel( float* gradient, float* operand, float* operandGradient, float exponent )
 {
     int i = blockIdx.x;
-    float grad = gradient[i] * exponent * pow( operand[i], exponent - 1);
+    float grad = gradient[i] * exponent * pow( operand[i], exponent - 1 );
     atomicAdd( &operandGradient[i], grad );
 }
 

@@ -1,7 +1,5 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
-#include <cuda_runtime.h>
-
 #include "Flow/NArray.h"
 #include "Flow/Print.h"
 
@@ -11,7 +9,7 @@ Flow::NArray::NArray() { NArray::NArray( new NArrayCore( { 1 }, { 0.0f } ) ); }
 
 Flow::NArray::NArray( NArrayCore* arr ) : Array(arr) { Array->Saved = true; }
 
-Flow::NArray::~NArray() { Array->Destroy(); delete Array; }
+Flow::NArray::~NArray() { Array->Destroy(); delete Array->GetGradient(); delete Array; }
 
 Flow::NArrayCore* Flow::NArray::GetCore() { return Array; }
 
@@ -29,9 +27,13 @@ void Flow::NArray::Set( vector<int> coordinates, float value ) { Array->Set( coo
 
 void Flow::NArray::Reset( float value ) { Array->Reset(value); }
 
+void Flow::NArray::ResetGradient( float value ) { Array->Gradient->Reset(value); }
+
 void Flow::NArray::Backpropagate() { Array->Backpropagate(); }
 
 Flow::NArrayCore* Flow::NArray::Copy() { return Array->Copy(); }
+
+Flow::NArrayCore* Flow::NArray::CopyGradient() { return Array->Gradient->Copy(); }
 
 void Flow::NArray::Assign( NArrayCore* arr ) { Array->Destroy(); Array = arr; Array->Saved = true; }
 

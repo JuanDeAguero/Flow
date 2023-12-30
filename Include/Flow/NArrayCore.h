@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_set>
@@ -74,9 +75,23 @@ namespace Flow
 
         bool Saved;
 
-        float Exponent;
+        int GatherDim;
 
-        NArrayCore( vector<int> shape );  // contructor for gradients
+        NArrayCore* GatherIndex;
+
+        int IndexDim;
+
+        NArrayCore* Index;
+        
+        int MaxDim;
+
+        float Exponent;
+        
+        int SumDim;
+        
+        int TransposeFirstDim, TransposeSecondDim;
+
+        NArrayCore( vector<int> shape );  // constructor for gradients
 
         vector<NArrayCore*> TopologicalSort();
 
@@ -116,23 +131,17 @@ namespace Flow
         
         void BackwardUnsqueeze();
 
+        friend NArrayCore* Gather( NArrayCore* arr, int dim, NArrayCore* index );
+
+        friend NArrayCore* Index( NArrayCore* arr, int dim, NArrayCore* index );
+
+        friend NArrayCore* Max( NArrayCore* arr, int dim );
+
         friend NArrayCore* Pow( NArrayCore* arr, float exponent );
-
-    public:
         
-        int GatherDim;
+        friend NArrayCore* Sum( NArrayCore* arr, int dim );
 
-        NArrayCore* GatherIndex;
-        
-        int MaxDim;
-        
-        int SumDim;
-        
-        int TransposeFirstDim, TransposeSecondDim;
-
-        int IndexDim;
-
-        NArrayCore* Index;
+        friend NArrayCore* Transpose( NArrayCore* arr, int firstDim, int secondDim );
 
     };
 

@@ -13,7 +13,7 @@ static bool Test_Unsqueeze()
     Flow::NArrayCore::Operation op = Flow::NArrayCore::Operation::UNSQUEEZE;
 
     Test( 1, numPassed,
-        Flow::Create( { 3, 1, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ), Flow::NArray(),
+        Flow::Create( { 3, 1, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ), nullptr,
         { 0 }, {}, {}, {}, op,
         { 0, 1, 2, 3, 4, 5, 6, 7, 8 },
         { 1, 3, 1, 3 },
@@ -21,7 +21,7 @@ static bool Test_Unsqueeze()
         { 3, 1, 3 }, {}, {} );
 
     Test( 2, numPassed,
-        Flow::Create( { 3, 1, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ), Flow::NArray(),
+        Flow::Create( { 3, 1, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ), nullptr,
         { 1 }, {}, {}, {}, op,
         { 0, 1, 2, 3, 4, 5, 6, 7, 8 },
         { 3, 1, 1, 3 },
@@ -29,7 +29,7 @@ static bool Test_Unsqueeze()
         { 3, 1, 3 }, {}, {} );
 
     Test( 3, numPassed,
-        Flow::Create( { 3, 1, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ), Flow::NArray(),
+        Flow::Create( { 3, 1, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ), nullptr,
         { 3 }, {}, {}, {}, op,
         { 0, 1, 2, 3, 4, 5, 6, 7, 8 },
         { 3, 1, 3, 1 },

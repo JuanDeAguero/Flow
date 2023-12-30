@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include <cuda_runtime.h>
 #include <vector>
+
+#include <cuda_runtime.h>
 
 #include "NArrayCore.h"
 

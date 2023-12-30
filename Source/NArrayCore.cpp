@@ -79,7 +79,6 @@ void Flow::NArrayCore::Destroy()
     if ( Operands.size() == 2 && Operands[1]->Saved == false ) Operands[1]->Destroy();
     if ( GatherIndex && GatherIndex->Saved == false ) GatherIndex->Destroy();
     if ( Index && Index->Saved == false ) Index->Destroy();
-    delete Gradient;
 }
 
 Flow::NArrayCore::NArrayCore( vector<int> shape )
@@ -93,7 +92,6 @@ vector<Flow::NArrayCore*> Flow::NArrayCore::TopologicalSort()
 {
     unordered_set<NArrayCore*> visited;
     vector<NArrayCore*> topo;
-    if (!Data) return topo;
     BuildTopo( this, visited, topo );
     reverse( topo.begin(), topo.end() );
     return topo;
@@ -167,14 +165,15 @@ Flow::NArrayCore* Flow::Mean( NArrayCore* arr, int dim )
 
 Flow::NArrayCore* Flow::Softmax( NArrayCore* arr, int dim )
 {
-    return Sub(
-        Sub( arr, Max( arr, dim ) ),
-        Log( Sum( Exp( Sub( arr, Max( arr, dim ) ) ), dim ) ) );
+    NArrayCore* index = new NArrayCore( { 1 }, { 0.0f } );
+    NArrayCore* exp = Exp( Sub( arr, Index( Max( arr, dim ), dim, index ) ) );
+    return Div( exp, Sum( exp, dim ) );
 }
 
 Flow::NArrayCore* Flow::CrossEntropy( NArrayCore* arr1, NArrayCore* arr2 )
 {
-    return Neg( Mean( Gather( Softmax( arr1, 1 ), 1, Unsqueeze( arr2, 1 ) ), 0 ) );
+    NArrayCore* small = new NArrayCore( { 1 }, { 1e-10f } );
+    return Mean( Neg( Log( Add( Gather( Softmax( arr1, 1 ), 1, Unsqueeze( arr2->Copy(), 1 ) ), small ) ) ), 0 );
 }
 
 Flow::NArrayCore* Flow::Random( vector<int> shape )

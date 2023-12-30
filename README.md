@@ -2,7 +2,7 @@
 Machine Learning Library in C++
 ## Features ✨
 - N dimensional array operations
-  - Addition, subtraction, multiplication, matrix multiplication, ...
+  - Addition, multiplication, ReLU, matrix multiplication, ...
 - Autograd system
 - GPU acceleration with CUDA
 - Deep neural networks

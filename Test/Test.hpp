@@ -7,14 +7,14 @@
 #include "Flow/Vector.h"
 
 static bool Test( int num, int& numPassed,
-    Flow::NArray arr1, Flow::NArray arr2,
-    std::vector<int> intParams, std::vector<std::vector<int>> intVecParams, std::vector<float> floatParams, std::vector<Flow::NArray> arrParams,
+    Flow::NArrayCore* arr1, Flow::NArrayCore* arr2,
+    std::vector<int> intParams, std::vector<std::vector<int>> intVecParams, std::vector<float> floatParams, std::vector<Flow::NArrayCore*> arrParams,
     Flow::NArrayCore::Operation op,
     std::vector<float> expectedData, std::vector<int> expectedShape,
     std::vector<float> expectedGradData1, std::vector<int> expectedGradShape1,
     std::vector<float> expectedGradData2, std::vector<int> expectedGradShape2 )
 {
-    Flow::NArray result;
+    Flow::NArrayCore* result;
     std::string name;
     bool binaryOp = false;
     switch (op)
@@ -35,17 +35,17 @@ static bool Test( int num, int& numPassed,
         case Flow::NArrayCore::Operation::INDEX: result = Flow::Index( arr1, intParams[0], arr2 ); name = "Index"; binaryOp = true; break;
         case Flow::NArrayCore::Operation::CROSSENTROPY: result = Flow::CrossEntropy( arr1, arr2 ); name = "CrossEntropy"; binaryOp = true; break;
     }
-    result.Backpropagate();
+    result->Backpropagate();
     bool passed = false;
-    if ( Flow::Equals( expectedData, result.Get(), 0.01f ) &&
-        expectedShape == result.GetShape() &&
-        Flow::Equals( expectedGradData1, arr1.GetGradient().Get(), 0.01f ) &&
-        expectedGradShape1 == arr1.GetGradient().GetShape() )
+    if ( Flow::Equals( expectedData, result->Get(), 0.01f ) &&
+        expectedShape == result->GetShape() &&
+        Flow::Equals( expectedGradData1, arr1->GetGradient()->Get(), 0.01f ) &&
+        expectedGradShape1 == arr1->GetGradient()->GetShape() )
     {
         if (binaryOp)
         {
-            if ( Flow::Equals( expectedGradData2, arr2.GetGradient().Get(), 0.01f ) &&
-                expectedGradShape2 == arr2.GetGradient().GetShape() )
+            if ( Flow::Equals( expectedGradData2, arr2->GetGradient()->Get(), 0.01f ) &&
+                expectedGradShape2 == arr2->GetGradient()->GetShape() )
                 passed = true;
         }
         else passed = true;

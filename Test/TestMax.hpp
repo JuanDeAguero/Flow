@@ -13,7 +13,7 @@ static bool Test_Max()
     Flow::NArrayCore::Operation op = Flow::NArrayCore::Operation::MAX;
 
     Test( 1, numPassed,
-        Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ), Flow::NArray(),
+        Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ), nullptr,
         { 0 }, {}, {}, {}, op,
         { 6, 7, 8 },
         { 1, 3 },

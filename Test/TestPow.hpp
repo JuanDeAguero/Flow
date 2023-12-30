@@ -1,4 +1,4 @@
-// Cop,yright (c) 2023 Juan M. G. de Agüero
+// Copyright (c) 2023 Juan M. G. de Agüero
 
 #pragma once
 
@@ -13,7 +13,7 @@ static bool Test_Pow()
     Flow::NArrayCore::Operation op = Flow::NArrayCore::Operation::POW;
 
     Test( 1, numPassed,
-        Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ), Flow::NArray(), {}, {},
+        Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ), nullptr, {}, {},
         { 3.0f }, {}, op,
         { 0, 1, 8, 27, 64, 125, 216, 343, 512 },
         { 3, 3 },

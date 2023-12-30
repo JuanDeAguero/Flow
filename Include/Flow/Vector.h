@@ -6,7 +6,5 @@
 
 namespace Flow
 {
-    using namespace std;
-
-    bool Equals( vector<float> vec1, vector<float> vec2, float tolerance );
+    bool Equals( std::vector<float> vec1, std::vector<float> vec2, float tolerance );
 }

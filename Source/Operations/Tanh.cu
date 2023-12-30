@@ -35,6 +35,6 @@ void BackwardTanh_Kernel( float* gradient, float* operand, float* operandGradien
 void Flow::NArrayCore::BackwardTanh()
 {
     int n = SizeFromShape(Shape);
-    BackwardTanh_Kernel<<< n, 1 >>>(Gradient->GetData(), Operands[0]->GetData(), Operands[0]->GetGradient()->GetData() );
+    BackwardTanh_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetData(), Operands[0]->GetGradient()->GetData() );
     cudaDeviceSynchronize();
 }

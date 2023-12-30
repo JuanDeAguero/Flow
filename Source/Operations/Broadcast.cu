@@ -3,8 +3,6 @@
 #include "CUDA.cuh"
 #include "Flow/NArrayCore.h"
 
-#include "Flow/Print.h"
-
 std::vector<int> Flow::BroadcastShapes( vector<int> shape1, vector<int> shape2 )
 {
     int maxDims = max( shape1.size(), shape2.size() );
@@ -16,7 +14,6 @@ std::vector<int> Flow::BroadcastShapes( vector<int> shape1, vector<int> shape2 )
         if ( shape1[i] == shape2[i] ) shape[i] = shape1[i];
         else if ( shape1[i] == 1 ) shape[i] = shape2[i];
         else if ( shape2[i] == 1 ) shape[i] = shape1[i];
-        else Print("wrong shapes!");
     }
     return shape;
 }
@@ -57,19 +54,19 @@ Flow::NArrayCore* Flow::Broadcast( NArrayCore* arr, vector<int> shape )
 }
 
 __global__
-void BackwardBroadcast_Kernel(float* gradient, int* shape, int shapeSize, int* operandShape, int operandShapeSize, float* operandGradient)
+void BackwardBroadcast_Kernel( float* gradient, int* shape, int shapeSize, int* operandShape, int operandShapeSize, float* operandGradient )
 {
     int i = blockIdx.x;
     int position[MAX_DIMS];
-    Flow::FlatToMultiIndex_Device(i, shape, shapeSize, position);
+    Flow::FlatToMultiIndex_Device( i, shape, shapeSize, position );
     int operandCoords[MAX_DIMS];
-    for (int j = 0; j < operandShapeSize; j++)
+    for ( int j = 0; j < operandShapeSize; j++ )
     {
-        int coord = position[shapeSize - operandShapeSize + j];
-        operandCoords[j] = (operandShape[j] == 1) ? 0 : coord;
+        int coord = position[ shapeSize - operandShapeSize + j ];
+        operandCoords[j] = ( operandShape[j] == 1 ) ? 0 : coord;
     }
-    int operandIndex = Flow::MultiToFlatIndex_Device(operandCoords, operandShape, operandShapeSize);
-    atomicAdd(&operandGradient[operandIndex], gradient[i]);
+    int operandIndex = Flow::MultiToFlatIndex_Device( operandCoords, operandShape, operandShapeSize );
+    atomicAdd( &operandGradient[operandIndex], gradient[i] );
 }
 
 __host__
@@ -78,11 +75,11 @@ void Flow::NArrayCore::BackwardBroadcast()
     int n = SizeFromShape(Gradient->GetShape());
     int* shape_d;
     int* operandShape_d;
-    cudaMalloc((void**)&shape_d, Shape.size() * sizeof(int));
-    cudaMalloc((void**)&operandShape_d, Operands[0]->Shape.size() * sizeof(int));
-    cudaMemcpy(shape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(operandShape_d, Operands[0]->GetShapeData(), Operands[0]->Shape.size() * sizeof(int), cudaMemcpyHostToDevice);
-    BackwardBroadcast_Kernel<<<n, 1>>>(Gradient->GetData(), shape_d, Shape.size(), operandShape_d, Operands[0]->Shape.size(), Operands[0]->Gradient->GetData());
+    cudaMalloc( (void**)&shape_d, Shape.size() * sizeof(int) );
+    cudaMalloc( (void**)&operandShape_d, Operands[0]->Shape.size() * sizeof(int) );
+    cudaMemcpy( shape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
+    cudaMemcpy( operandShape_d, Operands[0]->GetShapeData(), Operands[0]->Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
+    BackwardBroadcast_Kernel<<< n, 1 >>>( Gradient->GetData(), shape_d, Shape.size(), operandShape_d, Operands[0]->Shape.size(), Operands[0]->Gradient->GetData() );
     cudaDeviceSynchronize();
     cudaFree(shape_d);
     cudaFree(operandShape_d);
