@@ -1,5 +1,14 @@
 # Flow 🌊
 Machine Learning Library in C++
+## Minimum requirements
+- C++ 11
+- CMake 3.12
+- CUDA Toolkit 12.3
+- Windows 10
+## Installation
+Run **setup.bat** and all the required CMake files will be created.<br>
+The library file "flow.lib" will be found in "build/debug/".<br>
+In "Showcase/" you can find example projects.
 ## Features ✨
 - N dimensional array operations
   - Addition, multiplication, ReLU, matrix multiplication, ...
@@ -7,6 +16,7 @@ Machine Learning Library in C++
 - GPU acceleration with CUDA
 - Deep neural networks
 ## Example: MNIST classifier 🔢
+See "Showcase/MNIST/".<br><br>
 Load the data.
 ```bash
 vector<float> trainImages = ReadImagesMNIST("...");
