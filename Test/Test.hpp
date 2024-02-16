@@ -6,34 +6,85 @@
 #include "Flow/Print.h"
 #include "Flow/Vector.h"
 
-static bool Test( int num, int& numPassed,
-    Flow::NArrayCore* arr1, Flow::NArrayCore* arr2,
-    std::vector<int> intParams, std::vector<std::vector<int>> intVecParams, std::vector<float> floatParams, std::vector<Flow::NArrayCore*> arrParams,
-    Flow::NArrayCore::Operation op,
-    std::vector<float> expectedData, std::vector<int> expectedShape,
-    std::vector<float> expectedGradData1, std::vector<int> expectedGradShape1,
-    std::vector<float> expectedGradData2, std::vector<int> expectedGradShape2 )
+using namespace std;
+
+static bool Test( int num, int& numPassed, NARRAY arr1, NARRAY arr2, vector<int> intParams,
+    vector<vector<int>> intVecParams, vector<float> floatParams, vector<NARRAY> arrParams,
+    Flow::NArray::Operation op, vector<float> expectedData, vector<int> expectedShape,
+    vector<float> expectedGradData1, vector<int> expectedGradShape1,
+    vector<float> expectedGradData2, vector<int> expectedGradShape2 )
 {
-    Flow::NArrayCore* result;
-    std::string name;
+    NARRAY result;
+    string name;
     bool binaryOp = false;
     switch (op)
     {
-        case Flow::NArrayCore::Operation::ADD: result = Flow::Add( arr1, arr2 ); name = "Add"; binaryOp = true; break;
-        case Flow::NArrayCore::Operation::MUL: result = Flow::Mul( arr1, arr2 ); name = "Mul"; binaryOp = true; break;
-        case Flow::NArrayCore::Operation::MM: result = Flow::MM( arr1, arr2 ); name = "MM"; binaryOp = true; break;
-        case Flow::NArrayCore::Operation::POW: result = Flow::Pow( arr1, floatParams[0] ); name = "Pow"; break;
-        case Flow::NArrayCore::Operation::EXP: result = Flow::Exp(arr1); name = "Exp"; break;
-        case Flow::NArrayCore::Operation::TANH: result = Flow::Tanh(arr1); name = "Tanh"; break;
-        case Flow::NArrayCore::Operation::RELU: result = Flow::ReLU(arr1); name = "ReLU"; break;
-        case Flow::NArrayCore::Operation::LOG: result = Flow::Log(arr1); name = "Log"; break;
-        case Flow::NArrayCore::Operation::SUM: result = Flow::Sum( arr1, intParams[0] ); name = "Sum"; break;
-        case Flow::NArrayCore::Operation::MAX: result = Flow::Max( arr1, intParams[0] ); name = "Max"; break;
-        case Flow::NArrayCore::Operation::BROADCAST: result = Flow::Broadcast( arr1, intVecParams[0] ); name = "Broadcast"; break;
-        case Flow::NArrayCore::Operation::GATHER: result = Flow::Gather( arr1, intParams[0], arr2 ); name = "Gather"; binaryOp = true; break;
-        case Flow::NArrayCore::Operation::UNSQUEEZE: result = Flow::Unsqueeze( arr1, intParams[0] ); name = "Unsqueeze"; break;
-        case Flow::NArrayCore::Operation::INDEX: result = Flow::Index( arr1, intParams[0], arr2 ); name = "Index"; binaryOp = true; break;
-        case Flow::NArrayCore::Operation::CROSSENTROPY: result = Flow::CrossEntropy( arr1, arr2 ); name = "CrossEntropy"; binaryOp = true; break;
+        case Flow::NArray::Operation::ADD:
+            result = Flow::Add( arr1, arr2 );
+            name = "Add";
+            binaryOp = true;
+            break;
+        case Flow::NArray::Operation::MUL:
+            result = Flow::Mul( arr1, arr2 );
+            name = "Mul";
+            binaryOp = true;
+            break;
+        case Flow::NArray::Operation::MM:
+            result = Flow::MM( arr1, arr2 );
+            name = "MM";
+            binaryOp = true;
+            break;
+        case Flow::NArray::Operation::POW:
+            result = Flow::Pow( arr1, floatParams[0] );
+            name = "Pow";
+            break;
+        case Flow::NArray::Operation::EXP:
+            result = Flow::Exp(arr1);
+            name = "Exp";
+            break;
+        case Flow::NArray::Operation::TANH:
+            result = Flow::Tanh(arr1);
+            name = "Tanh";
+            break;
+        case Flow::NArray::Operation::RELU:
+            result = Flow::ReLU(arr1);
+            name = "ReLU";
+            break;
+        case Flow::NArray::Operation::LOG:
+            result = Flow::Log(arr1);
+            name = "Log";
+            break;
+        case Flow::NArray::Operation::SUM:
+            result = Flow::Sum( arr1, intParams[0] );
+            name = "Sum";
+            break;
+        case Flow::NArray::Operation::MAX:
+            result = Flow::Max( arr1, intParams[0] );
+            name = "Max";
+            break;
+        case Flow::NArray::Operation::BROADCAST:
+            result = Flow::Broadcast( arr1, intVecParams[0] );
+            name = "Broadcast";
+            break;
+        case Flow::NArray::Operation::GATHER:
+            result = Flow::Gather( arr1, intParams[0], arr2 );
+            name = "Gather";
+            binaryOp = true;
+            break;
+        case Flow::NArray::Operation::UNSQUEEZE:
+            result = Flow::Unsqueeze( arr1, intParams[0] );
+            name = "Unsqueeze";
+            break;
+        case Flow::NArray::Operation::INDEX:
+            result = Flow::Index( arr1, intParams[0], arr2 );
+            name = "Index";
+            binaryOp = true;
+            break;
+        case Flow::NArray::Operation::CROSSENTROPY:
+            result = Flow::CrossEntropy( arr1, arr2 );
+            name = "CrossEntropy";
+            binaryOp = true;
+            break;
     }
     result->Backpropagate();
     bool passed = false;
@@ -52,13 +103,13 @@ static bool Test( int num, int& numPassed,
     }
     if (passed)
     {
-        Flow::Print( "Test_" + name + "_" + std::to_string(num) + " PASSED" );
+        Flow::Print( "Test_" + name + "_" + to_string(num) + " PASSED" );
         numPassed++;
         return true;
     }
     else
     {
-        Flow::Print( "Test_" + name + "_" + std::to_string(num) + " FAILED" );
+        Flow::Print( "Test_" + name + "_" + to_string(num) + " FAILED" );
         return false;
     }
 }

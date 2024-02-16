@@ -3,10 +3,11 @@
 #include <limits>
 
 #include "CUDA.cuh"
-#include "Flow/NArrayCore.h"
+#include "Flow/NArray.h"
 
 __global__
-void Sum_Kernel( float* arr, int* arrShape, int arrShapeSize, int dim, float* result, int* resultShape, int resultShapeSize )
+void Sum_Kernel( float* arr, int* arrShape, int arrShapeSize, int dim, float* result,
+    int* resultShape, int resultShapeSize )
 {
     int i = blockIdx.x;
     int multiIndex[10];
@@ -16,7 +17,7 @@ void Sum_Kernel( float* arr, int* arrShape, int arrShapeSize, int dim, float* re
     atomicAdd( &result[flatIndex], arr[i] );
 }
 
-Flow::NArrayCore* Flow::Sum( NArrayCore* arr, int dim )
+NARRAY Flow::Sum( NARRAY arr, int dim )
 {
     int n = SizeFromShape(arr->GetShape());
     vector<int> resultShape = arr->GetShape();
@@ -28,20 +29,25 @@ Flow::NArrayCore* Flow::Sum( NArrayCore* arr, int dim )
     cudaMalloc( (void**)&arrShape_d, arr->GetShape().size() * sizeof(int) );
     cudaMalloc( (void**)&result_d, n * sizeof(float) );
     cudaMalloc( (void**)&resultShape_d, resultShape.size() * sizeof(int) );
-    cudaMemcpy( arrShape_d, arr->GetShapeData(), arr->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
-    cudaMemcpy( result_d, resultData.data(), SizeFromShape(resultShape) * sizeof(int), cudaMemcpyHostToDevice );
-    cudaMemcpy( resultShape_d, resultShape.data(), resultShape.size() * sizeof(int), cudaMemcpyHostToDevice );
-    Sum_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), dim, result_d, resultShape_d, resultShape.size() );
+    cudaMemcpy( arrShape_d, arr->GetShapeData(), arr->GetShape().size() * sizeof(int),
+        cudaMemcpyHostToDevice );
+    cudaMemcpy( result_d, resultData.data(), SizeFromShape(resultShape) * sizeof(int),
+        cudaMemcpyHostToDevice );
+    cudaMemcpy( resultShape_d, resultShape.data(), resultShape.size() * sizeof(int),
+        cudaMemcpyHostToDevice );
+    Sum_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), dim, result_d,
+        resultShape_d, resultShape.size() );
     cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(resultShape_d);
-    NArrayCore* result = new NArrayCore( resultShape, result_d, { arr }, NArrayCore::Operation::SUM );
+    NARRAY result = NArray::Create( resultShape, result_d, { arr }, NArray::Operation::SUM );
     result->SumDim = dim;
     return result;
 }
 
 __global__
-void BackwardSum_Kernel( float* arr, int* shape, int shapeSize, float* gradient, float* operand, int* operandShape, int operandShapeSize, float* operandGradient, int dim )
+void BackwardSum_Kernel( float* arr, int* shape, int shapeSize, float* gradient, float* operand,
+    int* operandShape, int operandShapeSize, float* operandGradient, int dim )
 {
     int i = blockIdx.x;
     int j = blockIdx.y;
@@ -60,10 +66,13 @@ void Flow::NArrayCore::BackwardSum()
     cudaMalloc( (void**)&shape_d, Shape.size() * sizeof(int) );
     cudaMalloc( (void**)&operandShape_d, Operands[0]->GetShape().size() * sizeof(int) );
     cudaMemcpy( shape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
-    cudaMemcpy( operandShape_d, Operands[0]->GetShapeData(), Operands[0]->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
+    cudaMemcpy( operandShape_d, Operands[0]->GetShapeData(),
+        Operands[0]->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
     int maxDimSize = Operands[0]->GetShape()[SumDim];
     dim3 gridDims( n, maxDimSize );
-    BackwardSum_Kernel<<< gridDims, 1 >>>( GetData(), shape_d, Shape.size(), Gradient->GetData(), Operands[0]->GetData(), operandShape_d, Operands[0]->GetShape().size(), Operands[0]->GetGradient()->GetData(), SumDim );
+    BackwardSum_Kernel<<< gridDims, 1 >>>( GetData(), shape_d, Shape.size(), Gradient->GetData(),
+        Operands[0]->GetData(), operandShape_d, Operands[0]->GetShape().size(),
+        Operands[0]->GetGradient()->GetData(), SumDim );
     cudaDeviceSynchronize();
     cudaFree(shape_d);
     cudaFree(operandShape_d);

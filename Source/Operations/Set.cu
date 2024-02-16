@@ -1,7 +1,7 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
 #include "CUDA.cuh"
-#include "Flow/NArrayCore.h"
+#include "Flow/NArray.h"
 
 __global__
 void Set_Kernel( float* arr, int index, float value )

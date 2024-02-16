@@ -6,7 +6,7 @@
 
 #include <cuda_runtime.h>
 
-#include "NArrayCore.h"
+#include "NArray.h"
 
 #define MAX_DIMS 100
 
@@ -45,19 +45,21 @@ namespace Flow
         do
         {
             assumed = old;
-            old = atomicCAS( addressInt, assumed, __float_as_int( fmaxf( val, __int_as_float(assumed) ) ) );
+            old = atomicCAS( addressInt, assumed, __float_as_int( fmaxf(
+                val, __int_as_float(assumed) ) ) );
         }
         while ( assumed != old );
         return __int_as_float(old);
     }
 
-    pair< vector<int>, float* > MMRaw( pair< vector<int>, float* > arr1, pair< vector<int>, float* > arr2 );
+    pair< vector<int>, float* > MMRaw( pair< vector<int>, float* > arr1,
+        pair< vector<int>, float* > arr2 );
 
-    pair< vector<int>, float* > MMRaw( NArrayCore* arr1, NArrayCore* arr2 );
+    pair< vector<int>, float* > MMRaw( NARRAY arr1, NARRAY arr2 );
 
-    pair< vector<int>, float* > MMRaw( pair< vector<int>, float* > arr1, NArrayCore* arr2 );
+    pair< vector<int>, float* > MMRaw( pair< vector<int>, float* > arr1, NARRAY arr2 );
 
-    pair< vector<int>, float* > MMRaw( NArrayCore* arr1, pair< vector<int>, float* > arr2 );
+    pair< vector<int>, float* > MMRaw( NARRAY arr1, pair< vector<int>, float* > arr2 );
 
-    pair< vector<int>, float* > TransposeRaw( NArrayCore* arr, int firstDim, int secondDim );
+    pair< vector<int>, float* > TransposeRaw( NARRAY arr, int firstDim, int secondDim );
 }

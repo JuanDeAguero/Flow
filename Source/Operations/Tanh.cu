@@ -3,7 +3,7 @@
 #include <cmath>
 
 #include "CUDA.cuh"
-#include "Flow/NArrayCore.h"
+#include "Flow/NArray.h"
 
 __global__
 void Tanh_Kernel( float* result )
@@ -12,7 +12,7 @@ void Tanh_Kernel( float* result )
     result[i] = tanh(result[i]);
 }
 
-Flow::NArrayCore* Flow::Tanh( NArrayCore* arr )
+NARRAY Flow::Tanh( NARRAY arr )
 {
     int n = SizeFromShape(arr->GetShape());
     float* result_d;
@@ -20,7 +20,7 @@ Flow::NArrayCore* Flow::Tanh( NArrayCore* arr )
     cudaMemcpy( result_d, arr->GetData(), n * sizeof(float), cudaMemcpyDeviceToDevice );
     Tanh_Kernel<<< n, 1 >>>(result_d);
     cudaDeviceSynchronize();
-    return new NArrayCore( arr->GetShape(), result_d, { arr }, NArrayCore::Operation::TANH );
+    return NArray::Create( arr->GetShape(), result_d, { arr }, NArray::Operation::TANH );
 }
 
 __global__
@@ -35,6 +35,7 @@ void BackwardTanh_Kernel( float* gradient, float* operand, float* operandGradien
 void Flow::NArrayCore::BackwardTanh()
 {
     int n = SizeFromShape(Shape);
-    BackwardTanh_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetData(), Operands[0]->GetGradient()->GetData() );
+    BackwardTanh_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetData(),
+        Operands[0]->GetGradient()->GetData() );
     cudaDeviceSynchronize();
 }

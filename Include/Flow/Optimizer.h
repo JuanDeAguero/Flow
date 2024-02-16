@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <functional>
 #include <vector>
 
 #include "Flow/NArray.h"
@@ -16,7 +15,7 @@ namespace Flow
 
     public:
 
-        Optimizer( vector<reference_wrapper<NArray>> arrays, float learningRate, float epsilon, float weightDecay );
+        Optimizer( vector<NARRAY> arrays, float learningRate, float epsilon, float weightDecay );
 
         void ZeroGrad();
 
@@ -24,7 +23,7 @@ namespace Flow
 
     private:
 
-        vector<reference_wrapper<NArray>> Arrays;
+        vector<NARRAY> Arrays;
 
         float LearningRate;
 
@@ -34,13 +33,13 @@ namespace Flow
 
         int Time;
 
-        vector<NArrayCore*> Beta1s;
+        vector<NARRAY> Beta1s;
 
-        vector<NArrayCore*> Beta2s;
+        vector<NARRAY> Beta2s;
 
-        vector<NArrayCore*> Ms;
+        vector<NARRAY> Ms;
 
-        vector<NArrayCore*> Vs;
+        vector<NARRAY> Vs;
 
     };
 }

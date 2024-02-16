@@ -18,6 +18,8 @@
 #include "TestTanh.hpp"
 #include "TestUnsqueeze.hpp"
 
+using namespace std;
+
 int main()
 {
     int numPassed = 0;
@@ -39,5 +41,5 @@ int main()
     if (Test_Unsqueeze())    numPassed++;
 
     int numTests = 15;
-    Flow::Print( "== FLOW TEST " + std::to_string(numPassed) + "/" + std::to_string(numTests) + " ==" );
+    Flow::Print( "== FLOW TEST " + to_string(numPassed) + "/" + to_string(numTests) + " ==" );
 }

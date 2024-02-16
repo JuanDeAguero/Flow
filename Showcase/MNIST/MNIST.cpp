@@ -32,38 +32,39 @@ int main()
     trainLabels.resize(n);
     testLabels.resize(n);
 
-    Flow::NArray xTrain( Flow::Create( { n, 784 }, trainImages ) );
-    Flow::NArray xTest( Flow::Create( { n, 784 }, testImages ) );
-    Flow::NArray yTrain( Flow::Create( { n }, trainLabels ) );
-    Flow::NArray yTest( Flow::Create( { n }, testLabels ) );
+    NARRAY xTrain( Flow::NArray::Create( { n, 784 }, trainImages ) );
+    NARRAY xTest( Flow::NArray::Create( { n, 784 }, testImages ) );
+    NARRAY yTrain( Flow::NArray::Create( { n }, trainLabels ) );
+    NARRAY yTest( Flow::NArray::Create( { n }, testLabels ) );
 
-    xTrain.Assign( Flow::Div( xTrain.Copy(), Flow::Create( { 1 }, { 255.0f } ) ) );
-    xTest.Assign( Flow::Div( xTest.Copy(), Flow::Create( { 1 }, { 255.0f } ) ) );
+    xTrain = Flow::Div( xTrain->Copy(), Flow::NArray::Create( { 1 }, { 255.0f } ) );
+    xTest = Flow::Div( xTest->Copy(), Flow::NArray::Create( { 1 }, { 255.0f } ) );
 
-    Flow::NArray w1( Flow::Random({ 784, 512 }) );
-    Flow::NArray b1( Flow::Random({ 512 }) );
-    Flow::NArray w2( Flow::Random({ 512, 256 }) );
-    Flow::NArray b2( Flow::Random({ 256 }) );
-    Flow::NArray w3( Flow::Random({ 256, 10 }) );
-    Flow::NArray b3( Flow::Random({ 10 }) );
+    NARRAY w1( Flow::Random({ 784, 512 }) );
+    NARRAY b1( Flow::Random({ 512 }) );
+    NARRAY w2( Flow::Random({ 512, 256 }) );
+    NARRAY b2( Flow::Random({ 256 }) );
+    NARRAY w3( Flow::Random({ 256, 10 }) );
+    NARRAY b3( Flow::Random({ 10 }) );
 
     Flow::Optimizer optimizer( { w1, b1, w2, b2, w3, b3 }, 0.0025f, 1e-8f, 0.01f );
 
     for ( int epoch = 0; epoch < 150; epoch++ )
     {
-        Flow::NArray a1( ReLU( Add( MM( xTrain, w1 ), b1 ) ) );
-        Flow::NArray a2( ReLU( Add( MM( a1, w2 ), b2 ) ) );
-        Flow::NArray yPredicted( Add( MM( a2, w3 ), b3 ) );
-        Flow::NArray loss( CrossEntropy( yPredicted, yTrain ) );
+        NARRAY a1 = ReLU( Add( MM( xTrain, w1 ), b1 ) );
+        NARRAY a2 = ReLU( Add( MM( a1, w2 ), b2 ) );
+        NARRAY yPredicted = Add( MM( a2, w3 ), b3 );
+        NARRAY loss = CrossEntropy( yPredicted, yTrain );
         optimizer.ZeroGrad();
-        loss.Backpropagate();
+        loss->Backpropagate();
         optimizer.Step();
-        Flow::Print( "epoch: " + to_string( epoch + 1 ) + "  loss: " + to_string(loss.Get()[0]) + "  free: " + to_string(Flow::GetCUDAFreeMemory()) );
+        Flow::Print( "epoch: " + to_string( epoch + 1 ) + "  loss: " + to_string(loss->Get()[0]) +
+            "  free: " + to_string(Flow::GetCUDAFreeMemory()) );
     }
 
-    Flow::NArray a1( ReLU( Add( MM( xTest, w1 ), b1 ) ) );
-    Flow::NArray a2( ReLU( Add( MM( a1, w2 ), b2 ) ) );
-    Flow::NArray yPredicted( Add( MM( a2, w3 ), b3 ) );
+    NARRAY a1 = ReLU( Add( MM( xTest, w1 ), b1 ) );
+    NARRAY a2 = ReLU( Add( MM( a1, w2 ), b2 ) );
+    NARRAY yPredicted = Add( MM( a2, w3 ), b3 );
 
     n = 100;
     int numCorrect = 0;
@@ -73,14 +74,14 @@ int main()
         float maxPredValue = 0.0f;
         for ( int j = 0; j < 10; j++ )
         {
-            float value = yPredicted.Get({ i, j });
+            float value = yPredicted->Get({ i, j });
             if ( value > maxPredValue )
             {
                 maxPredValue = value;
                 maxPredIndex = j;
             }
         }
-        if ( yTest.Get({ i }) == maxPredIndex ) numCorrect++;
+        if ( yTest->Get({ i }) == maxPredIndex ) numCorrect++;
     }
     Flow::Print( to_string(numCorrect) + "/" + to_string(n) );
 }

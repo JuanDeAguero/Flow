@@ -10,11 +10,11 @@ static bool Test_Mul()
 {
     int numPassed = 0;
     int numTests = 2;
-    Flow::NArrayCore::Operation op = Flow::NArrayCore::Operation::MUL;
+    Flow::NArray::Operation op = Flow::NArray::Operation::MUL;
 
     Test( 1, numPassed,
-        Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ),
-        Flow::Create( { 3 }, { 1, 10, 100 } ), {}, {}, {}, {}, op,
+        Flow::NArray::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ),
+        Flow::NArray::Create( { 3 }, { 1, 10, 100 } ), {}, {}, {}, {}, op,
         { 0, 10, 200, 3, 40, 500, 6, 70, 800 },
         { 3, 3 },
         { 1, 10, 100, 1, 10, 100, 1, 10, 100 },
@@ -23,8 +23,8 @@ static bool Test_Mul()
         { 3 } );
 
     Test( 2, numPassed,
-        Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ),
-        Flow::Create( { 1 }, { 2 } ), {}, {}, {}, {}, op,
+        Flow::NArray::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ),
+        Flow::NArray::Create( { 1 }, { 2 } ), {}, {}, {}, {}, op,
         { 0, 2, 4, 6, 8, 10, 12, 14, 16 },
         { 3, 3 },
         { 2, 2, 2, 2, 2, 2, 2, 2, 2 },
@@ -32,7 +32,7 @@ static bool Test_Mul()
         { 36 },
         { 1 } );
 
-    Flow::Print( "Test_Mul " + std::to_string(numPassed) + "/" + std::to_string(numTests) );
+    Flow::Print( "Test_Mul " + to_string(numPassed) + "/" + to_string(numTests) );
     if ( numPassed == numTests ) return true;
     else return false;
 }
