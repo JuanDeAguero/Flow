@@ -89,16 +89,6 @@ void Flow::NArrayCore::Copy( NARRAY arr )
     cudaMemcpy( Data, arr->Data, size * sizeof(float), cudaMemcpyDeviceToDevice );
 }
 
-void Flow::NArrayCore::Destroy()
-{
-    cudaFree(Data);
-    cudaFree(Gradient->Data);
-    if ( Operands.size() > 0 && Operands[0]->Saved == false ) Operands[0]->Destroy();
-    if ( Operands.size() == 2 && Operands[1]->Saved == false ) Operands[1]->Destroy();
-    if ( GatherIndex && GatherIndex->Saved == false ) GatherIndex->Destroy();
-    if ( Index && Index->Saved == false ) Index->Destroy();
-}
-
 vector<Flow::NArrayCore*> Flow::NArrayCore::TopologicalSort()
 {
     unordered_set<NArrayCore*> visited;

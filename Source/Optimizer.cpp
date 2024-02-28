@@ -26,35 +26,20 @@ void Flow::Optimizer::Step()
     Time++;
     for ( int i = 0; i < Arrays.size(); i++ )
     {
-        /*Arrays[i]->Copy(
-            Sub( Arrays[i]->Copy(), Mul( Arrays[i]->GetGradient()->Copy(), LearningRate ) ) );*/
-
-        NARRAY gradient = Arrays[i]->GetGradient()->Copy();
+        NARRAY gradient = Arrays[i]->GetGradient();
         NARRAY one = NArray::Create( { 1 }, { 1.0f } );
-        NARRAY m = Ms[i]->Copy();
-        NARRAY v = Vs[i]->Copy();
-        Ms[i] = Add(
-            Mul( Beta1s[i]->Copy(), m ),
-            Mul( Sub( one->Copy(), Beta1s[i]->Copy() ), gradient->Copy() )
-        );
+        Ms[i] = Add( Mul( Beta1s[i], Ms[i]->Copy() ), Mul( Sub( one, Beta1s[i] ), gradient ) );
         Vs[i] = Add(
-            Mul( Beta2s[i]->Copy(), v ),
-            Mul( Sub( one->Copy(), Beta2s[i]->Copy() ), Pow( gradient->Copy(), 2.0f ) )
-        );
-        NARRAY mHat = Div(
-            Ms[i]->Copy(),
-            Sub( one->Copy(), Pow( Beta1s[i]->Copy(), (float)Time ) )
-        );
-        NARRAY vHat = Div(
-            Vs[i]->Copy(),
-            Sub( one->Copy(), Pow( Beta2s[i]->Copy(), (float)Time ) )
-        );
+            Mul( Beta2s[i], Vs[i]->Copy() ),
+            Mul( Sub( one, Beta2s[i] ), Pow( gradient, 2.0f ) ) );
+        NARRAY mHat = Div( Ms[i], Sub( one, Pow( Beta1s[i], (float)Time ) ) );
+        NARRAY vHat = Div( Vs[i], Sub( one, Pow( Beta2s[i], (float)Time ) ) );
         NARRAY epsilon = NArray::Create( { 1 }, { Epsilon } );
         NARRAY weightDecay = NArray::Create( { 1 }, { WeightDecay } );
         NARRAY a = Add(
             Div( mHat, Add( Pow( vHat, 0.5f ), epsilon ) ),
-            Mul( weightDecay, Arrays[i]->Copy() )
+            Mul( weightDecay, Arrays[i] )
         );
-        Arrays[i]->Copy( Sub( Arrays[i]->Copy(), Mul( a->Copy(), LearningRate ) ) );
+        Arrays[i]->Copy( Sub( Arrays[i], Mul( a, LearningRate ) ) );
     }
 }

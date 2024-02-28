@@ -35,7 +35,7 @@ int main()
     NARRAY b2( Flow::Random({ 1 }) );
 
     float learningRate = 0.1f;
-    int maxEpochs = 100;
+    int maxEpochs = 500;
 
     for ( int epoch = 0; epoch < maxEpochs; epoch++ )
     {
@@ -50,10 +50,10 @@ int main()
 
         loss->Backpropagate();
 
-        w1->Copy( Sub( w1->Copy(), Mul( w1->GetGradient()->Copy(), learningRate ) ) );
-        b1->Copy( Sub( b1->Copy(), Mul( b1->GetGradient()->Copy(), learningRate ) ) );
-        w2->Copy( Sub( w2->Copy(), Mul( w2->GetGradient()->Copy(), learningRate ) ) );
-        b2->Copy( Sub( b2->Copy(), Mul( b2->GetGradient()->Copy(), learningRate ) ) );
+        w1->Copy( Sub( w1->Copy(), Mul( w1->GetGradient(), learningRate ) ) );
+        b1->Copy( Sub( b1->Copy(), Mul( b1->GetGradient(), learningRate ) ) );
+        w2->Copy( Sub( w2->Copy(), Mul( w2->GetGradient(), learningRate ) ) );
+        b2->Copy( Sub( b2->Copy(), Mul( b2->GetGradient(), learningRate ) ) );
 
         Flow::Print( loss->Get()[0] + loss->Get()[2] + loss->Get()[2], 20 );
     }

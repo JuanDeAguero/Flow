@@ -65,8 +65,6 @@ namespace Flow
 
         void Copy( NARRAY arr );
 
-        void Destroy();
-
     private:
 
         friend class NARRAY;
