@@ -12,75 +12,45 @@ Machine Learning Library in C++
 - GPU acceleration with CUDA
 - Deep neural networks
 ## Example: MNIST classifier 🔢
-See "Showcase/MNIST/".<br><br>
-Load the data.
-```bash
+See "Showcase/MNIST/".<br>
+```cpp
 vector<float> trainImages = ReadImagesMNIST("...");
 vector<float> trainLabels = ReadLabelsMNIST("...");
 vector<float> testImages = ReadImagesMNIST("...");
 vector<float> testLabels = ReadLabelsMNIST("...");
 
-trainImages.resize( 784 * 100 );
-trainLabels.resize( 100 );
-testImages.resize( 784 * 100 );
-testLabels.resize( 100 );
-```
-Create the train and test NArrays.
-```bash
-Flow::NArray xTrain = Flow::Create( { 100, 784 }, trainImages );
-Flow::NArray yTrain = Flow::Create( { 100 }, trainLabels );
-Flow::NArray xTest = Flow::Create( { 100, 784 }, testImages );
-Flow::NArray yTest = Flow::Create( { 100 }, trainLabels );
-```
-Create random weights and biases.
-```bash
-Flow::NArray w1 = Flow::Random({ 784, 128 });
-Flow::NArray b1 = Flow::Random({ 128 });
-Flow::NArray w2 = Flow::Random({ 128, 10 });
-Flow::NArray b2 = Flow::Random({ 10 });
-```
-Set a learing rate of 0.1.
-```bash
-float learningRate = 0.1f;
-```
-100 iterations.
-```bash
-for ( int epoch = 0; epoch < 100; epoch++ )
-```
-Simple two-layer network. 784 -> 128 -> 10<br>
-ReLU is the activation function.<br>
-Cross entropy is the loss function.
-```math
-\begin{align*}
-a &= \text{ReLU}(\text{xTrain} \cdot w1 + b1) \\
-\text{yPred} &= a \cdot w2 + b2 \\
-\text{loss} &= - \sum_{i} \text{yTrain}_i \log(\text{yPred}_i)
-\end{align*}
-```
-```bash
-  Flow::NArray a = ReLU( Add( MM( xTrain, w1 ), b1 ) );
-  Flow::NArray yPred = Add( MM( a, w2 ), b2 );
-  Flow::NArray loss = CrossEntropy( yPred, yTrain );
-```
-Reset the gradients and backpropagate the loss.<br>
-The autograd will do its magic.
-```bash
-  w1.GetGradient().Reset(0);
-  b1.GetGradient().Reset(0);
-  w2.GetGradient().Reset(0);
-  b2.GetGradient().Reset(0);
+int n = 6000;
 
-  loss.Backpropagate();
-```
-Gradient descent.<br>
-Modify the weights and biases using their gradients and the learning rate.
-```bash
-  w1 = Sub( w1.Copy(), Mul( w1.GetGradient().Copy(), learningRate ) );
-  b1 = Sub( b1.Copy(), Mul( b1.GetGradient().Copy(), learningRate ) );
-  w2 = Sub( w2.Copy(), Mul( w2.GetGradient().Copy(), learningRate ) );
-  b2 = Sub( b2.Copy(), Mul( b2.GetGradient().Copy(), learningRate ) );
-```
-Print the loss in every epoch.
-```bash
-  Flow::Print(loss);
+trainImages.resize( 784 * n );
+testImages.resize( 784 * n );
+trainLabels.resize(n);
+testLabels.resize(n);
+
+NARRAY xTrain( Flow::NArray::Create( { n, 784 }, trainImages ) );
+NARRAY xTest( Flow::NArray::Create( { n, 784 }, testImages ) );
+NARRAY yTrain( Flow::NArray::Create( { n }, trainLabels ) );
+NARRAY yTest( Flow::NArray::Create( { n }, testLabels ) );
+
+xTrain = Flow::Div( xTrain->Copy(), Flow::NArray::Create( { 1 }, { 255.0f } ) );
+xTest = Flow::Div( xTest->Copy(), Flow::NArray::Create( { 1 }, { 255.0f } ) );
+
+NARRAY w1( Flow::Random({ 784, 512 }) );
+NARRAY b1( Flow::Random({ 512 }) );
+NARRAY w2( Flow::Random({ 512, 256 }) );
+NARRAY b2( Flow::Random({ 256 }) );
+NARRAY w3( Flow::Random({ 256, 10 }) );
+NARRAY b3( Flow::Random({ 10 }) );
+
+Flow::Optimizer optimizer( { w1, b1, w2, b2, w3, b3 }, 0.0025f, 1e-8f, 0.01f );
+
+for ( int epoch = 0; epoch < 500; epoch++ )
+{
+    NARRAY a1 = ReLU( Add( MM( xTrain, w1 ), b1 ) );
+    NARRAY a2 = ReLU( Add( MM( a1, w2 ), b2 ) );
+    NARRAY yPredicted = Add( MM( a2, w3 ), b3 );
+    NARRAY loss = CrossEntropy( yPredicted, yTrain );
+    optimizer.ZeroGrad();
+    loss->Backpropagate();
+    optimizer.Step();
+}
 ```
