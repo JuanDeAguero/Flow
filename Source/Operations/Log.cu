@@ -20,7 +20,7 @@ NARRAY Flow::Log( NARRAY arr )
     cudaMemcpy( result_d, arr->GetData(), n * sizeof(float), cudaMemcpyDeviceToDevice );
     Log_Kernel<<< n, 1 >>>(result_d);
     cudaDeviceSynchronize();
-    return NArray::Create( arr->GetShape(), result_d, { arr }, NArray::Operation::LOG );
+    return Create( arr->GetShape(), result_d, { arr }, NArray::Operation::LOG );
 }
 
 __global__
@@ -31,7 +31,7 @@ void BackwardLog_Kernel( float* gradient, float* operand, float* operandGradient
     atomicAdd( &operandGradient[i], grad );
 }
 
-void Flow::NArrayCore::BackwardLog()
+void Flow::NArray::BackwardLog()
 {
     int n = SizeFromShape(Shape);
     BackwardLog_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetData(),

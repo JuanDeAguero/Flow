@@ -14,20 +14,20 @@
 
 using namespace std;
 
-Flow::NArrayCore::NArrayCore( vector<int> shape, const vector<float>& data )
-    : Shape(shape), Gradient( make_shared<NArrayCore>(shape) ), Op(NArray::Operation::NONE),
+Flow::NArray::NArray( vector<int> shape, const vector<float>& data )
+    : Shape(shape), Gradient( make_shared<NArray>(shape) ), Op(NArray::Operation::NONE),
       Saved(false), GatherIndex(nullptr), Index(nullptr)
 {
     cudaMalloc( (void**)&Data, data.size() * sizeof(float) );
     cudaMemcpy( Data, data.data(), data.size() * sizeof(float), cudaMemcpyHostToDevice );
 }
 
-Flow::NArrayCore::NArrayCore( vector<int> shape, float* deviceData, vector<NARRAY> operands,
+Flow::NArray::NArray( vector<int> shape, float* deviceData, vector<NARRAY> operands,
     NArray::Operation op )
-    : Data(deviceData), Shape(shape), Gradient( make_shared<NArrayCore>(shape) ),
-      Operands(operands), Op(op), Saved(false), GatherIndex(nullptr), Index(nullptr) {}
+    : Data(deviceData), Shape(shape), Gradient( make_shared<NArray>(shape) ), Operands(operands),
+      Op(op), Saved(false), GatherIndex(nullptr), Index(nullptr) {}
 
-Flow::NArrayCore::NArrayCore( vector<int> shape )
+Flow::NArray::NArray( vector<int> shape )
     : Shape(shape), Gradient(nullptr), Op(NArray::Operation::NONE), Saved(false),
       GatherIndex(nullptr), Index(nullptr)
 {
@@ -35,12 +35,12 @@ Flow::NArrayCore::NArrayCore( vector<int> shape )
     cudaMemset( Data, 0, SizeFromShape(shape) * sizeof(float) );
 }
 
-Flow::NArrayCore::~NArrayCore()
+Flow::NArray::~NArray()
 {
     cudaFree(Data);
 }
 
-float Flow::NArrayCore::Get( vector<int> coordinates )
+float Flow::NArray::Get( vector<int> coordinates )
 {
     int index = MultiToFlatIndex( coordinates, Shape );
     if ( index >= 0 && index < SizeFromShape(Shape) )
@@ -51,7 +51,7 @@ float Flow::NArrayCore::Get( vector<int> coordinates )
     }
 }
 
-vector<float> Flow::NArrayCore::Get()
+vector<float> Flow::NArray::Get()
 {
     int size = SizeFromShape(Shape);
     vector<float> data(size);
@@ -59,64 +59,64 @@ vector<float> Flow::NArrayCore::Get()
     return data;
 }
 
-float* Flow::NArrayCore::GetData() { return Data; }
+float* Flow::NArray::GetData() { return Data; }
 
-vector<int> Flow::NArrayCore::GetShape() { return Shape; }
+vector<int> Flow::NArray::GetShape() { return Shape; }
 
-int* Flow::NArrayCore::GetShapeData() { return Shape.data(); }
+int* Flow::NArray::GetShapeData() { return Shape.data(); }
 
-NARRAY Flow::NArrayCore::GetGradient() { return Gradient; }
+NARRAY Flow::NArray::GetGradient() { return Gradient; }
 
-void Flow::NArrayCore::Backpropagate()
+void Flow::NArray::Backpropagate()
 {
     if ( Operands.size() == 0 ) return;
     Gradient->Reset(1.0f);
     auto topo = TopologicalSort();
-    for ( Flow::NArrayCore* arr : topo ) arr->Backward();
+    for ( Flow::NArray* arr : topo ) arr->Backward();
 }
 
-NARRAY Flow::NArrayCore::Copy()
+NARRAY Flow::NArray::Copy()
 {
     int size = SizeFromShape(Shape);
     vector<float> data(size);
     cudaMemcpy( data.data(), Data, size * sizeof(float), cudaMemcpyDeviceToHost );
-    return make_shared<NArrayCore>( Shape, data );
+    return make_shared<NArray>( Shape, data );
 }
 
-void Flow::NArrayCore::Copy( NARRAY arr )
+void Flow::NArray::Copy( NARRAY arr )
 {
     int size = SizeFromShape(Shape);
     cudaMemcpy( Data, arr->Data, size * sizeof(float), cudaMemcpyDeviceToDevice );
 }
 
-vector<Flow::NArrayCore*> Flow::NArrayCore::TopologicalSort()
+vector<Flow::NArray*> Flow::NArray::TopologicalSort()
 {
-    unordered_set<NArrayCore*> visited;
-    vector<NArrayCore*> topo;
+    unordered_set<NArray*> visited;
+    vector<NArray*> topo;
     BuildTopo( this, visited, topo );
     reverse( topo.begin(), topo.end() );
     return topo;
 }
 
-void Flow::NArrayCore::BuildTopo( NArrayCore* current, unordered_set<NArrayCore*>& visited,
-    vector<NArrayCore*>& topo )
+void Flow::NArray::BuildTopo( NArray* current, unordered_set<NArray*>& visited,
+    vector<NArray*>& topo )
 {
     if ( visited.find(current) != visited.end() || current->Operands.size() == 0 ) return;
     visited.insert(current);
-    NArrayCore* first = current->Operands[0].get();
+    NArray* first = current->Operands[0].get();
     if (first)
     {
         BuildTopo( first, visited, topo );
         if ( current->Operands.size() != 1 )
         {
-            NArrayCore* second = current->Operands[1].get();
+            NArray* second = current->Operands[1].get();
             if (second) BuildTopo( second, visited, topo );
         }
     }
     topo.push_back(current);
 }
 
-void Flow::NArrayCore::Backward()
+void Flow::NArray::Backward()
 {
     if ( Operands.size() == 0 ) return;
     switch (Op)
@@ -142,15 +142,15 @@ void Flow::NArrayCore::Backward()
     }
 }
 
-NARRAY Flow::NArray::Create( vector<int> shape, const vector<float>& data )
+NARRAY Flow::Create( vector<int> shape, const vector<float>& data )
 {
-    return make_shared<NArrayCore>( shape, data );
+    return make_shared<NArray>( shape, data );
 }
 
-NARRAY Flow::NArray::Create( vector<int> shape, float* deviceData, vector<NARRAY> operands,
+NARRAY Flow::Create( vector<int> shape, float* deviceData, vector<NARRAY> operands,
     NArray::Operation op )
 {
-    return make_shared<NArrayCore>( shape, deviceData, operands, op );
+    return make_shared<NArray>( shape, deviceData, operands, op );
 }
 
 NARRAY Flow::Neg( NARRAY arr )
@@ -172,20 +172,20 @@ NARRAY Flow::Mean( NARRAY arr, int dim )
 {
     NARRAY sum = Sum( arr, dim );
     float numElements = (float)arr->GetShape()[dim];
-    NARRAY n = NArray::Create( { 1 }, { numElements } );
+    NARRAY n = Create( { 1 }, { numElements } );
     return Div( sum, n );
 }
 
 NARRAY Flow::Softmax( NARRAY arr, int dim )
 {
-    NARRAY index = NArray::Create( { 1 }, { 0.0f } );
+    NARRAY index = Create( { 1 }, { 0.0f } );
     NARRAY exp = Exp( Sub( arr, Index( Max( arr, dim ), dim, index ) ) );
     return Div( exp, Sum( exp, dim ) );
 }
 
 NARRAY Flow::CrossEntropy( NARRAY arr1, NARRAY arr2 )
 {
-    NARRAY small = NArray::Create( { 1 }, { 1e-10f } );
+    NARRAY small = Create( { 1 }, { 1e-10f } );
     NARRAY arrUnsqueezed2 = Unsqueeze( arr2, 1 );
     return Mean( Neg( Log( Add( Gather( Softmax( arr1, 1 ), 1, arrUnsqueezed2 ), small ) ) ), 0 );
 }
@@ -198,25 +198,25 @@ NARRAY Flow::Random( vector<int> shape )
     int size = SizeFromShape(shape);
     vector<float> data( size, 0.0f );
     for ( int i = 0; i < size; i++ ) data[i] = distribution(generator);
-    return NArray::Create( shape, data );
+    return Create( shape, data );
 }
 
 NARRAY Flow::Zeros( vector<int> shape )
 {
     vector<float> data( SizeFromShape(shape), 0.0f );
-    return NArray::Create( shape, data );
+    return Create( shape, data );
 }
 
 NARRAY Flow::Ones( vector<int> shape )
 {
     vector<float> data( SizeFromShape(shape), 1.0f );
-    return NArray::Create( shape, data );
+    return Create( shape, data );
 }
 
 NARRAY Flow::OneHot( vector<int> integers, int num )
 {
     vector<float> data( integers.size() * num );
-    NARRAY arr = NArray::Create( { (int)integers.size(), num }, data );
+    NARRAY arr = Create( { (int)integers.size(), num }, data );
     for ( int i = 0; i < integers.size(); i++ )
     {
         for ( int j = 0; j < num; j++ )

@@ -11,7 +11,7 @@ NARRAY Flow::Unsqueeze( NARRAY arr, int dim )
     cudaMalloc( (void**)&result_d, SizeFromShape(arr->GetShape()) * sizeof(float) );
     cudaMemcpy( result_d, arr->GetData(), SizeFromShape(arr->GetShape()) * sizeof(float),
         cudaMemcpyDeviceToDevice );
-    return NArray::Create( resultShape, result_d, { arr }, NArray::Operation::UNSQUEEZE );
+    return Create( resultShape, result_d, { arr }, NArray::Operation::UNSQUEEZE );
 }
 
 __global__
@@ -21,7 +21,7 @@ void BackwardUnsqueeze_Kernel( float* gradient, float* operandGradient )
     atomicAdd( &operandGradient[i], gradient[i] );
 }
 
-void Flow::NArrayCore::BackwardUnsqueeze()
+void Flow::NArray::BackwardUnsqueeze()
 {
     int n = SizeFromShape(Shape);
     BackwardUnsqueeze_Kernel<<< n, 1 >>>( Gradient->GetData(),

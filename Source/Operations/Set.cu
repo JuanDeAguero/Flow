@@ -9,7 +9,7 @@ void Set_Kernel( float* arr, int index, float value )
     arr[index] = value;
 }
 
-void Flow::NArrayCore::Set( vector<int> coordinates, float value )
+void Flow::NArray::Set( vector<int> coordinates, float value )
 {
     int index = MultiToFlatIndex( coordinates, Shape );
     if ( index >= 0 && index < SizeFromShape(Shape) )
@@ -26,7 +26,7 @@ void Reset_Kernel( float* arr, float value )
     arr[i] = value;
 }
 
-void Flow::NArrayCore::Reset( float value )
+void Flow::NArray::Reset( float value )
 {
     int n = SizeFromShape(Shape);
     Reset_Kernel<<< n, 1 >>>( Data, value );

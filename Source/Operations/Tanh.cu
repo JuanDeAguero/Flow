@@ -20,7 +20,7 @@ NARRAY Flow::Tanh( NARRAY arr )
     cudaMemcpy( result_d, arr->GetData(), n * sizeof(float), cudaMemcpyDeviceToDevice );
     Tanh_Kernel<<< n, 1 >>>(result_d);
     cudaDeviceSynchronize();
-    return NArray::Create( arr->GetShape(), result_d, { arr }, NArray::Operation::TANH );
+    return Create( arr->GetShape(), result_d, { arr }, NArray::Operation::TANH );
 }
 
 __global__
@@ -32,7 +32,7 @@ void BackwardTanh_Kernel( float* gradient, float* operand, float* operandGradien
     atomicAdd( &operandGradient[i], grad );
 }
 
-void Flow::NArrayCore::BackwardTanh()
+void Flow::NArray::BackwardTanh()
 {
     int n = SizeFromShape(Shape);
     BackwardTanh_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetData(),

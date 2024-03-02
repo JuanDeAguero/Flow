@@ -38,8 +38,7 @@ NARRAY Flow::Gather( NARRAY arr, int dim, NARRAY index )
     cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(indexShape_d);
-    NARRAY result = NArray::Create( index->GetShape(), result_d, { arr },
-        NArray::Operation::GATHER );
+    NARRAY result = Create( index->GetShape(), result_d, { arr }, NArray::Operation::GATHER );
     result->GatherDim = dim;
     result->GatherIndex = index;
     return result;
@@ -62,7 +61,7 @@ void BackwardGather_Kernel( float* gradient, int* operandShape, int operandShape
     atomicAdd( &operandGradient[flatIndex], gradient[i] );
 }
 
-void Flow::NArrayCore::BackwardGather()
+void Flow::NArray::BackwardGather()
 {
     int n = SizeFromShape(GatherIndex->GetShape());
     int* operandShape_d;

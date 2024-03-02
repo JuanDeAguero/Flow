@@ -53,7 +53,7 @@ NARRAY Flow::Broadcast( NARRAY arr, vector<int> shape )
     cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(shape_d);
-    return NArray::Create( shape, result_d, { arr }, NArray::Operation::BROADCAST );
+    return Create( shape, result_d, { arr }, NArray::Operation::BROADCAST );
 }
 
 __global__
@@ -75,7 +75,7 @@ void BackwardBroadcast_Kernel( float* gradient, int* shape, int shapeSize, int* 
 }
 
 __host__
-void Flow::NArrayCore::BackwardBroadcast()
+void Flow::NArray::BackwardBroadcast()
 {
     int n = SizeFromShape(Gradient->GetShape());
     int* shape_d;

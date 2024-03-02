@@ -15,8 +15,8 @@ Machine Learning Library in C++
 See "Showcase/MNIST/".<br>
 ```cpp
 vector<float> trainImages = ReadImagesMNIST("...");
-vector<float> trainLabels = ReadLabelsMNIST("...");
 vector<float> testImages = ReadImagesMNIST("...");
+vector<float> trainLabels = ReadLabelsMNIST("...");
 vector<float> testLabels = ReadLabelsMNIST("...");
 
 int n = 6000;
@@ -26,13 +26,13 @@ testImages.resize( 784 * n );
 trainLabels.resize(n);
 testLabels.resize(n);
 
-NARRAY xTrain( Flow::NArray::Create( { n, 784 }, trainImages ) );
-NARRAY xTest( Flow::NArray::Create( { n, 784 }, testImages ) );
-NARRAY yTrain( Flow::NArray::Create( { n }, trainLabels ) );
-NARRAY yTest( Flow::NArray::Create( { n }, testLabels ) );
+NARRAY xTrain( Flow::Create( { n, 784 }, trainImages ) );
+NARRAY xTest( Flow::Create( { n, 784 }, testImages ) );
+NARRAY yTrain( Flow::Create( { n }, trainLabels ) );
+NARRAY yTest( Flow::Create( { n }, testLabels ) );
 
-xTrain = Flow::Div( xTrain->Copy(), Flow::NArray::Create( { 1 }, { 255.0f } ) );
-xTest = Flow::Div( xTest->Copy(), Flow::NArray::Create( { 1 }, { 255.0f } ) );
+xTrain = Flow::Div( xTrain->Copy(), Flow::Create( { 1 }, { 255.0f } ) );
+xTest = Flow::Div( xTest->Copy(), Flow::Create( { 1 }, { 255.0f } ) );
 
 NARRAY w1( Flow::Random({ 784, 512 }) );
 NARRAY b1( Flow::Random({ 512 }) );
@@ -45,10 +45,10 @@ Flow::Optimizer optimizer( { w1, b1, w2, b2, w3, b3 }, 0.0025f, 1e-8f, 0.01f );
 
 for ( int epoch = 0; epoch < 500; epoch++ )
 {
-    NARRAY a1 = ReLU( Add( MM( xTrain, w1 ), b1 ) );
-    NARRAY a2 = ReLU( Add( MM( a1, w2 ), b2 ) );
-    NARRAY yPredicted = Add( MM( a2, w3 ), b3 );
-    NARRAY loss = CrossEntropy( yPredicted, yTrain );
+    NARRAY a1 = Flow::ReLU( Add( MM( xTrain, w1 ), b1 ) );
+    NARRAY a2 = Flow::ReLU( Add( MM( a1, w2 ), b2 ) );
+    NARRAY yPredicted = Flow::Add( MM( a2, w3 ), b3 );
+    NARRAY loss = Flow::CrossEntropy( yPredicted, yTrain );
     optimizer.ZeroGrad();
     loss->Backpropagate();
     optimizer.Step();

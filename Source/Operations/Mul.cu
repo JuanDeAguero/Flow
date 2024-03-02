@@ -20,13 +20,12 @@ NARRAY Flow::Mul( NARRAY arr1, NARRAY arr2 )
     cudaMalloc( (void**)&result_d, n * sizeof(float) );
     Mul_Kernel<<< n, 1 >>>( arr1B->GetData(), arr2B->GetData(), result_d );
     cudaDeviceSynchronize();
-    return NArray::Create( arr1B->GetShape(), result_d, { arr1B, arr2B }, NArray::Operation::MUL );
+    return Create( arr1B->GetShape(), result_d, { arr1B, arr2B }, NArray::Operation::MUL );
 }
 
 NARRAY Flow::Mul( NARRAY arr, float literal )
 {
-    NARRAY arrLiteral = NArray::Create( { 1 }, { literal } );
-    return Mul( arr, arrLiteral );
+    return Mul( arr, Create( { 1 }, { literal } ) );
 }
 
 __global__
@@ -38,7 +37,7 @@ void BackwardMul_Kernel( float* gradient, float* operand1, float* operandGradien
     atomicAdd( &operandGradient2[i], operand1[i] * gradient[i] );
 }
 
-void Flow::NArrayCore::BackwardMul()
+void Flow::NArray::BackwardMul()
 {
     int n = SizeFromShape(Gradient->GetShape());
     BackwardMul_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetData(),

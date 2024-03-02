@@ -35,8 +35,7 @@ NARRAY Flow::Index( NARRAY arr, int dim, NARRAY index )
     cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(resultShape_d);
-    NARRAY result = NArray::Create( resultShape, result_d, { arr, index },
-        NArray::Operation::INDEX );
+    NARRAY result = Create( resultShape, result_d, { arr, index }, NArray::Operation::INDEX );
     result->IndexDim = dim;
     result->Index = index;
     return result;
@@ -54,7 +53,7 @@ void BackwardIndex_Kernel( int* shape, int shapeSize, float* gradient, int* oper
     atomicAdd( &operandGradient[flatIndex], gradient[i] );
 }
 
-void Flow::NArrayCore::BackwardIndex()
+void Flow::NArray::BackwardIndex()
 {
     int n = SizeFromShape(Gradient->GetShape());
     int* shape_d;

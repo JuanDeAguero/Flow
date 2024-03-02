@@ -40,7 +40,7 @@ NARRAY Flow::Max( NARRAY arr, int dim )
     cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(resultShape_d);
-    NARRAY result = NArray::Create( resultShape, result_d, { arr }, NArray::Operation::MAX );
+    NARRAY result = Create( resultShape, result_d, { arr }, NArray::Operation::MAX );
     result->MaxDim = dim;
     return result;
 }
@@ -59,7 +59,7 @@ void BackwardMax_Kernel( float* arr, int* shape, int shapeSize, float* gradient,
         atomicAdd( &operandGradient[flatIndex], gradient[i] );
 }
 
-void Flow::NArrayCore::BackwardMax()
+void Flow::NArray::BackwardMax()
 {
     int n = SizeFromShape(Shape);
     int* shape_d;

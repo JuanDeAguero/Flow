@@ -9,7 +9,7 @@ NARRAY Flow::Reshape( NARRAY arr, vector<int> shape )
     cudaMalloc( (void**)&result_d, SizeFromShape(arr->GetShape()) * sizeof(float) );
     cudaMemcpy( result_d, arr->GetData(), SizeFromShape(arr->GetShape()) * sizeof(float),
         cudaMemcpyDeviceToDevice );
-    return NArray::Create( shape, result_d, { arr }, NArray::Operation::UNSQUEEZE );
+    return Create( shape, result_d, { arr }, NArray::Operation::UNSQUEEZE );
 }
 
 __global__
@@ -19,7 +19,7 @@ void BackwardReshape_Kernel( float* gradient, float* operandGradient )
     atomicAdd( &operandGradient[i], gradient[i] );
 }
 
-void Flow::NArrayCore::BackwardReshape()
+void Flow::NArray::BackwardReshape()
 {
     int n = SizeFromShape(Shape);
     BackwardReshape_Kernel<<< n, 1 >>>( Gradient->GetData(),

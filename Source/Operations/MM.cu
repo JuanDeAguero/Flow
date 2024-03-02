@@ -68,10 +68,10 @@ pair< vector<int>, float* > Flow::MMRaw( NARRAY arr1, pair< vector<int>, float* 
 NARRAY Flow::MM( NARRAY arr1, NARRAY arr2 )
 {
     auto mm = MMRaw( arr1, arr2 );
-    return NArray::Create( mm.first, mm.second, { arr1, arr2 }, NArray::Operation::MM );
+    return Create( mm.first, mm.second, { arr1, arr2 }, NArray::Operation::MM );
 }
 
-void Flow::NArrayCore::BackwardMM()
+void Flow::NArray::BackwardMM()
 {
     auto transpose1 = TransposeRaw( Operands[0], 0, 1 );
     auto transpose2 = TransposeRaw( Operands[1], 0, 1 );

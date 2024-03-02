@@ -20,7 +20,7 @@ NARRAY Flow::Exp( NARRAY arr )
     cudaMemcpy( result_d, arr->GetData(), n * sizeof(float), cudaMemcpyDeviceToDevice );
     Exp_Kernel<<< n, 1 >>>(result_d);
     cudaDeviceSynchronize();
-    return NArray::Create( arr->GetShape(), result_d, { arr }, NArray::Operation::EXP );
+    return Create( arr->GetShape(), result_d, { arr }, NArray::Operation::EXP );
 }
 
 __global__
@@ -31,7 +31,7 @@ void BackwardExp_Kernel( float* gradient, float* operand, float* operandGradient
     atomicAdd( &operandGradient[i], grad );
 }
 
-void Flow::NArrayCore::BackwardExp()
+void Flow::NArray::BackwardExp()
 {
     int n = SizeFromShape(Shape);
     BackwardExp_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetData(),

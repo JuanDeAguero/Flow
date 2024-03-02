@@ -40,7 +40,7 @@ NARRAY Flow::Sum( NARRAY arr, int dim )
     cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(resultShape_d);
-    NARRAY result = NArray::Create( resultShape, result_d, { arr }, NArray::Operation::SUM );
+    NARRAY result = Create( resultShape, result_d, { arr }, NArray::Operation::SUM );
     result->SumDim = dim;
     return result;
 }
@@ -58,7 +58,7 @@ void BackwardSum_Kernel( float* arr, int* shape, int shapeSize, float* gradient,
     atomicAdd( &operandGradient[flatIndex], gradient[i] );
 }
 
-void Flow::NArrayCore::BackwardSum()
+void Flow::NArray::BackwardSum()
 {
     int n = SizeFromShape(Shape);
     int* shape_d;

@@ -8,7 +8,7 @@ Two shapes are compatible if for each element of the shape with the smaller size
 Same applies if the two shapes have the same size.
 ### Example
 ```cpp
-NARRAY arr = NArray::Create( { 3 }, { 1, 2, 3 } );
+NARRAY arr = Create( { 3 }, { 1, 2, 3 } );
 NARRAY broadcasted = Broadcast( arr, { 3, 3 } );
 ```
 ```bash

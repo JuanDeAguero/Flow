@@ -49,11 +49,10 @@ pair< vector<int>, float* > Flow::TransposeRaw( NARRAY arr, int firstDim, int se
 NARRAY Flow::Transpose( NARRAY arr, int firstDim, int secondDim )
 {
     auto transpose = TransposeRaw( arr, firstDim, secondDim );
-    return NArray::Create( transpose.first, transpose.second, { arr },
-        NArray::Operation::TRANSPOSE );
+    return Create( transpose.first, transpose.second, { arr }, NArray::Operation::TRANSPOSE );
 }
 
-void Flow::NArrayCore::BackwardTranspose()
+void Flow::NArray::BackwardTranspose()
 {
     throw runtime_error("Backward transpose not implemented!");
 }

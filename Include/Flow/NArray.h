@@ -8,14 +8,17 @@
 #include <unordered_set>
 #include <vector>
 
-#define NARRAY std::shared_ptr<Flow::NArrayCore>
+#define NARRAY std::shared_ptr<Flow::NArray>
 
 namespace Flow
 {
     using namespace std;
 
-    namespace NArray
+    class NArray
     {
+
+    public:
+
         enum Operation
         {
             NONE,
@@ -27,21 +30,14 @@ namespace Flow
             RESHAPE, SOFTMAX, SQUEEZE,   SUB,
             SUM,     TANH,    TRANSPOSE, UNSQUEEZE
         };
-    }
 
-    class NArrayCore
-    {
+        NArray( vector<int> shape, const vector<float>& data );
 
-    public:
+        NArray( vector<int> shape, float* deviceData, vector<NARRAY> operands, Operation op );
 
-        NArrayCore( vector<int> shape, const vector<float>& data );
+        NArray( vector<int> shape );  // Constructor for gradients.
 
-        NArrayCore( vector<int> shape, float* deviceData, vector<NARRAY> operands,
-            NArray::Operation op );
-
-        NArrayCore( vector<int> shape );  // Constructor for gradients.
-
-        ~NArrayCore();
+        ~NArray();
 
         float Get( vector<int> coordinates );
 
@@ -97,10 +93,9 @@ namespace Flow
         
         int TransposeFirstDim, TransposeSecondDim;
 
-        vector<NArrayCore*> TopologicalSort();
+        vector<NArray*> TopologicalSort();
 
-        void BuildTopo( NArrayCore* current, unordered_set<NArrayCore*>& visited,
-            vector<NArrayCore*>& topo );
+        void BuildTopo( NArray* current, unordered_set<NArray*>& visited, vector<NArray*>& topo );
 
         void Backward();
 
@@ -150,13 +145,10 @@ namespace Flow
 
     };
 
-    namespace NArray
-    {
-        NARRAY Create( vector<int> shape, const vector<float>& data );
+    NARRAY Create( vector<int> shape, const vector<float>& data );
 
-        NARRAY Create( vector<int> shape, float* deviceData, vector<NARRAY> operands,
-            NArray::Operation op );
-    }
+    NARRAY Create( vector<int> shape, float* deviceData, vector<NARRAY> operands,
+        NArray::Operation op );
 
     NARRAY Add( NARRAY arr1, NARRAY arr2 );
 
