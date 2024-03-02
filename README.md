@@ -1,16 +1,16 @@
 # Flow 🌊
 Machine Learning Library in C++
-## Minimum requirements
-- C++ 11
-- CMake 3.12
-- CUDA Toolkit 12.3
-- Windows 10
 ## Features ✨
 - N dimensional array operations
   - Addition, multiplication, ReLU, matrix multiplication, ...
 - Autograd system
 - GPU acceleration with CUDA
 - Deep neural networks
+## Minimum requirements
+- C++ 11
+- CMake 3.12
+- CUDA Toolkit 12.3
+- Windows 10
 ## Example: MNIST classifier 🔢
 See "Showcase/MNIST/".<br>
 ```cpp
