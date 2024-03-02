@@ -186,7 +186,7 @@ NARRAY Flow::Softmax( NARRAY arr, int dim )
 NARRAY Flow::CrossEntropy( NARRAY arr1, NARRAY arr2 )
 {
     NARRAY small = NArray::Create( { 1 }, { 1e-10f } );
-    NARRAY arrUnsqueezed2 = Unsqueeze( arr2->Copy(), 1 );
+    NARRAY arrUnsqueezed2 = Unsqueeze( arr2, 1 );
     return Mean( Neg( Log( Add( Gather( Softmax( arr1, 1 ), 1, arrUnsqueezed2 ), small ) ) ), 0 );
 }
 

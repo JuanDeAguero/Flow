@@ -90,13 +90,11 @@ vector<float> ReadImagesMNIST( string filePath )
 {
     vector< vector< unsigned char > > images;
     ifstream file( filePath, ios::binary );
-    if (!file.is_open())
-        throw runtime_error("Cannot open MNIST image file.");
+    if (!file.is_open()) throw runtime_error("Cannot open MNIST image file.");
     int magicNumber = 0, numImages = 0, rows = 0, cols = 0;
     file.read( (char*)&magicNumber, 4 );
     magicNumber = _byteswap_ulong(magicNumber);
-    if( magicNumber != 2051 )
-        throw runtime_error("Invalid MNIST image file.");
+    if( magicNumber != 2051 ) throw runtime_error("Invalid MNIST image file.");
     file.read( (char*)&numImages, 4 );
     numImages = _byteswap_ulong(numImages);
     file.read( (char*)&rows, 4 );
@@ -113,8 +111,7 @@ vector<float> ReadImagesMNIST( string filePath )
     vector<float> imagesData;
     for ( auto image : images )
     {
-        for ( auto imageChar : image )
-            imagesData.push_back((float)imageChar);
+        for ( auto imageChar : image ) imagesData.push_back((float)imageChar);
     }
     return imagesData;
 }
@@ -123,20 +120,17 @@ vector<float> ReadLabelsMNIST( string filePath )
 {
     vector< unsigned char > labels;
     ifstream file( filePath, ios::binary );
-    if (!file.is_open())
-        throw runtime_error("Cannot open MNIST label file.");
+    if (!file.is_open()) throw runtime_error("Cannot open MNIST label file.");
     int magicNumber = 0, numLabels = 0;
     file.read( (char*)&magicNumber, 4 );
     magicNumber = _byteswap_ulong(magicNumber);
-    if ( magicNumber != 2049 )
-        throw runtime_error("Invalid MNIST label file.");
+    if ( magicNumber != 2049 ) throw runtime_error("Invalid MNIST label file.");
     file.read( (char*)&numLabels, 4 );
     numLabels = _byteswap_ulong(numLabels);
     labels.resize(numLabels);
     file.read( (char*)labels.data(), numLabels );
     file.close();
     vector<float> labelsData;
-    for ( auto label : labels )
-        labelsData.push_back((float)label);
+    for ( auto label : labels ) labelsData.push_back((float)label);
     return labelsData;
 }

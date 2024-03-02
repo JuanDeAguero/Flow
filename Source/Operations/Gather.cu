@@ -51,14 +51,14 @@ void BackwardGather_Kernel( float* gradient, int* operandShape, int operandShape
     int* indexShape, int indexShapeSize )
 {
     int i = blockIdx.x;
-    if (i >= indexSize) return;
+    if ( i >= indexSize ) return;
     int multiIndex[MAX_DIMS];
     Flow::FlatToMultiIndex_Device( i, indexShape, indexShapeSize, multiIndex );
     int indexElement = (int)index[i];
-    if (indexElement < 0 || indexElement >= operandShape[dim]) return;
+    if ( indexElement < 0 || indexElement >= operandShape[dim] ) return;
     multiIndex[dim] = indexElement;
     int flatIndex = Flow::MultiToFlatIndex_Device( multiIndex, operandShape, operandShapeSize );
-    if (flatIndex < 0 || flatIndex >= operandGradientSize) return;
+    if ( flatIndex < 0 || flatIndex >= operandGradientSize ) return;
     atomicAdd( &operandGradient[flatIndex], gradient[i] );
 }
 
