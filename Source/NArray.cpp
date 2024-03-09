@@ -16,7 +16,7 @@ using namespace std;
 
 Flow::NArray::NArray( vector<int> shape, const vector<float>& data )
     : Shape(shape), Gradient( make_shared<NArray>(shape) ), Op(NArray::Operation::NONE),
-      Saved(false), GatherIndex(nullptr), Index(nullptr)
+      GatherIndex(nullptr), Index(nullptr)
 {
     cudaMalloc( (void**)&Data, data.size() * sizeof(float) );
     cudaMemcpy( Data, data.data(), data.size() * sizeof(float), cudaMemcpyHostToDevice );
@@ -25,11 +25,11 @@ Flow::NArray::NArray( vector<int> shape, const vector<float>& data )
 Flow::NArray::NArray( vector<int> shape, float* deviceData, vector<NARRAY> operands,
     NArray::Operation op )
     : Data(deviceData), Shape(shape), Gradient( make_shared<NArray>(shape) ), Operands(operands),
-      Op(op), Saved(false), GatherIndex(nullptr), Index(nullptr) {}
+      Op(op), GatherIndex(nullptr), Index(nullptr) {}
 
 Flow::NArray::NArray( vector<int> shape )
-    : Shape(shape), Gradient(nullptr), Op(NArray::Operation::NONE), Saved(false),
-      GatherIndex(nullptr), Index(nullptr)
+    : Shape(shape), Gradient(nullptr), Op(NArray::Operation::NONE), GatherIndex(nullptr),
+      Index(nullptr)
 {
     cudaMalloc( (void**)&Data, SizeFromShape(shape) * sizeof(float) );
     cudaMemset( Data, 0, SizeFromShape(shape) * sizeof(float) );
@@ -134,6 +134,7 @@ void Flow::NArray::Backward()
         case NArray::Operation::POW:       BackwardPow();       break;
         case NArray::Operation::RELU:      BackwardReLU();      break;
         case NArray::Operation::RESHAPE:   BackwardReshape();   break;
+        case NArray::Operation::SQUEEZE:   BackwardSqueeze();   break;
         case NArray::Operation::SUM:       BackwardSum();       break;
         case NArray::Operation::TANH:      BackwardTanh();      break;
         case NArray::Operation::TRANSPOSE: BackwardTranspose(); break;

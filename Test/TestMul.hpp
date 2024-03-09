@@ -13,8 +13,8 @@ static bool Test_Mul()
     Flow::NArray::Operation op = Flow::NArray::Operation::MUL;
 
     Test( 1, numPassed,
-        Flow::NArray::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ),
-        Flow::NArray::Create( { 3 }, { 1, 10, 100 } ), {}, {}, {}, {}, op,
+        Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ),
+        Flow::Create( { 3 }, { 1, 10, 100 } ), {}, {}, {}, {}, op,
         { 0, 10, 200, 3, 40, 500, 6, 70, 800 },
         { 3, 3 },
         { 1, 10, 100, 1, 10, 100, 1, 10, 100 },
@@ -23,8 +23,8 @@ static bool Test_Mul()
         { 3 } );
 
     Test( 2, numPassed,
-        Flow::NArray::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ),
-        Flow::NArray::Create( { 1 }, { 2 } ), {}, {}, {}, {}, op,
+        Flow::Create( { 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 } ),
+        Flow::Create( { 1 }, { 2 } ), {}, {}, {}, {}, op,
         { 0, 2, 4, 6, 8, 10, 12, 14, 16 },
         { 3, 3 },
         { 2, 2, 2, 2, 2, 2, 2, 2, 2 },

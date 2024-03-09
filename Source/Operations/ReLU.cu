@@ -25,7 +25,8 @@ __global__
 void BackwardReLU_Kernel( float* gradient, float* operand, float* operandGradient )
 {
     int i = blockIdx.x;
-    float grad = ( operand[i] > 0.0f ) ? gradient[i] : 0.0f;
+    float grad = 0.0f;
+    if ( operand[i] > 0.0f ) grad = gradient[i];
     atomicAdd( &operandGradient[i], grad );
 }
 

@@ -13,7 +13,7 @@ static bool Test_Log()
     Flow::NArray::Operation op = Flow::NArray::Operation::LOG;
 
     Test( 1, numPassed,
-        Flow::NArray::Create( { 4, 2 }, { 5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 } ), nullptr, {}, {}, {}, {}, op,
+        Flow::Create( { 4, 2 }, { 5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 } ), nullptr, {}, {}, {}, {}, op,
         { 1.6094, -2.3026, -1.6094, -1.2040, -0.9163, -0.6931, -0.5108, -0.3567 },
         { 4, 2 },
         { 0.2, 10, 5, 3.3333, 2.5, 2, 1.6667, 1.4286 },

@@ -37,7 +37,6 @@ NARRAY Flow::Max( NARRAY arr, int dim )
         cudaMemcpyHostToDevice );
     Max_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), dim, result_d,
         resultShape_d, resultShape.size() );
-    cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(resultShape_d);
     NARRAY result = Create( resultShape, result_d, { arr }, NArray::Operation::MAX );
@@ -46,35 +45,34 @@ NARRAY Flow::Max( NARRAY arr, int dim )
 }
 
 __global__
-void BackwardMax_Kernel( float* arr, int* shape, int shapeSize, float* gradient, float* operand,
-    int* operandShape, int operandShapeSize, float* operandGradient, int dim )
+void BackwardMax_Kernel( float* arr, int* arrShape, int arrShapeSize, float* arrGradient,
+    float* operand, int* operandShape, int operandShapeSize, float* operandGradient, int dim )
 {
     int i = blockIdx.x;
     int j = blockIdx.y;
     int multiIndex[10];
-    Flow::FlatToMultiIndex_Device( i, shape, shapeSize, multiIndex );
+    Flow::FlatToMultiIndex_Device( i, arrShape, arrShapeSize, multiIndex );
     multiIndex[dim] = j;
     int flatIndex = Flow::MultiToFlatIndex_Device( multiIndex, operandShape, operandShapeSize );
     if ( operand[flatIndex] == arr[i] )
-        atomicAdd( &operandGradient[flatIndex], gradient[i] );
+        atomicAdd( &operandGradient[flatIndex], arrGradient[i] );
 }
 
 void Flow::NArray::BackwardMax()
 {
     int n = SizeFromShape(Shape);
-    int* shape_d;
+    int* arrShape_d;
     int* operandShape_d;
-    cudaMalloc( (void**)&shape_d, Shape.size() * sizeof(int) );
+    cudaMalloc( (void**)&arrShape_d, Shape.size() * sizeof(int) );
     cudaMalloc( (void**)&operandShape_d, Operands[0]->GetShape().size() * sizeof(int) );
-    cudaMemcpy( shape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
+    cudaMemcpy( arrShape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
     cudaMemcpy( operandShape_d, Operands[0]->GetShapeData(),
         Operands[0]->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
     int maxDimSize = Operands[0]->GetShape()[MaxDim];
     dim3 gridDims( n, maxDimSize );
-    BackwardMax_Kernel<<< gridDims, 1 >>>( GetData(), shape_d, Shape.size(), Gradient->GetData(),
+    BackwardMax_Kernel<<< gridDims, 1 >>>( GetData(), arrShape_d, Shape.size(), Gradient->GetData(),
         Operands[0]->GetData(), operandShape_d, Operands[0]->GetShape().size(),
         Operands[0]->GetGradient()->GetData(), MaxDim );
-    cudaDeviceSynchronize();
-    cudaFree(shape_d);
+    cudaFree(arrShape_d);
     cudaFree(operandShape_d);
 }

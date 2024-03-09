@@ -1,5 +1,7 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
+#include <stdexcept>
+
 #include "CUDA.cuh"
 #include "Flow/NArray.h"
 
@@ -8,12 +10,13 @@ std::vector<int> Flow::BroadcastShapes( vector<int> shape1, vector<int> shape2 )
     int maxDims = max( shape1.size(), shape2.size() );
     while ( shape1.size() < maxDims ) shape1.insert( shape1.begin(), 1 );
     while ( shape2.size() < maxDims ) shape2.insert( shape2.begin(), 1 );
-    std::vector<int> shape(maxDims);
+    vector<int> shape(maxDims);
     for ( int i = 0; i < maxDims; i++ )
     {
         if ( shape1[i] == shape2[i] ) shape[i] = shape1[i];
         else if ( shape1[i] == 1 ) shape[i] = shape2[i];
         else if ( shape2[i] == 1 ) shape[i] = shape1[i];
+        else throw runtime_error("Incompatible shapes for broadcast!");
     }
     return shape;
 }
@@ -23,12 +26,12 @@ void Broadcast_Kernel( float* arr, int* arrShape, int arrShapeSize, int* shape, 
     float* result )
 {
     int i = blockIdx.x;
-    int position[MAX_DIMS];
-    Flow::FlatToMultiIndex_Device( i, shape, shapeSize, position );
+    int multiIndex[MAX_DIMS];
+    Flow::FlatToMultiIndex_Device( i, shape, shapeSize, multiIndex );
     int originalCoords[MAX_DIMS];
     for ( int j = 0; j < arrShapeSize; j++ )
     {
-        int coord = position[ shapeSize - arrShapeSize + j ];
+        int coord = multiIndex[ shapeSize - arrShapeSize + j ];
         if ( arrShape[j] == 1 ) coord = 0;
         originalCoords[j] = coord;
     }
@@ -50,7 +53,6 @@ NARRAY Flow::Broadcast( NARRAY arr, vector<int> shape )
     cudaMemcpy( shape_d, shape.data(), shape.size() * sizeof(int), cudaMemcpyHostToDevice );
     Broadcast_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), shape_d,
         shape.size(), result_d );
-    cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(shape_d);
     return Create( shape, result_d, { arr }, NArray::Operation::BROADCAST );
@@ -61,13 +63,14 @@ void BackwardBroadcast_Kernel( float* gradient, int* shape, int shapeSize, int* 
     int operandShapeSize, float* operandGradient )
 {
     int i = blockIdx.x;
-    int position[MAX_DIMS];
-    Flow::FlatToMultiIndex_Device( i, shape, shapeSize, position );
+    int multiIndex[MAX_DIMS];
+    Flow::FlatToMultiIndex_Device( i, shape, shapeSize, multiIndex );
     int operandCoords[MAX_DIMS];
     for ( int j = 0; j < operandShapeSize; j++ )
     {
-        int coord = position[ shapeSize - operandShapeSize + j ];
-        operandCoords[j] = ( operandShape[j] == 1 ) ? 0 : coord;
+        int coord = multiIndex[ shapeSize - operandShapeSize + j ];
+        if ( operandShape[j] == 1 ) operandCoords[j] = 0;
+        else operandCoords[j] = coord;
     }
     int operandIndex = Flow::MultiToFlatIndex_Device( operandCoords, operandShape,
         operandShapeSize );
@@ -87,7 +90,6 @@ void Flow::NArray::BackwardBroadcast()
         Operands[0]->Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
     BackwardBroadcast_Kernel<<< n, 1 >>>( Gradient->GetData(), shape_d, Shape.size(),
         operandShape_d, Operands[0]->Shape.size(), Operands[0]->Gradient->GetData() );
-    cudaDeviceSynchronize();
     cudaFree(shape_d);
     cudaFree(operandShape_d);
 }

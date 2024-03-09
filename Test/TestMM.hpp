@@ -14,8 +14,8 @@ static bool Test_MM()
     Flow::NArray::Operation op = Flow::NArray::Operation::MM;
 
     Test( 1, numPassed,
-        Flow::NArray::Create( { 2, 2 }, { 1, 2, 3, 4 } ),
-        Flow::NArray::Create( { 2, 2 }, { 5, 6, 7, 8 } ), {}, {}, {}, {}, op,
+        Flow::Create( { 2, 2 }, { 1, 2, 3, 4 } ),
+        Flow::Create( { 2, 2 }, { 5, 6, 7, 8 } ), {}, {}, {}, {}, op,
         { 19, 22, 43, 50 },
         { 2, 2 },
         { 11, 15, 11, 15 },
@@ -24,8 +24,8 @@ static bool Test_MM()
         { 2, 2 } );
 
     Test( 2, numPassed,
-        Flow::NArray::Create( { 2, 4 }, { 5, 7, 8, 9, 3, 4, 5, 4 } ),
-        Flow::NArray::Create( { 4, 2 }, { 5, 6, 5, 6, 1, 3, 7, 8 } ), {}, {}, {}, {}, op,
+        Flow::Create( { 2, 4 }, { 5, 7, 8, 9, 3, 4, 5, 4 } ),
+        Flow::Create( { 4, 2 }, { 5, 6, 5, 6, 1, 3, 7, 8 } ), {}, {}, {}, {}, op,
         { 131, 168, 68, 89 },
         { 2, 2 },
         { 11, 11, 4, 15, 11, 11, 4, 15 },
@@ -34,8 +34,8 @@ static bool Test_MM()
         { 4, 2 } );
 
     Test( 3, numPassed,
-        Flow::NArray::Create( { 2, 3 }, { 1, 2, 3, 4, 5, 6 } ),
-        Flow::NArray::Create( { 3, 2 }, { 1, 2, 3, 4, 5, 6 } ), {}, {}, {}, {}, op,
+        Flow::Create( { 2, 3 }, { 1, 2, 3, 4, 5, 6 } ),
+        Flow::Create( { 3, 2 }, { 1, 2, 3, 4, 5, 6 } ), {}, {}, {}, {}, op,
         { 22, 28, 49, 64 },
         { 2, 2 },
         { 3, 7, 11, 3, 7, 11 },

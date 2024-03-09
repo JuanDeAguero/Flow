@@ -75,8 +75,6 @@ namespace Flow
         
         NArray::Operation Op;
 
-        bool Saved;
-
         int GatherDim;
 
         NARRAY GatherIndex;
@@ -122,6 +120,8 @@ namespace Flow
         void BackwardReLU();
         
         void BackwardReshape();
+
+        void BackwardSqueeze();
         
         void BackwardSum();
         
@@ -187,6 +187,8 @@ namespace Flow
     NARRAY Reshape( NARRAY arr, vector<int> shape );
 
     NARRAY Softmax( NARRAY arr, int dim );
+
+    NARRAY Squeeze( NARRAY arr, int dim );
 
     NARRAY Sub( NARRAY arr1, NARRAY arr2 );
 

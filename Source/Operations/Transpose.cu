@@ -1,7 +1,5 @@
 // Copyright (c) 2023 Juan M. G. de Agüero
 
-#include <stdexcept>
-
 #include "CUDA.cuh"
 #include "Flow/NArray.h"
 
@@ -40,7 +38,6 @@ pair< vector<int>, float* > Flow::TransposeRaw( NARRAY arr, int firstDim, int se
         cudaMemcpyHostToDevice );
     Transpose_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), firstDim,
         secondDim, result_d, resultShape_d, resultShape.size() );
-    cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(resultShape_d);
     return { resultShape, result_d };
@@ -49,10 +46,44 @@ pair< vector<int>, float* > Flow::TransposeRaw( NARRAY arr, int firstDim, int se
 NARRAY Flow::Transpose( NARRAY arr, int firstDim, int secondDim )
 {
     auto transpose = TransposeRaw( arr, firstDim, secondDim );
-    return Create( transpose.first, transpose.second, { arr }, NArray::Operation::TRANSPOSE );
+    NARRAY result = Create( transpose.first, transpose.second, { arr },
+        NArray::Operation::TRANSPOSE );
+    result->TransposeFirstDim = firstDim;
+    result->TransposeSecondDim = secondDim;
+    return result;
+}
+
+__global__
+void BackwardTranspose_Kernel( int* arrShape, int arrShapeSize, float* arrGradient,
+    int* operandShape, int operandShapeSize, float* operandGradient, int firstDim, int secondDim )
+{
+    int i = blockIdx.x;
+    int arrSize = 1;
+    for ( int i = 0; i < arrShapeSize; i++ ) arrSize *= arrShape[i];
+    if ( i >= arrSize ) return;
+    int multiIndex[MAX_DIMS];
+    Flow::FlatToMultiIndex_Device( i, arrShape, arrShapeSize, multiIndex );
+    int temp = multiIndex[firstDim];
+    multiIndex[firstDim] = multiIndex[secondDim];
+    multiIndex[secondDim] = temp;
+    int flatIndex = Flow::MultiToFlatIndex_Device( multiIndex, operandShape, operandShapeSize );
+    atomicAdd( &operandGradient[flatIndex], arrGradient[i] );
 }
 
 void Flow::NArray::BackwardTranspose()
 {
-    throw runtime_error("Backward transpose not implemented!");
+    int n = SizeFromShape(GetShape());
+    int* arrShape_d;
+    int* operandShape_d;
+    cudaMalloc( &arrShape_d, GetShape().size() * sizeof(int) );
+    cudaMalloc( &operandShape_d, Operands[0]->GetShape().size() * sizeof(int) );
+    cudaMemcpy( arrShape_d, GetShape().data(), GetShape().size() * sizeof(int),
+        cudaMemcpyHostToDevice );
+    cudaMemcpy( operandShape_d, Operands[0]->GetShape().data(),
+        Operands[0]->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
+    BackwardTranspose_Kernel<<< n, 1 >>>( arrShape_d, GetShape().size(), Gradient->GetData(),
+        operandShape_d, Operands[0]->GetShape().size(), Operands[0]->GetGradient()->GetData(),
+        TransposeFirstDim, TransposeSecondDim );
+    cudaFree(arrShape_d);
+    cudaFree(operandShape_d);
 }

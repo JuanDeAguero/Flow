@@ -13,8 +13,8 @@ static bool Test_CrossEntropy()
     Flow::NArray::Operation op = Flow::NArray::Operation::CROSSENTROPY;
 
     Test( 1, numPassed,
-        Flow::NArray::Create( { 2, 3 }, { 1.5, 0.5, -0.5, -0.5, 1.5, 0.5 } ),
-        Flow::NArray::Create( { 2 }, { 0, 1 } ), {}, {}, {}, {}, op,
+        Flow::Create( { 2, 3 }, { 1.5, 0.5, -0.5, -0.5, 1.5, 0.5 } ),
+        Flow::Create( { 2 }, { 0, 1 } ), {}, {}, {}, {}, op,
         { 0.4076 },
         { 1, 1 },
         { -0.1674, 0.1224, 0.0450, 0.0450, -0.1674, 0.1224 },
