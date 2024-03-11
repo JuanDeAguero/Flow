@@ -37,7 +37,6 @@ NARRAY Flow::Sum( NARRAY arr, int dim )
         cudaMemcpyHostToDevice );
     Sum_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), dim, result_d,
         resultShape_d, resultShape.size() );
-    cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(resultShape_d);
     NARRAY result = Create( resultShape, result_d, { arr }, NArray::Operation::SUM );
@@ -73,7 +72,6 @@ void Flow::NArray::BackwardSum()
     BackwardSum_Kernel<<< gridDims, 1 >>>( GetData(), shape_d, Shape.size(), Gradient->GetData(),
         Operands[0]->GetData(), operandShape_d, Operands[0]->GetShape().size(),
         Operands[0]->GetGradient()->GetData(), SumDim );
-    cudaDeviceSynchronize();
     cudaFree(shape_d);
     cudaFree(operandShape_d);
 }

@@ -49,7 +49,7 @@ int main()
 
     Flow::Optimizer optimizer( { w1, b1, w2, b2, w3, b3 }, 0.0025f, 1e-8f, 0.01f );
 
-    for ( int epoch = 0; epoch < 500; epoch++ )
+    for ( int epoch = 0; epoch < 100; epoch++ )
     {
         NARRAY a1 = Flow::ReLU( Add( MM( xTrain, w1 ), b1 ) );
         NARRAY a2 = Flow::ReLU( Add( MM( a1, w2 ), b2 ) );

@@ -35,7 +35,6 @@ NARRAY Flow::Gather( NARRAY arr, int dim, NARRAY index )
     Gather_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), dim,
         index->GetData(), SizeFromShape(index->GetShape()), indexShape_d, index->GetShape().size(),
         result_d, n );
-    cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(indexShape_d);
     NARRAY result = Create( index->GetShape(), result_d, { arr }, NArray::Operation::GATHER );
@@ -76,7 +75,6 @@ void Flow::NArray::BackwardGather()
         Operands[0]->GetShape().size(), Operands[0]->GetGradient()->GetData(),
         SizeFromShape(Operands[0]->GetGradient()->GetShape()), GatherDim, GatherIndex->GetData(),
         SizeFromShape(GatherIndex->GetShape()), indexShape_d, GatherIndex->GetShape().size() );
-    cudaDeviceSynchronize();
     cudaFree(operandShape_d);
     cudaFree(indexShape_d);
 }

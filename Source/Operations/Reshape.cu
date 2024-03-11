@@ -23,6 +23,5 @@ void Flow::NArray::BackwardReshape()
 {
     int n = SizeFromShape(Shape);
     BackwardReshape_Kernel<<< n, 1 >>>( Gradient->GetData(),
-        Operands[0]->GetGradient()->GetData() );   
-    cudaDeviceSynchronize();
+        Operands[0]->GetGradient()->GetData() );
 }

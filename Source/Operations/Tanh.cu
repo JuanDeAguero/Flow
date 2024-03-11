@@ -19,7 +19,6 @@ NARRAY Flow::Tanh( NARRAY arr )
     cudaMalloc( (void**)&result_d, n * sizeof(float) );
     cudaMemcpy( result_d, arr->GetData(), n * sizeof(float), cudaMemcpyDeviceToDevice );
     Tanh_Kernel<<< n, 1 >>>(result_d);
-    cudaDeviceSynchronize();
     return Create( arr->GetShape(), result_d, { arr }, NArray::Operation::TANH );
 }
 
@@ -37,5 +36,4 @@ void Flow::NArray::BackwardTanh()
     int n = SizeFromShape(Shape);
     BackwardTanh_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetData(),
         Operands[0]->GetGradient()->GetData() );
-    cudaDeviceSynchronize();
 }

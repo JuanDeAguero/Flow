@@ -32,7 +32,6 @@ NARRAY Flow::Index( NARRAY arr, int dim, NARRAY index )
         cudaMemcpyHostToDevice );
     Index_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), dim,
         index->GetData(), result_d, resultShape_d, resultShape.size() );
-    cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(resultShape_d);
     NARRAY result = Create( resultShape, result_d, { arr, index }, NArray::Operation::INDEX );
@@ -66,7 +65,6 @@ void Flow::NArray::BackwardIndex()
     BackwardIndex_Kernel<<< n, 1 >>>( shape_d, Shape.size(), Gradient->GetData(), operandShape_d,
         Operands[0]->GetShape().size(), Operands[0]->GetGradient()->GetData(), IndexDim,
         Index->GetData() );
-    cudaDeviceSynchronize();
     cudaFree(shape_d);
     cudaFree(operandShape_d);
 }
