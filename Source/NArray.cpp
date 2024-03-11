@@ -123,13 +123,13 @@ void Flow::NArray::Backward()
     {
         case NArray::Operation::NONE:                           break;
         case NArray::Operation::ADD:       BackwardAdd();       break;
+        case NArray::Operation::BMM:       BackwardBMM();       break;
         case NArray::Operation::BROADCAST: BackwardBroadcast(); break;
         case NArray::Operation::EXP:       BackwardExp();       break;
         case NArray::Operation::GATHER:    BackwardGather();    break;
         case NArray::Operation::INDEX:     BackwardIndex();     break;
         case NArray::Operation::LOG:       BackwardLog();       break;
         case NArray::Operation::MAX:       BackwardMax();       break;
-        case NArray::Operation::MM:        BackwardMM();        break;
         case NArray::Operation::MUL:       BackwardMul();       break;
         case NArray::Operation::POW:       BackwardPow();       break;
         case NArray::Operation::RELU:      BackwardReLU();      break;
@@ -172,9 +172,13 @@ NARRAY Flow::Div( NARRAY arr1, NARRAY arr2 )
 NARRAY Flow::Mean( NARRAY arr, int dim )
 {
     NARRAY sum = Sum( arr, dim );
-    float numElements = (float)arr->GetShape()[dim];
-    NARRAY n = Create( { 1 }, { numElements } );
+    NARRAY n = Create( { 1 }, { (float)arr->GetShape()[dim] } );
     return Div( sum, n );
+}
+
+NARRAY Flow::MM( NARRAY arr1, NARRAY arr2 )
+{
+    return Squeeze( BMM( Unsqueeze( arr1, 0 ), Unsqueeze( arr2, 0 ) ), 0 );
 }
 
 NARRAY Flow::Softmax( NARRAY arr, int dim )

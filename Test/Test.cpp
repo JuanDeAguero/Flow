@@ -22,6 +22,12 @@ using namespace std;
 
 int main()
 {
+    NARRAY arr1 = Flow::Create( { 2, 2, 3 }, { 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6 } );
+    NARRAY arr2 = Flow::Create( { 2, 3, 2 }, { 77, 8, 9, 10, 11, 12, 7, 8, 9, 10, 11, 12 } );
+    NARRAY bmm = Flow::BMM( arr1, arr2 );
+    bmm->Backpropagate();
+    Flow::Print(arr2->GetGradient());
+
     int numPassed = 0;
 
     if (Test_Add())          numPassed++;

@@ -22,13 +22,11 @@ namespace Flow
         enum Operation
         {
             NONE,
-            ADD,     BMM,     BROADCAST, CROSSENTROPY,
-            DIV,     DOT,     EXP,       GATHER,
-            INDEX,   LOG,     MATMUL,    MAX,
-            MEAN,    MM,      MUL,       MV,
-            NEG,     POW,     PROD,      RELU,
-            RESHAPE, SOFTMAX, SQUEEZE,   SUB,
-            SUM,     TANH,    TRANSPOSE, UNSQUEEZE
+            ADD, BMM, BROADCAST, CONV1D, CONV2D,
+            CROSSENTROPY, EXP, FOLD, GATHER, INDEX,
+            LOG, MAX, MM, MUL, POW,
+            PROD, RELU, RESHAPE, SQUEEZE, SUM,
+            TANH, TRANSPOSE, UNFOLD, UNSQUEEZE
         };
 
         NArray( vector<int> shape, const vector<float>& data );
@@ -98,6 +96,8 @@ namespace Flow
         void Backward();
 
         void BackwardAdd();
+
+        void BackwardBMM();
         
         void BackwardBroadcast();
         
@@ -110,8 +110,6 @@ namespace Flow
         void BackwardLog();
         
         void BackwardMax();
-        
-        void BackwardMM();
         
         void BackwardMul();
         
@@ -151,6 +149,8 @@ namespace Flow
         NArray::Operation op );
 
     NARRAY Add( NARRAY arr1, NARRAY arr2 );
+
+    NARRAY BMM( NARRAY arr1, NARRAY arr2 );
 
     NARRAY Broadcast( NARRAY arr, vector<int> shape );
 

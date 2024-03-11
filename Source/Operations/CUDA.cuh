@@ -52,14 +52,14 @@ namespace Flow
         return __int_as_float(old);
     }
 
-    pair< vector<int>, float* > MMRaw( pair< vector<int>, float* > arr1,
+    pair< vector<int>, float* > BMMRaw( pair< vector<int>, float* > arr1,
         pair< vector<int>, float* > arr2 );
 
-    pair< vector<int>, float* > MMRaw( NARRAY arr1, NARRAY arr2 );
+    pair< vector<int>, float* > BMMRaw( NARRAY arr1, NARRAY arr2 );
 
-    pair< vector<int>, float* > MMRaw( pair< vector<int>, float* > arr1, NARRAY arr2 );
+    pair< vector<int>, float* > BMMRaw( pair< vector<int>, float* > arr1, NARRAY arr2 );
 
-    pair< vector<int>, float* > MMRaw( NARRAY arr1, pair< vector<int>, float* > arr2 );
+    pair< vector<int>, float* > BMMRaw( NARRAY arr1, pair< vector<int>, float* > arr2 );
 
     pair< vector<int>, float* > TransposeRaw( NARRAY arr, int firstDim, int secondDim );
 }
