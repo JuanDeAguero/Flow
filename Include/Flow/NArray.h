@@ -73,6 +73,8 @@ namespace Flow
         
         NArray::Operation Op;
 
+        float Exponent;
+
         int GatherDim;
 
         NARRAY GatherIndex;
@@ -83,7 +85,7 @@ namespace Flow
         
         int MaxDim;
 
-        float Exponent;
+        int ProdDim;
         
         int SumDim;
         
@@ -114,6 +116,8 @@ namespace Flow
         void BackwardMul();
         
         void BackwardPow();
+
+        void BackwardProd();
         
         void BackwardReLU();
         
@@ -136,6 +140,8 @@ namespace Flow
         friend NARRAY Max( NARRAY arr, int dim );
 
         friend NARRAY Pow( NARRAY arr, float exponent );
+
+        friend NARRAY Prod( NARRAY arr, int dim );
         
         friend NARRAY Sum( NARRAY arr, int dim );
 
@@ -181,6 +187,8 @@ namespace Flow
     NARRAY Neg( NARRAY arr );
     
     NARRAY Pow( NARRAY arr, float exponent );
+
+    NARRAY Prod( NARRAY arr, int dim );
 
     NARRAY ReLU( NARRAY arr );
 

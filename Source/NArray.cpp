@@ -132,6 +132,7 @@ void Flow::NArray::Backward()
         case NArray::Operation::MAX:       BackwardMax();       break;
         case NArray::Operation::MUL:       BackwardMul();       break;
         case NArray::Operation::POW:       BackwardPow();       break;
+        case NArray::Operation::PROD:      BackwardProd();      break;
         case NArray::Operation::RELU:      BackwardReLU();      break;
         case NArray::Operation::RESHAPE:   BackwardReshape();   break;
         case NArray::Operation::SQUEEZE:   BackwardSqueeze();   break;

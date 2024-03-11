@@ -45,13 +45,13 @@ NARRAY Flow::Sum( NARRAY arr, int dim )
 }
 
 __global__
-void BackwardSum_Kernel( float* arr, int* shape, int shapeSize, float* gradient, float* operand,
-    int* operandShape, int operandShapeSize, float* operandGradient, int dim )
+void BackwardSum_Kernel( float* arr, int* arrShape, int arrShapeSize, float* gradient,
+    float* operand, int* operandShape, int operandShapeSize, float* operandGradient, int dim )
 {
     int i = blockIdx.x;
     int j = blockIdx.y;
     int multiIndex[10];
-    Flow::FlatToMultiIndex_Device( i, shape, shapeSize, multiIndex );
+    Flow::FlatToMultiIndex_Device( i, arrShape, arrShapeSize, multiIndex );
     multiIndex[dim] = j;
     int flatIndex = Flow::MultiToFlatIndex_Device( multiIndex, operandShape, operandShapeSize );
     atomicAdd( &operandGradient[flatIndex], gradient[i] );
@@ -60,18 +60,18 @@ void BackwardSum_Kernel( float* arr, int* shape, int shapeSize, float* gradient,
 void Flow::NArray::BackwardSum()
 {
     int n = SizeFromShape(Shape);
-    int* shape_d;
+    int* arrShape_d;
     int* operandShape_d;
-    cudaMalloc( (void**)&shape_d, Shape.size() * sizeof(int) );
+    cudaMalloc( (void**)&arrShape_d, Shape.size() * sizeof(int) );
     cudaMalloc( (void**)&operandShape_d, Operands[0]->GetShape().size() * sizeof(int) );
-    cudaMemcpy( shape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
+    cudaMemcpy( arrShape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
     cudaMemcpy( operandShape_d, Operands[0]->GetShapeData(),
         Operands[0]->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
     int maxDimSize = Operands[0]->GetShape()[SumDim];
     dim3 gridDims( n, maxDimSize );
-    BackwardSum_Kernel<<< gridDims, 1 >>>( GetData(), shape_d, Shape.size(), Gradient->GetData(),
+    BackwardSum_Kernel<<< gridDims, 1 >>>( GetData(), arrShape_d, Shape.size(), Gradient->GetData(),
         Operands[0]->GetData(), operandShape_d, Operands[0]->GetShape().size(),
         Operands[0]->GetGradient()->GetData(), SumDim );
-    cudaFree(shape_d);
+    cudaFree(arrShape_d);
     cudaFree(operandShape_d);
 }
