@@ -23,10 +23,10 @@ namespace Flow
         {
             NONE,
             ADD, BMM, BROADCAST, CONV1D, CONV2D,
-            CROSSENTROPY, EXP, FOLD, GATHER, INDEX,
+            CROSSENTROPY, EXP, FOLD2D, GATHER, INDEX,
             LOG, MAX, MM, MUL, POW,
             PROD, RELU, RESHAPE, SQUEEZE, SUM,
-            TANH, TRANSPOSE, UNFOLD, UNSQUEEZE
+            TANH, TRANSPOSE, UNFOLD2D, UNSQUEEZE
         };
 
         NArray( vector<int> shape, const vector<float>& data );
@@ -91,6 +91,8 @@ namespace Flow
         
         int TransposeFirstDim, TransposeSecondDim;
 
+        vector<int> UnfoldKernel2d;
+
         vector<NArray*> TopologicalSort();
 
         void BuildTopo( NArray* current, unordered_set<NArray*>& visited, vector<NArray*>& topo );
@@ -130,6 +132,8 @@ namespace Flow
         void BackwardTanh();
         
         void BackwardTranspose();
+
+        void BackwardUnfold2d();
         
         void BackwardUnsqueeze();
 
@@ -147,6 +151,8 @@ namespace Flow
 
         friend NARRAY Transpose( NARRAY arr, int firstDim, int secondDim );
 
+        friend NARRAY Unfold2d( NARRAY arr, vector<int> kernel );
+        
     };
 
     NARRAY Create( vector<int> shape, const vector<float>& data );
@@ -160,11 +166,15 @@ namespace Flow
 
     NARRAY Broadcast( NARRAY arr, vector<int> shape );
 
+    NARRAY Conv2d( NARRAY arr, NARRAY weight );
+
     NARRAY CrossEntropy( NARRAY arr1, NARRAY arr2 );
 
     NARRAY Div( NARRAY arr1, NARRAY arr2 );
 
     NARRAY Exp( NARRAY arr );
+
+    NARRAY Fold2d( NARRAY arr, vector<int> outShape, vector<int> kernel );
 
     NARRAY Gather( NARRAY arr, int dim, NARRAY index );
 
@@ -205,6 +215,8 @@ namespace Flow
     NARRAY Tanh( NARRAY arr );
 
     NARRAY Transpose( NARRAY arr, int firstDim, int secondDim );
+
+    NARRAY Unfold2d( NARRAY arr, vector<int> kernel );
     
     NARRAY Unsqueeze( NARRAY arr, int dim );
 

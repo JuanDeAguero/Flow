@@ -19,17 +19,10 @@ vector<float> testImages = ReadImagesMNIST("...");
 vector<float> trainLabels = ReadLabelsMNIST("...");
 vector<float> testLabels = ReadLabelsMNIST("...");
 
-int n = 6000;
-
-trainImages.resize( 784 * n );
-testImages.resize( 784 * n );
-trainLabels.resize(n);
-testLabels.resize(n);
-
-NARRAY xTrain( Flow::Create( { n, 784 }, trainImages ) );
-NARRAY xTest( Flow::Create( { n, 784 }, testImages ) );
-NARRAY yTrain( Flow::Create( { n }, trainLabels ) );
-NARRAY yTest( Flow::Create( { n }, testLabels ) );
+NARRAY xTrain( Flow::Create( { 6000, 784 }, trainImages ) );
+NARRAY xTest( Flow::Create( { 6000, 784 }, testImages ) );
+NARRAY yTrain( Flow::Create( { 6000 }, trainLabels ) );
+NARRAY yTest( Flow::Create( { 6000 }, testLabels ) );
 
 xTrain = Flow::Div( xTrain->Copy(), Flow::Create( { 1 }, { 255.0f } ) );
 xTest = Flow::Div( xTest->Copy(), Flow::Create( { 1 }, { 255.0f } ) );

@@ -38,8 +38,7 @@ void Flow::Optimizer::Step()
         NARRAY weightDecay = Create( { 1 }, { WeightDecay } );
         NARRAY a = Add(
             Div( mHat, Add( Pow( vHat, 0.5f ), epsilon ) ),
-            Mul( weightDecay, Arrays[i] )
-        );
+            Mul( weightDecay, Arrays[i] ) );
         Arrays[i]->Copy( Sub( Arrays[i], Mul( a, LearningRate ) ) );
     }
 }

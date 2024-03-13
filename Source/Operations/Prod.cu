@@ -43,7 +43,7 @@ NARRAY Flow::Prod( NARRAY arr, int dim )
 }
 
 __global__
-void BackwardProd_Kernel( float* arr, int* arrShape, int arrShapeSize, float* gradient,
+void BackwardProd_Kernel( float* arr, int* arrShape, int arrShapeSize, float* arrGradient,
     float* operand, int* operandShape, int operandShapeSize, float* operandGradient, int dim )
 {
     int i = blockIdx.x;
@@ -62,7 +62,7 @@ void BackwardProd_Kernel( float* arr, int* arrShape, int arrShapeSize, float* gr
             prodWithoutCurrent *= operand[index];
         }
     }
-    atomicAdd( &operandGradient[flatIndex], gradient[i] * prodWithoutCurrent );
+    atomicAdd( &operandGradient[flatIndex], arrGradient[i] * prodWithoutCurrent );
 }
 
 void Flow::NArray::BackwardProd()

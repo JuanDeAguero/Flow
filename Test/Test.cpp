@@ -28,16 +28,21 @@ int main()
     bmm->Backpropagate();
     //Flow::Print(arr2->GetGradient());
 
-    NARRAY arr3 = Flow::Create( { 2, 3, 4 }, { 1, 2, 3, 4, 4, 65, 7, 8, 1, 2, 3, 4, 1, 2, 3, 4, 4, 5, 7, 8, 1, 2, 3, 45 } );
-    NARRAY prod = Flow::Prod( arr3, 2 );
+    arr1 = Flow::Create( { 2, 3, 4 }, { 1, 2, 3, 4, 4, 65, 7, 8, 1, 2, 3, 4, 1, 2, 3, 4, 4, 5, 7, 8, 1, 2, 3, 45 } );
+    NARRAY prod = Flow::Prod( arr1, 2 );
     prod->Backpropagate();
-    //Flow::Print(arr3->GetGradient());
+    //Flow::Print(arr1->GetGradient());
 
-    NARRAY arr4 = Flow::Create( { 2, 3, 1, 2, 3 }, { 1, 2, 33, 4, 55, 6, 1, 2, 33, 4, 5, 65, 1, 2, 33, 41, 5, 6, 1, 2, 33, 4, 55, 6, 1, 2, 33, 4, 5, 65, 1, 2, 33, 41, 5, 6 } );
-    NARRAY arr5 = Flow::Create( { 5, 3, 2 }, { 1, 7, 88, 8, 9, 9, 7, 7, 8, 8, 95, 9, 7, 777, 8, 8, 9, 92, 7, 7, 855, 8, 9, 9, 7, 7, 855, 8, 9, 9 } );
-    NARRAY arr6 = Flow::Matmul( arr4, arr5 );
-    arr6->Backpropagate();
-    Flow::Print(arr6);
+    arr1 = Flow::Create( { 2, 3, 1, 2, 3 }, { 1, 2, 33, 4, 55, 6, 1, 2, 33, 4, 5, 65, 1, 2, 33, 41, 5, 6, 1, 2, 33, 4, 55, 6, 1, 2, 33, 4, 5, 65, 1, 2, 33, 41, 5, 6 } );
+    arr2 = Flow::Create( { 5, 3, 2 }, { 1, 7, 88, 8, 9, 9, 7, 7, 8, 8, 95, 9, 7, 777, 8, 8, 9, 92, 7, 7, 855, 8, 9, 9, 7, 7, 855, 8, 9, 9 } );
+    NARRAY matmul = Flow::Matmul( arr1, arr2 );
+    matmul->Backpropagate();
+    //Flow::Print(matmul);
+
+    arr1 = Flow::Create( { 1, 1, 3, 4 }, { 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1 } );
+    NARRAY unfolded = Flow::Unfold2d( arr1, { 2, 2 } );
+    unfolded->Backpropagate();
+    Flow::Print(arr1->GetGradient());
 
     int numPassed = 0;
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Juan M. G. de Agüero
+// Copyright (c) 2023-2024 Juan M. G. de Agüero
 
 #include <algorithm>
 #include <cmath>
@@ -139,6 +139,7 @@ void Flow::NArray::Backward()
         case NArray::Operation::SUM:       BackwardSum();       break;
         case NArray::Operation::TANH:      BackwardTanh();      break;
         case NArray::Operation::TRANSPOSE: BackwardTranspose(); break;
+        case NArray::Operation::UNFOLD2D:  BackwardUnfold2d();  break;
         case NArray::Operation::UNSQUEEZE: BackwardUnsqueeze(); break;
         default: break;
     }
@@ -153,47 +154,6 @@ NARRAY Flow::Create( vector<int> shape, float* deviceData, vector<NARRAY> operan
     NArray::Operation op )
 {
     return make_shared<NArray>( shape, deviceData, operands, op );
-}
-
-NARRAY Flow::Neg( NARRAY arr )
-{
-    return Mul( arr, -1.0f );
-}
-
-NARRAY Flow::Sub( NARRAY arr1, NARRAY arr2 )
-{
-    return Add( arr1, Neg(arr2) );
-}
-
-NARRAY Flow::Div( NARRAY arr1, NARRAY arr2 )
-{
-    return Mul( arr1, Pow( arr2, -1.0f ) );
-}
-
-NARRAY Flow::Mean( NARRAY arr, int dim )
-{
-    NARRAY sum = Sum( arr, dim );
-    NARRAY n = Create( { 1 }, { (float)arr->GetShape()[dim] } );
-    return Div( sum, n );
-}
-
-NARRAY Flow::MM( NARRAY arr1, NARRAY arr2 )
-{
-    return Squeeze( BMM( Unsqueeze( arr1, 0 ), Unsqueeze( arr2, 0 ) ), 0 );
-}
-
-NARRAY Flow::Softmax( NARRAY arr, int dim )
-{
-    NARRAY index = Create( { 1 }, { 0.0f } );
-    NARRAY exp = Exp( Sub( arr, Index( Max( arr, dim ), dim, index ) ) );
-    return Div( exp, Sum( exp, dim ) );
-}
-
-NARRAY Flow::CrossEntropy( NARRAY arr1, NARRAY arr2 )
-{
-    NARRAY small = Create( { 1 }, { 1e-10f } );
-    NARRAY arrUnsqueezed2 = Unsqueeze( arr2, 1 );
-    return Mean( Neg( Log( Add( Gather( Softmax( arr1, 1 ), 1, arrUnsqueezed2 ), small ) ) ), 0 );
 }
 
 NARRAY Flow::Random( vector<int> shape )
@@ -217,22 +177,6 @@ NARRAY Flow::Ones( vector<int> shape )
 {
     vector<float> data( SizeFromShape(shape), 1.0f );
     return Create( shape, data );
-}
-
-NARRAY Flow::OneHot( vector<int> integers, int num )
-{
-    vector<float> data( integers.size() * num );
-    NARRAY arr = Create( { (int)integers.size(), num }, data );
-    for ( int i = 0; i < integers.size(); i++ )
-    {
-        for ( int j = 0; j < num; j++ )
-        {
-            float value = 0.0f;
-            if ( integers[i] == j ) value = 1.0f;
-            arr->Set( { i, j }, value );
-        }
-    }
-    return arr;
 }
 
 void Flow::Print( NARRAY arr )
