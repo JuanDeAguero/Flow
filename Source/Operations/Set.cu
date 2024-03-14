@@ -13,18 +13,22 @@ void Flow::NArray::Set( vector<int> coordinates, float value )
 {
     int index = MultiToFlatIndex( coordinates, Shape );
     if ( index >= 0 && index < SizeFromShape(Shape) )
+    {
         Set_Kernel<<< 1, 1 >>>( Data, index, value );
+        cudaDeviceSynchronize();
+    }
 }
 
 __global__
-void Reset_Kernel( float* arr, float value )
+void Flow::Reset_Kernel( float* arr, int n, float value )
 {
     int i = blockIdx.x;
-    arr[i] = value;
+    if ( i < n ) arr[i] = value;
 }
 
 void Flow::NArray::Reset( float value )
 {
     int n = SizeFromShape(Shape);
-    Reset_Kernel<<< n, 1 >>>( Data, value );
+    Reset_Kernel<<< n, 1 >>>( Data, n, value );
+    cudaDeviceSynchronize();
 }

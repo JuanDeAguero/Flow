@@ -53,6 +53,7 @@ pair< vector<int>, float* > Flow::BMMRaw( pair< vector<int>, float* > arr1,
     dim3 dimBlock( TILE_SIZE, TILE_SIZE, 1 );
     BMM_Kernel<<< dimGrid, dimBlock >>>( arr1.second, arr2.second, result_d, arr1Rows, arr1Cols,
         arr2Cols, batchSize );
+    cudaDeviceSynchronize();
     return { { batchSize, arr1Rows, arr2Cols }, result_d };
 }
 

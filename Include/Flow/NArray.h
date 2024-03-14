@@ -75,6 +75,10 @@ namespace Flow
 
         float Exponent;
 
+        vector<int> FoldOutShape2d;
+
+        vector<int> FoldKernel2d;
+
         int GatherDim;
 
         NARRAY GatherIndex;
@@ -106,6 +110,8 @@ namespace Flow
         void BackwardBroadcast();
         
         void BackwardExp();
+
+        void BackwardFold2d();
         
         void BackwardGather();
         
@@ -136,6 +142,8 @@ namespace Flow
         void BackwardUnfold2d();
         
         void BackwardUnsqueeze();
+
+        friend NARRAY Fold2d( NARRAY arr, vector<int> outShape, vector<int> kernel );
 
         friend NARRAY Gather( NARRAY arr, int dim, NARRAY index );
 

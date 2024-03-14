@@ -19,6 +19,7 @@ NARRAY Flow::Mul( NARRAY arr1, NARRAY arr2 )
     float* result_d;
     cudaMalloc( (void**)&result_d, n * sizeof(float) );
     Mul_Kernel<<< n, 1 >>>( arr1B->GetData(), arr2B->GetData(), result_d );
+    cudaDeviceSynchronize();
     return Create( arr1B->GetShape(), result_d, { arr1B, arr2B }, NArray::Operation::MUL );
 }
 
@@ -42,4 +43,5 @@ void Flow::NArray::BackwardMul()
     BackwardMul_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetData(),
         Operands[0]->GetGradient()->GetData(), Operands[1]->GetData(),
         Operands[1]->GetGradient()->GetData() );
+    cudaDeviceSynchronize();
 }

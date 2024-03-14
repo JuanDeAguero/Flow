@@ -22,7 +22,6 @@ NARRAY Flow::Sum( NARRAY arr, int dim )
     int n = SizeFromShape(arr->GetShape());
     vector<int> resultShape = arr->GetShape();
     resultShape[dim] = 1;
-    vector<float> resultData( SizeFromShape(resultShape), numeric_limits<float>::min() );
     int* arrShape_d;
     float* result_d;
     int* resultShape_d;
@@ -31,12 +30,13 @@ NARRAY Flow::Sum( NARRAY arr, int dim )
     cudaMalloc( (void**)&resultShape_d, resultShape.size() * sizeof(int) );
     cudaMemcpy( arrShape_d, arr->GetShapeData(), arr->GetShape().size() * sizeof(int),
         cudaMemcpyHostToDevice );
-    cudaMemcpy( result_d, resultData.data(), SizeFromShape(resultShape) * sizeof(int),
-        cudaMemcpyHostToDevice );
     cudaMemcpy( resultShape_d, resultShape.data(), resultShape.size() * sizeof(int),
         cudaMemcpyHostToDevice );
+    Reset_Kernel<<< n, 1 >>>( result_d, n, numeric_limits<float>::min() );
+    cudaDeviceSynchronize();
     Sum_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), dim, result_d,
         resultShape_d, resultShape.size() );
+    cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(resultShape_d);
     NARRAY result = Create( resultShape, result_d, { arr }, NArray::Operation::SUM );
@@ -72,6 +72,7 @@ void Flow::NArray::BackwardSum()
     BackwardSum_Kernel<<< gridDims, 1 >>>( GetData(), arrShape_d, Shape.size(), Gradient->GetData(),
         Operands[0]->GetData(), operandShape_d, Operands[0]->GetShape().size(),
         Operands[0]->GetGradient()->GetData(), SumDim );
+    cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(operandShape_d);
 }

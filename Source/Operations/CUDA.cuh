@@ -14,6 +14,9 @@ namespace Flow
 {
     using namespace std;
 
+    __global__
+    void Reset_Kernel( float* arr, int n, float value );
+
     __device__
     inline int MultiToFlatIndex_Device( int* index, int* shape, int shapeSize )
     {

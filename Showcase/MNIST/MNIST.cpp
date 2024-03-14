@@ -49,9 +49,9 @@ int main()
 
     Flow::Optimizer optimizer( { w1, b1, w2, b2, w3, b3 }, 0.0025f, 1e-8f, 0.01f );
 
-    for ( int epoch = 0; epoch < 100; epoch++ )
+    for ( int epoch = 0; epoch < 500; epoch++ )
     {
-        NARRAY a1 = Flow::ReLU( Add( MM( xTrain, w1 ), b1 ) );
+        NARRAY a1 = Flow::ReLU( Add( Matmul( xTrain, w1 ), b1 ) );
         NARRAY a2 = Flow::ReLU( Add( MM( a1, w2 ), b2 ) );
         NARRAY yPredicted = Flow::Add( MM( a2, w3 ), b3 );
         NARRAY loss = Flow::CrossEntropy( yPredicted, yTrain );
@@ -65,7 +65,7 @@ int main()
     NARRAY a1 = Flow::ReLU( Add( MM( xTest, w1 ), b1 ) );
     NARRAY a2 = Flow::ReLU( Add( MM( a1, w2 ), b2 ) );
     NARRAY yPredicted = Flow::Add( MM( a2, w3 ), b3 );
-
+    
     n = 100;
     int numCorrect = 0;
     for ( int i = 0; i < n; i++ )
@@ -110,9 +110,7 @@ vector<float> ReadImagesMNIST( string filePath )
     file.close();
     vector<float> imagesData;
     for ( auto image : images )
-    {
-        for ( auto imageChar : image ) imagesData.push_back((float)imageChar);
-    }
+    for ( auto imageChar : image ) imagesData.push_back((float)imageChar);
     return imagesData;
 }
 

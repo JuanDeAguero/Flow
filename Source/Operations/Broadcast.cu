@@ -53,6 +53,7 @@ NARRAY Flow::Broadcast( NARRAY arr, vector<int> shape )
     cudaMemcpy( shape_d, shape.data(), shape.size() * sizeof(int), cudaMemcpyHostToDevice );
     Broadcast_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), shape_d,
         shape.size(), result_d );
+    cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(shape_d);
     return Create( shape, result_d, { arr }, NArray::Operation::BROADCAST );
@@ -90,6 +91,7 @@ void Flow::NArray::BackwardBroadcast()
         Operands[0]->Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
     BackwardBroadcast_Kernel<<< n, 1 >>>( Gradient->GetData(), shape_d, Shape.size(),
         operandShape_d, Operands[0]->Shape.size(), Operands[0]->Gradient->GetData() );
+    cudaDeviceSynchronize();
     cudaFree(shape_d);
     cudaFree(operandShape_d);
 }

@@ -19,6 +19,7 @@ NARRAY Flow::Pow( NARRAY arr, float exponent )
     cudaMalloc( (void**)&result_d, n * sizeof(float) );
     cudaMemcpy( result_d, arr->GetData(), n * sizeof(float), cudaMemcpyDeviceToDevice );
     Pow_Kernel<<< n, 1 >>>( result_d, exponent );
+    cudaDeviceSynchronize();
     NARRAY result = Create( arr->GetShape(), result_d, { arr }, NArray::Operation::POW );
     result->Exponent = exponent;
     return result;
@@ -37,4 +38,5 @@ void Flow::NArray::BackwardPow()
     int n = SizeFromShape(Shape);
     BackwardPow_Kernel<<< n, 1 >>>( Gradient->GetData(), Operands[0]->GetData(),
         Operands[0]->GetGradient()->GetData(), Exponent );
+    cudaDeviceSynchronize();
 }

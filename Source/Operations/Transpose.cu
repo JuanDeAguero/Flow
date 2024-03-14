@@ -38,6 +38,7 @@ pair< vector<int>, float* > Flow::TransposeRaw( NARRAY arr, int firstDim, int se
         cudaMemcpyHostToDevice );
     Transpose_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), firstDim,
         secondDim, result_d, resultShape_d, resultShape.size() );
+    cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(resultShape_d);
     return { resultShape, result_d };
@@ -84,6 +85,7 @@ void Flow::NArray::BackwardTranspose()
     BackwardTranspose_Kernel<<< n, 1 >>>( arrShape_d, GetShape().size(), Gradient->GetData(),
         operandShape_d, Operands[0]->GetShape().size(), Operands[0]->GetGradient()->GetData(),
         TransposeFirstDim, TransposeSecondDim );
+    cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(operandShape_d);
 }

@@ -126,6 +126,7 @@ void Flow::NArray::Backward()
         case NArray::Operation::BMM:       BackwardBMM();       break;
         case NArray::Operation::BROADCAST: BackwardBroadcast(); break;
         case NArray::Operation::EXP:       BackwardExp();       break;
+        case NArray::Operation::FOLD2D:    BackwardFold2d();    break;
         case NArray::Operation::GATHER:    BackwardGather();    break;
         case NArray::Operation::INDEX:     BackwardIndex();     break;
         case NArray::Operation::LOG:       BackwardLog();       break;

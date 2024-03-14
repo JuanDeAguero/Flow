@@ -26,4 +26,5 @@ void Flow::NArray::BackwardSqueeze()
     int n = SizeFromShape(Shape);
     BackwardSqueeze_Kernel<<< n, 1 >>>( Gradient->GetData(),
         Operands[0]->GetGradient()->GetData() );
+    cudaDeviceSynchronize();
 }
