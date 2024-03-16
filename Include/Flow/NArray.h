@@ -75,9 +75,7 @@ namespace Flow
 
         float Exponent;
 
-        vector<int> FoldOutShape2d;
-
-        vector<int> FoldKernel2d;
+        vector<int> FoldOutShape2d, FoldKernel2d;
 
         int GatherDim;
 

@@ -39,11 +39,23 @@ int main()
     matmul->Backpropagate();
     //Flow::Print(matmul);
 
-    arr1 = Flow::Create( { 1, 1, 3, 4 }, { 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1 } );
+    /*arr1 = Flow::Create( { 1, 1, 3, 4 }, { 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1 } );
     NARRAY unfolded = Flow::Unfold2d( arr1, { 2, 2 } );
     NARRAY folded = Flow::Fold2d( unfolded, { 1, 1, 3, 4 }, { 2, 2 } );
-    //unfolded->Backpropagate();
-    Flow::Print(unfolded);
+    folded->Backpropagate();
+    Flow::Print(folded);
+    Flow::Print(arr1->GetGradient());*/
+
+    int batchSize = 1;
+    int inChannels = 3;
+    int outChannels = 2;
+    int kernelSize = 2;
+    int inSize = 6;
+    NARRAY arr = Flow::Create( { batchSize, inChannels, inSize, inSize }, { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } );
+    NARRAY weight = Flow::Ones({ outChannels, inChannels, kernelSize, kernelSize });
+    NARRAY conv = Flow::Conv2d( arr, weight );
+    conv->Backpropagate();
+    Flow::Print(weight->GetGradient());
 
     int numPassed = 0;
 
