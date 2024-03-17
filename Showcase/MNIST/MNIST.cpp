@@ -18,6 +18,30 @@ static vector<float> ReadImagesMNIST( string filePath );
 
 static vector<float> ReadLabelsMNIST( string filePath );
 
+class Network : public Flow::Module
+{
+
+public:
+
+    shared_ptr<Flow::Linear> Linear1, Linear2, Linear3;
+
+    Network()
+    {
+        Linear1 = Flow::Linear::Create( { 784, 512 }, { 512 } );
+        Linear2 = Flow::Linear::Create( { 512, 256 }, { 256 } );
+        Linear3 = Flow::Linear::Create( { 256, 10 }, { 10 } );
+        Modules = { Linear1, Linear2, Linear3 };
+    }
+
+    NARRAY Forward( NARRAY arr ) override
+    {
+        NARRAY a1 = Flow::ReLU( Linear1->Forward(arr) );
+        NARRAY a2 = Flow::ReLU( Linear2->Forward(a1) );
+        return Linear3->Forward(a2);
+    }
+
+};
+
 int main()
 {
     vector<float> trainImages = ReadImagesMNIST("../train-images-idx3-ubyte");
@@ -25,35 +49,19 @@ int main()
     vector<float> trainLabels = ReadLabelsMNIST("../train-labels-idx1-ubyte");
     vector<float> testLabels = ReadLabelsMNIST("../t10k-labels-idx1-ubyte");
 
-    int n = 6000;
-
-    trainImages.resize( 784 * n );
-    testImages.resize( 784 * n );
-    trainLabels.resize(n);
-    testLabels.resize(n);
-
-    NARRAY xTrain( Flow::Create( { n, 784 }, trainImages ) );
-    NARRAY xTest( Flow::Create( { n, 784 }, testImages ) );
-    NARRAY yTrain( Flow::Create( { n }, trainLabels ) );
-    NARRAY yTest( Flow::Create( { n }, testLabels ) );
-
+    NARRAY xTrain( Flow::Create( { 6000, 784 }, trainImages ) );
+    NARRAY xTest( Flow::Create( { 6000, 784 }, testImages ) );
+    NARRAY yTrain( Flow::Create( { 6000 }, trainLabels ) );
+    NARRAY yTest( Flow::Create( { 6000 }, testLabels ) );
     xTrain = Flow::Div( xTrain->Copy(), Flow::Create( { 1 }, { 255.0f } ) );
     xTest = Flow::Div( xTest->Copy(), Flow::Create( { 1 }, { 255.0f } ) );
 
-    NARRAY w1( Flow::Random({ 784, 512 }) );
-    NARRAY b1( Flow::Random({ 512 }) );
-    NARRAY w2( Flow::Random({ 512, 256 }) );
-    NARRAY b2( Flow::Random({ 256 }) );
-    NARRAY w3( Flow::Random({ 256, 10 }) );
-    NARRAY b3( Flow::Random({ 10 }) );
+    Network network;
+    Flow::Optimizer optimizer( network.GetParameters(), 0.0025f, 1e-8f, 0.01f );
 
-    Flow::Optimizer optimizer( { w1, b1, w2, b2, w3, b3 }, 0.0025f, 1e-8f, 0.01f );
-
-    for ( int epoch = 0; epoch < 500; epoch++ )
+    for ( int epoch = 0; epoch < 100; epoch++ )
     {
-        NARRAY a1 = Flow::ReLU( Add( Matmul( xTrain, w1 ), b1 ) );
-        NARRAY a2 = Flow::ReLU( Add( MM( a1, w2 ), b2 ) );
-        NARRAY yPredicted = Flow::Add( MM( a2, w3 ), b3 );
+        NARRAY yPredicted = network.Forward(xTrain);
         NARRAY loss = Flow::CrossEntropy( yPredicted, yTrain );
         optimizer.ZeroGrad();
         loss->Backpropagate();
@@ -62,11 +70,9 @@ int main()
             "  free: " + to_string(Flow::GetCUDAFreeMemory()) );
     }
 
-    NARRAY a1 = Flow::ReLU( Add( MM( xTest, w1 ), b1 ) );
-    NARRAY a2 = Flow::ReLU( Add( MM( a1, w2 ), b2 ) );
-    NARRAY yPredicted = Flow::Add( MM( a2, w3 ), b3 );
+    NARRAY yPredicted = network.Forward(xTest);
     
-    n = 100;
+    int n = 100;
     int numCorrect = 0;
     for ( int i = 0; i < n; i++ )
     {
