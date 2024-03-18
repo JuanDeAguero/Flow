@@ -6,7 +6,7 @@
 __global__
 void Unfold2d_Kernel( float* arr, int* arrShape, int arrShapeSize, float* result, int* resultShape,
     int resultShapeSize, int batchSize, int channels, int kernelHeight, int kernelWidth,
-    int outHeight, int outWidth )
+    int strideHeight, int strideWidth, int outHeight, int outWidth )
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
@@ -19,8 +19,8 @@ void Unfold2d_Kernel( float* arr, int* arrShape, int arrShapeSize, float* result
         int arrMultiIndex[MAX_DIMS];
         arrMultiIndex[0] = b;
         arrMultiIndex[1] = c;
-        arrMultiIndex[2] = i + ki;
-        arrMultiIndex[3] = j + kj;
+        arrMultiIndex[2] = ( i * strideHeight ) + ki;
+        arrMultiIndex[3] = ( j * strideWidth ) + kj;
         int resultMultiIndex[MAX_DIMS];
         resultMultiIndex[0] = b;
         resultMultiIndex[1] = ( c * kernelHeight * kernelWidth ) + ( ki * kernelWidth ) + kj;
@@ -32,7 +32,7 @@ void Unfold2d_Kernel( float* arr, int* arrShape, int arrShapeSize, float* result
     }
 }
 
-NARRAY Flow::Unfold2d( NARRAY arr, vector<int> kernel )
+NARRAY Flow::Unfold2d( NARRAY arr, vector<int> kernel, vector<int> stride )
 {
     int batchSize = arr->GetShape()[0];
     int channels = arr->GetShape()[1];
@@ -40,8 +40,10 @@ NARRAY Flow::Unfold2d( NARRAY arr, vector<int> kernel )
     int width = arr->GetShape()[3];
     int kernelHeight = kernel[0];
     int kernelWidth = kernel[1];
-    int outHeight = height - kernelHeight + 1;
-    int outWidth = width - kernelWidth + 1;
+    int strideHeight = stride[0];
+    int strideWidth = stride[1];
+    int outHeight = ( ( height - kernelHeight ) / strideHeight ) + 1;
+    int outWidth = ( ( width - kernelWidth ) / strideWidth ) + 1;
     vector<int> resultShape = { batchSize, channels * kernelHeight * kernelWidth,
         outHeight * outWidth };
     int* arrShape_d;
@@ -60,19 +62,21 @@ NARRAY Flow::Unfold2d( NARRAY arr, vector<int> kernel )
     dim3 numBlocks( blocksX, blocksY );
     Unfold2d_Kernel<<< numBlocks, threadsPerBlock >>>( arr->GetData(), arrShape_d,
         arr->GetShape().size(), result_d, resultShape_d, resultShape.size(), batchSize, channels,
-        kernelHeight, kernelWidth, outHeight, outWidth );
+        kernelHeight, kernelWidth, strideHeight, strideWidth, outHeight, outWidth );
     cudaDeviceSynchronize();
     cudaFree(arrShape_d);
     cudaFree(resultShape_d);
     NARRAY result = Create( resultShape, result_d, { arr }, NArray::Operation::UNFOLD2D );
     result->UnfoldKernel2d = kernel;
+    result->UnfoldStride2d = stride;
     return result;
 }
 
 __global__
 void BackwardUnfold2d_Kernel( int* arrShape, int arrShapeSize, float* arrGradient,
     int* operandShape, int operandShapeSize, float* operandGradient, int batchSize, int channels,
-    int kernelHeight, int kernelWidth, int outHeight, int outWidth )
+    int kernelHeight, int kernelWidth, int strideHeight, int strideWidth, int outHeight,
+    int outWidth )
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
@@ -89,8 +93,8 @@ void BackwardUnfold2d_Kernel( int* arrShape, int arrShapeSize, float* arrGradien
         int operandMultiIndex[MAX_DIMS];
         operandMultiIndex[0] = b;
         operandMultiIndex[1] = c;
-        operandMultiIndex[2] = i + ki;
-        operandMultiIndex[3] = j + kj;
+        operandMultiIndex[2] = ( i * strideHeight ) + ki;
+        operandMultiIndex[3] = ( j * strideWidth ) + kj;
         int arrIndex = Flow::MultiToFlatIndex_Device( arrMultiIndex, arrShape, arrShapeSize );
         int operandIndex = Flow::MultiToFlatIndex_Device( operandMultiIndex, operandShape,
             operandShapeSize );
@@ -106,8 +110,10 @@ void Flow::NArray::BackwardUnfold2d()
     int width = Operands[0]->GetShape()[3];
     int kernelHeight = UnfoldKernel2d[0];
     int kernelWidth = UnfoldKernel2d[1];
-    int outHeight = height - kernelHeight + 1;
-    int outWidth = width - kernelWidth + 1;
+    int strideHeight = UnfoldStride2d[0];
+    int strideWidth = UnfoldStride2d[1];
+    int outHeight = ( ( height - kernelHeight ) / strideHeight ) + 1;
+    int outWidth = ( ( width - kernelWidth ) / strideWidth ) + 1;
     int* arrShape_d;
     int* operandShape_d;
     cudaMalloc( (void**)&arrShape_d, Shape.size() * sizeof(int) );
@@ -122,6 +128,6 @@ void Flow::NArray::BackwardUnfold2d()
     BackwardUnfold2d_Kernel<<< numBlocks, threadsPerBlock >>>( arrShape_d, Shape.size(),
         Gradient->GetData(), operandShape_d, Operands[0]->GetShape().size(),
         Operands[0]->GetGradient()->GetData(), batchSize, channels, kernelHeight, kernelWidth,
-        outHeight, outWidth );
+        strideHeight, strideWidth, outHeight, outWidth );
     cudaDeviceSynchronize();
 }

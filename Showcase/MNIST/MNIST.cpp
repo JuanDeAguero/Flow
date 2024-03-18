@@ -23,21 +23,27 @@ class Network : public Flow::Module
 
 public:
 
-    shared_ptr<Flow::Linear> Linear1, Linear2, Linear3;
+    shared_ptr<Flow::Convolution> Conv1, Conv2;
+    shared_ptr<Flow::Linear> Linear1, Linear2;
 
     Network()
     {
-        Linear1 = Flow::Linear::Create( { 784, 512 }, { 512 } );
-        Linear2 = Flow::Linear::Create( { 512, 256 }, { 256 } );
-        Linear3 = Flow::Linear::Create( { 256, 10 }, { 10 } );
-        Modules = { Linear1, Linear2, Linear3 };
+        Conv1 = Flow::Convolution::Create( 1, 10, { 5, 5 } );
+        Conv2 = Flow::Convolution::Create( 10, 20, { 5, 5 } );
+        Linear1 = Flow::Linear::Create( { 320, 50 }, { 50 } );
+        Linear2 = Flow::Linear::Create( { 50, 10 }, { 10 } );
+        Modules = { Conv1, Conv2, Linear1, Linear2 };
     }
 
     NARRAY Forward( NARRAY arr ) override
     {
-        NARRAY a1 = Flow::ReLU( Linear1->Forward(arr) );
-        NARRAY a2 = Flow::ReLU( Linear2->Forward(a1) );
-        return Linear3->Forward(a2);
+        NARRAY a1 = Flow::Unsqueeze( arr, 1 );
+        NARRAY a2 = Flow::ReLU( MaxPool2d( Conv1->Forward(a1), { 2, 2 } ) );
+        NARRAY a3 = Flow::ReLU( MaxPool2d( Conv2->Forward(a2), { 2, 2 } ) );
+        NARRAY a4 = Flow::Reshape( a3, { a3->GetShape()[0], 320 } );
+        NARRAY a5 = Flow::ReLU( Linear1->Forward(a4) );
+        NARRAY a6 = Linear2->Forward(a5);
+        return Flow::Softmax( a6, 1 );
     }
 
 };
@@ -49,15 +55,15 @@ int main()
     vector<float> trainLabels = ReadLabelsMNIST("../train-labels-idx1-ubyte");
     vector<float> testLabels = ReadLabelsMNIST("../t10k-labels-idx1-ubyte");
 
-    NARRAY xTrain( Flow::Create( { 6000, 784 }, trainImages ) );
-    NARRAY xTest( Flow::Create( { 6000, 784 }, testImages ) );
+    NARRAY xTrain( Flow::Create( { 6000, 28, 28 }, trainImages ) );
+    NARRAY xTest( Flow::Create( { 6000, 28, 28 }, testImages ) );
     NARRAY yTrain( Flow::Create( { 6000 }, trainLabels ) );
     NARRAY yTest( Flow::Create( { 6000 }, testLabels ) );
     xTrain = Flow::Div( xTrain->Copy(), Flow::Create( { 1 }, { 255.0f } ) );
     xTest = Flow::Div( xTest->Copy(), Flow::Create( { 1 }, { 255.0f } ) );
 
     Network network;
-    Flow::Optimizer optimizer( network.GetParameters(), 0.0025f, 1e-8f, 0.01f );
+    Flow::Optimizer optimizer( network.GetParameters(), 0.0025f, 1e-8f, 0.001f );
 
     for ( int epoch = 0; epoch < 100; epoch++ )
     {

@@ -10,11 +10,10 @@ NARRAY Flow::Conv2d( NARRAY arr, NARRAY weight )
     int inChannels = weight->GetShape()[1];
     int kernelSize = weight->GetShape()[2];
     int outSize = inSize - kernelSize + 1;
-    NARRAY unfolded = Flow::Unfold2d( arr, { kernelSize, kernelSize } );
+    NARRAY unfolded = Unfold2d( arr, { kernelSize, kernelSize }, { 1, 1 } );
     NARRAY unfoldedTransposed = Transpose( unfolded, 1, 2 );
     auto weightShape = { outChannels, inChannels * kernelSize * kernelSize };
     NARRAY weightTransposed = Transpose( Reshape( weight, weightShape ), 0, 1 );
-    NARRAY conv = Flow::Transpose( Matmul( unfoldedTransposed, weightTransposed ), 1, 2 );
-    NARRAY folded = Flow::Fold2d( conv, { batchSize, outChannels, outSize, outSize }, { 1, 1 } );
-    return folded;
+    NARRAY conv = Transpose( Matmul( unfoldedTransposed, weightTransposed ), 1, 2 );
+    return Fold2d( conv, { batchSize, outChannels, outSize, outSize }, { 1, 1 } );
 }

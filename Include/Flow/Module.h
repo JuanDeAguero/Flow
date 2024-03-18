@@ -16,7 +16,7 @@ namespace Flow
 
     public:
 
-        Module();
+        Module() = default;
 
         virtual NARRAY Forward( NARRAY arr );
 
@@ -33,7 +33,7 @@ namespace Flow
 
     public:
 
-        Linear();
+        Linear() = default;
 
         Linear( vector<int> weightShape, vector<int> biasShape );
 
@@ -51,8 +51,24 @@ namespace Flow
 
     };
 
-    class Conv2d : public Module
+    class Convolution : public Module
     {
+
+    public:
+
+        Convolution() = default;
+
+        Convolution( int inChannels, int outChannels, vector<int> kernel );
+
+        static shared_ptr<Convolution> Create( int inChannels, int outChannels, vector<int> kernel );
+
+        NARRAY Forward( NARRAY arr ) override;
+
+        vector<NARRAY> GetParameters() override;
+
+    private:
+
+        NARRAY Weight;
 
     };
 }

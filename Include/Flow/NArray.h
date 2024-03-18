@@ -93,7 +93,7 @@ namespace Flow
         
         int TransposeFirstDim, TransposeSecondDim;
 
-        vector<int> UnfoldKernel2d;
+        vector<int> UnfoldKernel2d, UnfoldStride2d;
 
         vector<NArray*> TopologicalSort();
 
@@ -157,7 +157,7 @@ namespace Flow
 
         friend NARRAY Transpose( NARRAY arr, int firstDim, int secondDim );
 
-        friend NARRAY Unfold2d( NARRAY arr, vector<int> kernel );
+        friend NARRAY Unfold2d( NARRAY arr, vector<int> kernel, vector<int> stride );
         
     };
 
@@ -192,6 +192,8 @@ namespace Flow
 
     NARRAY Max( NARRAY arr, int dim );
 
+    NARRAY MaxPool2d( NARRAY arr, vector<int> kernel );
+
     NARRAY Mean( NARRAY arr, int dim );
 
     NARRAY MM( NARRAY arr1, NARRAY arr2 );
@@ -222,7 +224,7 @@ namespace Flow
 
     NARRAY Transpose( NARRAY arr, int firstDim, int secondDim );
 
-    NARRAY Unfold2d( NARRAY arr, vector<int> kernel );
+    NARRAY Unfold2d( NARRAY arr, vector<int> kernel, vector<int> stride );
     
     NARRAY Unsqueeze( NARRAY arr, int dim );
 

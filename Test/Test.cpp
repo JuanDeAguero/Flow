@@ -55,7 +55,11 @@ int main()
     NARRAY weight = Flow::Ones({ outChannels, inChannels, kernelSize, kernelSize });
     NARRAY conv = Flow::Conv2d( arr, weight );
     conv->Backpropagate();
-    Flow::Print(weight->GetGradient());
+    //Flow::Print(weight->GetGradient());
+
+    arr = Flow::Create( { 2, 1, 5, 10 }, { 0, 7, 3, 3, 9, 1, 6, 1, 0, 6, 4, 10, 0, 10, 0, 10, 10, 3, 9, 6, 5, 5, 4, 5, 9, 8, 6, 5, 9, 1, 1, 2, 10, 3, 4, 7, 8, 3, 6, 10, 9, 6, 5, 1, 1, 6, 2, 10, 1, 7, 6, 9, 8, 5, 1, 6, 6, 1, 8, 3, 4, 8, 5, 4, 8, 7, 2, 2, 5, 10, 0, 0, 3, 8, 4, 1, 1, 2, 8, 7, 5, 9, 4, 0, 2, 10, 8, 3, 5, 5, 1, 7, 3, 9, 6, 2, 8, 9, 6, 3 } );
+    NARRAY pooled = Flow::MaxPool2d( arr, { 2, 2 } );
+    Flow::Print(pooled);
 
     int numPassed = 0;
 
