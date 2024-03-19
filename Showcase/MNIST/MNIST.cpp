@@ -2,8 +2,11 @@
 
 #pragma once
 
+#include <algorithm>
+#include <chrono>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -23,10 +26,35 @@ class Network : public Flow::Module
 
 public:
 
+    shared_ptr<Flow::Linear> Linear1, Linear2, Linear3;
+
+    Network()
+    {
+        Linear1 = Flow::Linear::Create( { 784, 512 }, { 512 } );
+        Linear2 = Flow::Linear::Create( { 512, 256 }, { 256 } );
+        Linear3 = Flow::Linear::Create( { 256, 10 }, { 10 } );
+        Modules = { Linear1, Linear2, Linear3 };
+    }
+
+    NARRAY Forward( NARRAY arr ) override
+    {
+        NARRAY a1 = Flow::Reshape( arr, { arr->GetShape()[0], 28 * 28 } );
+        NARRAY a2 = Flow::ReLU( Linear1->Forward(a1) );
+        NARRAY a3 = Flow::ReLU( Linear2->Forward(a2) );
+        return Linear3->Forward(a3);
+    }
+
+};
+
+class CNN : public Flow::Module
+{
+
+public:
+
     shared_ptr<Flow::Convolution> Conv1, Conv2;
     shared_ptr<Flow::Linear> Linear1, Linear2;
 
-    Network()
+    CNN()
     {
         Conv1 = Flow::Convolution::Create( 1, 10, { 5, 5 } );
         Conv2 = Flow::Convolution::Create( 10, 20, { 5, 5 } );
@@ -55,47 +83,64 @@ int main()
     vector<float> trainLabels = ReadLabelsMNIST("../train-labels-idx1-ubyte");
     vector<float> testLabels = ReadLabelsMNIST("../t10k-labels-idx1-ubyte");
 
-    NARRAY xTrain( Flow::Create( { 6000, 28, 28 }, trainImages ) );
-    NARRAY xTest( Flow::Create( { 6000, 28, 28 }, testImages ) );
-    NARRAY yTrain( Flow::Create( { 6000 }, trainLabels ) );
-    NARRAY yTest( Flow::Create( { 6000 }, testLabels ) );
+    int numTrain = 60000;
+    int numTest = 10000;
+    trainImages.resize( 784 * numTrain );
+    testImages.resize( 784 * numTest );
+    trainLabels.resize(numTrain);
+    testLabels.resize(numTest);
+
+    NARRAY xTrain( Flow::Create( { numTrain, 28, 28 }, trainImages ) );
+    NARRAY xTest( Flow::Create( { numTest, 28, 28 }, testImages ) );
+    NARRAY yTrain( Flow::Create( { numTrain }, trainLabels ) );
+    NARRAY yTest( Flow::Create( { numTest }, testLabels ) );
     xTrain = Flow::Div( xTrain->Copy(), Flow::Create( { 1 }, { 255.0f } ) );
     xTest = Flow::Div( xTest->Copy(), Flow::Create( { 1 }, { 255.0f } ) );
 
-    Network network;
-    Flow::Optimizer optimizer( network.GetParameters(), 0.0025f, 1e-8f, 0.001f );
+    CNN network;
+    Flow::Optimizer optimizer( network.GetParameters(), 0.001f, 1e-8f, 0.0f );
 
-    for ( int epoch = 0; epoch < 100; epoch++ )
+    for ( int epoch = 0; epoch < 10; epoch++ )
     {
-        NARRAY yPredicted = network.Forward(xTrain);
-        NARRAY loss = Flow::CrossEntropy( yPredicted, yTrain );
-        optimizer.ZeroGrad();
-        loss->Backpropagate();
-        optimizer.Step();
-        Flow::Print( "epoch: " + to_string( epoch + 1 ) + "  loss: " + to_string(loss->Get()[0]) +
-            "  free: " + to_string(Flow::GetCUDAFreeMemory()) );
-    }
-
-    NARRAY yPredicted = network.Forward(xTest);
-    
-    int n = 100;
-    int numCorrect = 0;
-    for ( int i = 0; i < n; i++ )
-    {
-        int maxPredIndex = 0;
-        float maxPredValue = 0.0f;
-        for ( int j = 0; j < 10; j++ )
+        auto batches = Flow::CreateBatches( xTrain, yTrain, 100 );
+        for ( auto batch : batches )
         {
-            float value = yPredicted->Get({ i, j });
-            if ( value > maxPredValue )
-            {
-                maxPredValue = value;
-                maxPredIndex = j;
-            }
+            NARRAY yPredicted = network.Forward(batch.first);
+            NARRAY loss = Flow::CrossEntropy( yPredicted, batch.second );
+            optimizer.ZeroGrad();
+            loss->Backpropagate();
+            optimizer.Step();
+            Flow::Print( "epoch: " + to_string( epoch + 1 ) +
+                "  loss: " + to_string(loss->Get()[0]) +
+                "  free: " + to_string(Flow::GetCUDAFreeMemory()) );
         }
-        if ( yTest->Get({ i }) == maxPredIndex ) numCorrect++;
     }
-    Flow::Print( to_string(numCorrect) + "/" + to_string(n) );
+
+    auto batches = Flow::CreateBatches( xTest, yTest, 100 );
+    int numCorrect = 0;
+    for ( auto batch : batches )
+    {
+        NARRAY yPredicted = network.Forward(batch.first);
+        for ( int i = 0; i < batch.first->GetShape()[0]; i++ )
+        {
+            int maxPredIndex = 0;
+            float maxPredValue = 0.0f;
+            for ( int j = 0; j < 10; j++ )
+            {
+                float value = yPredicted->Get({ i, j });
+                if ( value > maxPredValue )
+                {
+                    maxPredValue = value;
+                    maxPredIndex = j;
+                }
+            }
+            Flow::Print( to_string((int)batch.second->Get({ i })) +
+                " | " + to_string(maxPredIndex) );
+            if ( batch.second->Get({ i }) == maxPredIndex ) numCorrect++;
+        }
+    }
+    Flow::Print( to_string(numCorrect) + "/" + to_string(numTest) +
+        " " + to_string( ( (float)numCorrect / (float)numTest ) * 100.0f ) + "%" );
 }
 
 vector<float> ReadImagesMNIST( string filePath )

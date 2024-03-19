@@ -1,6 +1,7 @@
 // Copyright (c) 2023-2024 Juan M. G. de Agüero
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
@@ -161,11 +162,20 @@ NARRAY Flow::Random( vector<int> shape )
 {
     random_device randomDevice;
     mt19937 generator(randomDevice());
-    normal_distribution<float> distribution( 0.0f, 1.0f );
+    normal_distribution<float> distribution( 0.0f, 0.01f );
     int size = SizeFromShape(shape);
     vector<float> data( size, 0.0f );
     for ( int i = 0; i < size; i++ ) data[i] = distribution(generator);
     return Create( shape, data );
+}
+
+NARRAY Flow::RandomPermutation( int n )
+{
+    vector<float> data(n);
+    for( int i = 0; i < n; i++ ) data[i] = static_cast<float>(i);
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    shuffle( data.begin(), data.end(), default_random_engine(seed) );
+    return Create( { n }, data );
 }
 
 NARRAY Flow::Zeros( vector<int> shape )
@@ -229,4 +239,25 @@ float Flow::GetCUDAFreeMemory()
     size_t totalByte;
     cudaError_t cudaStatus = cudaMemGetInfo( &freeByte, &totalByte );
     return freeByte / 1024.0f / 1024.0f;
+}
+
+vector< pair< NARRAY, NARRAY > > Flow::CreateBatches( NARRAY arr1, NARRAY arr2, int batchSize )
+{
+    vector< pair< NARRAY, NARRAY > > batches;
+    int numSamples = arr1->GetShape()[0];
+    NARRAY indices = RandomPermutation(numSamples);
+    int totalBatches = ( numSamples + batchSize - 1 ) / batchSize;
+    for ( int i = 0; i < totalBatches; i++ )
+    {
+        int start = i * batchSize;
+        int length = min( batchSize, numSamples - start );
+        NARRAY batchIndices = Zeros({ length });
+        for ( int j = 0; j < length; j++ )
+            batchIndices->Set( { j }, indices->Get({ start + j }) );
+        NARRAY batchX = Index( arr1, 0, batchIndices );
+        NARRAY batchY = Index( arr2, 0, batchIndices );
+        pair< NARRAY, NARRAY > batchPair = { batchX, batchY };
+        batches.push_back(batchPair);
+    }
+    return batches;
 }

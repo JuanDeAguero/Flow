@@ -230,6 +230,8 @@ namespace Flow
 
     NARRAY Random( vector<int> shape );
 
+    NARRAY RandomPermutation( int n );
+
     NARRAY Zeros( vector<int> shape );
 
     NARRAY Ones( vector<int> shape );
@@ -249,4 +251,6 @@ namespace Flow
     vector<int> BroadcastShapes( vector<int> shape1, vector<int> shape2 );
 
     float GetCUDAFreeMemory();
+
+    vector< pair< NARRAY, NARRAY > > CreateBatches( NARRAY arr1, NARRAY arr2, int batchSize );
 }

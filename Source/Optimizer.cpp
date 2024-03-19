@@ -36,9 +36,7 @@ void Flow::Optimizer::Step()
         NARRAY vHat = Div( Vs[i], Sub( one, Pow( Beta2s[i], (float)Time ) ) );
         NARRAY epsilon = Create( { 1 }, { Epsilon } );
         NARRAY weightDecay = Create( { 1 }, { WeightDecay } );
-        NARRAY a = Add(
-            Div( mHat, Add( Pow( vHat, 0.5f ), epsilon ) ),
-            Mul( weightDecay, Arrays[i] ) );
-        Arrays[i]->Copy( Sub( Arrays[i], Mul( a, LearningRate ) ) );
+        NARRAY a = Mul( Div( mHat, Add( Pow( vHat, 0.5f ), epsilon ) ), LearningRate );
+        Arrays[i]->Copy( Sub( Arrays[i], a ) );
     }
 }
