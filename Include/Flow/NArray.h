@@ -2,7 +2,9 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
+#include <random>
 #include <set>
 #include <string>
 #include <unordered_set>
@@ -29,11 +31,14 @@ namespace Flow
             TANH, TRANSPOSE, UNFOLD2D, UNSQUEEZE
         };
 
-        NArray( vector<int> shape, const vector<float>& data );
+        NArray( const vector<int>& shape, const vector<float>& data );
 
-        NArray( vector<int> shape, float* deviceData, vector<NARRAY> operands, Operation op );
+        NArray( const vector<int>& shape );
 
-        NArray( vector<int> shape );  // Constructor for gradients.
+        NArray( vector<int> shape, vector<NARRAY> operands, Operation op );
+
+        NArray( vector<int> shape, vector<int> stride, int storageOffset, NARRAY metaParent,
+            vector<NARRAY> operands, Operation op );
 
         ~NArray();
 
@@ -44,34 +49,52 @@ namespace Flow
         float* GetData();
 
         vector<int> GetShape();
-        
-        int* GetShapeData();
+
+        int* GetShapeDevice();
+
+        vector<int> GetStride();
+
+        int* GetStrideDevice();
+
+        int GetOffset();
 
         NARRAY GetGradient();
+
+        struct NArrayDevice* GetDeviceStruct();
         
         void Set( vector<int> coordinates, float value );
 
         void Reset( float value );
 
-        void Backpropagate();
-
         NARRAY Copy();
 
         void Copy( NARRAY arr );
 
-    private:
+        void Backpropagate();
 
-        friend class NARRAY;
+    private:
 
         float* Data;
 
         vector<int> Shape;
+
+        int* ShapeDevice;
+
+        NARRAY MetaParent;
+
+        vector<int> Stride;
+
+        int* StrideDevice;
+        
+        int StorageOffset;
 
         NARRAY Gradient;
 
         vector<NARRAY> Operands;
         
         NArray::Operation Op;
+
+        struct NArrayDevice* DeviceStruct;
 
         float Exponent;
 
@@ -95,18 +118,20 @@ namespace Flow
 
         vector<int> UnfoldKernel2d, UnfoldStride2d;
 
+        void Backward();
+
         vector<NArray*> TopologicalSort();
 
         void BuildTopo( NArray* current, unordered_set<NArray*>& visited, vector<NArray*>& topo );
 
-        void Backward();
+        void CreateDeviceStruct();
 
         void BackwardAdd();
 
         void BackwardBMM();
-        
+
         void BackwardBroadcast();
-        
+
         void BackwardExp();
 
         void BackwardFold2d();
@@ -141,6 +166,8 @@ namespace Flow
         
         void BackwardUnsqueeze();
 
+        friend NARRAY Broadcast( NARRAY arr, vector<int> shape );
+
         friend NARRAY Fold2d( NARRAY arr, vector<int> outShape, vector<int> kernel );
 
         friend NARRAY Gather( NARRAY arr, int dim, NARRAY index );
@@ -158,13 +185,19 @@ namespace Flow
         friend NARRAY Transpose( NARRAY arr, int firstDim, int secondDim );
 
         friend NARRAY Unfold2d( NARRAY arr, vector<int> kernel, vector<int> stride );
+
+        friend NARRAY FindMetaParent( NARRAY arr );
         
     };
 
-    NARRAY Create( vector<int> shape, const vector<float>& data );
+    struct NArrayDevice
+    {
+        float* Data; int* Shape; int ShapeSize; int* Stride; int Offset;
 
-    NARRAY Create( vector<int> shape, float* deviceData, vector<NARRAY> operands,
-        NArray::Operation op );
+        NArrayDevice( float* data, int* shape, int shapeSize, int* stride, int offset );
+    };
+
+    NARRAY Create( const vector<int>& shape, const vector<float>& data );
 
     NARRAY Add( NARRAY arr1, NARRAY arr2 );
 
@@ -218,6 +251,8 @@ namespace Flow
 
     NARRAY Sub( NARRAY arr1, NARRAY arr2 );
 
+    NARRAY Sum( NARRAY arr, vector<int> dims );
+
     NARRAY Sum( NARRAY arr, int dim );
 
     NARRAY Tanh( NARRAY arr );
@@ -229,6 +264,12 @@ namespace Flow
     NARRAY Unsqueeze( NARRAY arr, int dim );
 
     NARRAY Random( vector<int> shape );
+
+    NARRAY Random( vector<int> shape, function<float(mt19937&)> distribution );
+
+    NARRAY RandomNormal( vector<int> shape, int mean, int std );
+
+    NARRAY RandomUniform( vector<int> shape, float min, float max );
 
     NARRAY RandomPermutation( int n );
 
@@ -244,13 +285,23 @@ namespace Flow
 
     int SizeFromShape( vector<int> shape );
 
-    int MultiToFlatIndex( vector<int> index, vector<int> shape );
+    vector<int> StrideFromShape( vector<int> shape );
 
-    vector<int> FlatToMultiIndex( int index, vector<int> shape );
+    vector<int> FlatToMultiIndex( int flatIndex, vector<int> shape );
+
+    int MultiToFlatIndex( vector<int> multiIndex, vector<int> stride, int offset );
 
     vector<int> BroadcastShapes( vector<int> shape1, vector<int> shape2 );
 
-    float GetCUDAFreeMemory();
-
     vector< pair< NARRAY, NARRAY > > CreateBatches( NARRAY arr1, NARRAY arr2, int batchSize );
+
+    NARRAY FindMetaParent( NARRAY arr );
+
+    bool CUDA_AllocateFloat( float*& deviceData, const const vector<float>& data );
+
+    bool CUDA_AllocateInt( int*& deviceData, const const vector<int>& data );
+
+    float CUDA_GetFreeMemory();
+
+    void CUDA_DeviceSynchronize();
 }

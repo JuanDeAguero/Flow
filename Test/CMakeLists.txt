@@ -9,7 +9,7 @@ target_link_libraries(test PRIVATE ${CMAKE_SOURCE_DIR}/../build/Debug/flow.lib)
 target_link_libraries(test PRIVATE ${CUDA_LIBRARIES})
 target_include_directories(test PRIVATE ${CUDA_INCLUDE_DIRS})
 
-# TORCH
+# Torch
 list(APPEND CMAKE_PREFIX_PATH "C:/Program Files/libtorch")
 find_package(Torch REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")

@@ -1,11 +1,13 @@
-// Copyright (c) 2023 Juan M. G. de Agüero
+// Copyright (c) 2023-2024 Juan M. G. de Agüero
 
 #include <stdexcept>
 
 #include "CUDA.cuh"
 #include "Flow/NArray.h"
 
-std::vector<int> Flow::BroadcastShapes( vector<int> shape1, vector<int> shape2 )
+using namespace std;
+
+vector<int> Flow::BroadcastShapes( vector<int> shape1, vector<int> shape2 )
 {
     int maxDims = max( shape1.size(), shape2.size() );
     while ( shape1.size() < maxDims ) shape1.insert( shape1.begin(), 1 );
@@ -21,77 +23,49 @@ std::vector<int> Flow::BroadcastShapes( vector<int> shape1, vector<int> shape2 )
     return shape;
 }
 
-__global__
-void Broadcast_Kernel( float* arr, int* arrShape, int arrShapeSize, int* shape, int shapeSize,
-    float* result )
-{
-    int i = blockIdx.x;
-    int multiIndex[MAX_DIMS];
-    Flow::FlatToMultiIndex_Device( i, shape, shapeSize, multiIndex );
-    int originalCoords[MAX_DIMS];
-    for ( int j = 0; j < arrShapeSize; j++ )
-    {
-        int coord = multiIndex[ shapeSize - arrShapeSize + j ];
-        if ( arrShape[j] == 1 ) coord = 0;
-        originalCoords[j] = coord;
-    }
-    int flatIndex = Flow::MultiToFlatIndex_Device( originalCoords, arrShape, arrShapeSize );
-    result[i] = arr[flatIndex];
-}
-
 NARRAY Flow::Broadcast( NARRAY arr, vector<int> shape )
 {
-    int n = SizeFromShape(shape);
-    int* arrShape_d;
-    int* shape_d;
-    float* result_d;
-    cudaMalloc( (void**)&arrShape_d, arr->GetShape().size() * sizeof(int) );
-    cudaMalloc( (void**)&shape_d, shape.size() * sizeof(int) );
-    cudaMalloc( (void**)&result_d, n * sizeof(float) );
-    cudaMemcpy( arrShape_d, arr->GetShapeData(), arr->GetShape().size() * sizeof(int),
-        cudaMemcpyHostToDevice );
-    cudaMemcpy( shape_d, shape.data(), shape.size() * sizeof(int), cudaMemcpyHostToDevice );
-    Broadcast_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), shape_d,
-        shape.size(), result_d );
-    cudaDeviceSynchronize();
-    cudaFree(arrShape_d);
-    cudaFree(shape_d);
-    return Create( shape, result_d, { arr }, NArray::Operation::BROADCAST );
+    if ( arr->GetShape() == shape ) return arr;
+    vector<int> arrShape = arr->GetShape();
+    vector<int> resultShape( max( arrShape.size(), shape.size() ), 1 );
+    vector<int> resultStride( resultShape.size(), 0 );
+    for ( int i = resultShape.size() - 1, j = arrShape.size() - 1, k = shape.size() - 1; i >= 0;
+        i--, j--, k-- )
+    {
+        int originalDim = j >= 0 ? arrShape[j] : 1;
+        int targetDim = k >= 0 ? shape[k] : 1;
+        resultShape[i] = max( originalDim, targetDim );
+        resultStride[i] = ( originalDim == 1 ) ? 0 : ( j >= 0 ? arr->GetStride()[j] : 0 );
+    }
+    return make_shared<NArray>( resultShape, resultStride, arr->GetOffset(), FindMetaParent(arr),
+        vector<NARRAY>({ arr }), NArray::Operation::BROADCAST );
 }
 
 __global__
-void BackwardBroadcast_Kernel( float* gradient, int* shape, int shapeSize, int* operandShape,
-    int operandShapeSize, float* operandGradient )
+void BackwardBroadcast_Kernel( Flow::NArrayDevice* arr, Flow::NArrayDevice* grad,
+    Flow::NArrayDevice* operand, Flow::NArrayDevice* operandGrad, int n )
 {
-    int i = blockIdx.x;
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if ( i >= n ) return;
     int multiIndex[MAX_DIMS];
-    Flow::FlatToMultiIndex_Device( i, shape, shapeSize, multiIndex );
+    Flow::FlatToMultiIndex_Device( i, multiIndex, arr );
     int operandCoords[MAX_DIMS];
-    for ( int j = 0; j < operandShapeSize; j++ )
+    for ( int j = 0; j < operand->ShapeSize; j++ )
     {
-        int coord = multiIndex[ shapeSize - operandShapeSize + j ];
-        if ( operandShape[j] == 1 ) operandCoords[j] = 0;
+        int coord = multiIndex[ arr->ShapeSize - operand->ShapeSize + j ];
+        if ( operand->Shape[j] == 1 ) operandCoords[j] = 0;
         else operandCoords[j] = coord;
     }
-    int operandIndex = Flow::MultiToFlatIndex_Device( operandCoords, operandShape,
-        operandShapeSize );
-    atomicAdd( &operandGradient[operandIndex], gradient[i] );
+    int flatIndex = Flow::MultiToFlatIndex_Device( operandCoords, operand );
+    int operandGradIndex = Flow::GetIndex_Device( flatIndex, operandGrad );
+    int gradIndex = Flow::GetIndex_Device( i, grad );
+    Flow::AtomicAdd_Device( &operandGrad->Data[operandGradIndex], grad->Data[gradIndex] );
 }
 
-__host__
 void Flow::NArray::BackwardBroadcast()
 {
-    int n = SizeFromShape(Gradient->GetShape());
-    int* shape_d;
-    int* operandShape_d;
-    cudaMalloc( (void**)&shape_d, Shape.size() * sizeof(int) );
-    cudaMalloc( (void**)&operandShape_d, Operands[0]->Shape.size() * sizeof(int) );
-    cudaMemcpy( shape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
-    cudaMemcpy( operandShape_d, Operands[0]->GetShapeData(),
-        Operands[0]->Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
-    BackwardBroadcast_Kernel<<< n, 1 >>>( Gradient->GetData(), shape_d, Shape.size(),
-        operandShape_d, Operands[0]->Shape.size(), Operands[0]->Gradient->GetData() );
-    cudaDeviceSynchronize();
-    cudaFree(shape_d);
-    cudaFree(operandShape_d);
+    int n = SizeFromShape(Gradient->Shape);
+    BackwardBroadcast_Kernel<<< BLOCKS(n), TPB >>>( DeviceStruct, Gradient->DeviceStruct,
+        Operands[0]->DeviceStruct, Operands[0]->Gradient->DeviceStruct, n );
+    CUDA_DeviceSynchronize();
 }

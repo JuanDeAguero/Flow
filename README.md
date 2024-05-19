@@ -6,11 +6,6 @@ Machine Learning Library in C++
 - Autograd system
 - GPU acceleration with CUDA
 - Deep neural networks
-## Minimum requirements
-- C++ 17
-- CMake 3.12
-- CUDA Toolkit 11.8
-- Windows 10
 ## Example: MNIST classifier 🔢
 See "Showcase/MNIST/".<br>
 ```cpp

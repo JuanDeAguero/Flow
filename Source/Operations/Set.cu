@@ -4,31 +4,32 @@
 #include "Flow/NArray.h"
 
 __global__
-void Set_Kernel( float* arr, int index, float value )
+void Set_Kernel( float* arr, float value, int index )
 {
     arr[index] = value;
 }
 
 void Flow::NArray::Set( vector<int> coordinates, float value )
 {
-    int index = MultiToFlatIndex( coordinates, Shape );
+    int index = MultiToFlatIndex( coordinates, Stride, StorageOffset );
     if ( index >= 0 && index < SizeFromShape(Shape) )
     {
-        Set_Kernel<<< 1, 1 >>>( Data, index, value );
-        cudaDeviceSynchronize();
+        Set_Kernel<<< 1, 1 >>>( Data, value, index );
+        CUDA_DeviceSynchronize();
     }
 }
 
 __global__
-void Flow::Reset_Kernel( float* arr, int n, float value )
+void Flow::Reset_Kernel( float* arr, float value, int n )
 {
-    int i = blockIdx.x;
-    if ( i < n ) arr[i] = value;
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if ( i >= n ) return;
+    arr[i] = value;
 }
 
 void Flow::NArray::Reset( float value )
 {
     int n = SizeFromShape(Shape);
-    Reset_Kernel<<< n, 1 >>>( Data, n, value );
-    cudaDeviceSynchronize();
+    Reset_Kernel<<< BLOCKS(n), TPB >>>( Data, value, n );
+    CUDA_DeviceSynchronize();
 }

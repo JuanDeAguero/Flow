@@ -26,10 +26,14 @@ void Flow::Print( float value, int precision )
 
 void Flow::Print( vector<float> vec )
 {
-    for ( float value : vec ) Print(value);
+    cout << "{ ";
+    for ( float value : vec ) cout << value << " ";
+    cout << "}" << endl;
 }
 
 void Flow::Print( vector<int> vec )
 {
-    for ( int value : vec ) Print(value);
+    cout << "{ ";
+    for ( int value : vec ) cout << value << " ";
+    cout << "}" << endl;
 }

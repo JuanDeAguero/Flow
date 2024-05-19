@@ -9,53 +9,52 @@
 #include "NArray.h"
 
 #define MAX_DIMS 100
+#define TPB 256
+#define BLOCKS(n) ( n + TPB - 1 ) / TPB
 
 namespace Flow
 {
     using namespace std;
 
     __global__
-    void Reset_Kernel( float* arr, int n, float value );
+    void Reset_Kernel( float* arr, float value, int n );
 
     __device__
-    inline int MultiToFlatIndex_Device( int* index, int* shape, int shapeSize )
+    inline void FlatToMultiIndex_Device( int flatIndex, int* multiIndex, NArrayDevice* arr )
     {
-        int flatIndex = 0;
-        int stride = 1;
-        for ( int i = shapeSize - 1; i >= 0; i-- )
+        int product = 1;
+        for ( int i = arr->ShapeSize - 1; i >= 0; i-- ) product *= arr->Shape[i];
+        for ( int i = 0; i < arr->ShapeSize; i++ )
         {
-            flatIndex += index[i] * stride;
-            stride *= shape[i];
+            product /= arr->Shape[i];
+            multiIndex[i] = ( flatIndex / product ) % arr->Shape[i];
         }
+    }
+
+    __device__
+    inline int MultiToFlatIndex_Device( int* multiIndex, NArrayDevice* arr )
+    {
+        int flatIndex = arr->Offset;
+        for ( int i = arr->ShapeSize - 1; i >= 0; i-- ) flatIndex += multiIndex[i] * arr->Stride[i];
         return flatIndex;
     }
 
-    __device__
-    inline void FlatToMultiIndex_Device( int index, int* shape, int shapeSize, int* multiIndex )
+        __device__
+    inline int GetIndex_Device( int linearIndex, NArrayDevice* arr )
     {
-        for ( int i = shapeSize - 1; i >= 0; i-- )
-        {
-            multiIndex[i] = index % shape[i];
-            index /= shape[i];
-        }
+        int multiIndex[MAX_DIMS];
+        FlatToMultiIndex_Device( linearIndex, multiIndex, arr );
+        return MultiToFlatIndex_Device( multiIndex, arr );
     }
 
     __device__
-    inline float AtomicMul_Device( float* address, int val )
+    inline void AtomicAdd_Device( float* address, float value )
     {
-        int* addressInt = (int*)address;
-        int old = *addressInt, assumed;
-        do
-        {
-            assumed = old;
-            old = atomicCAS( addressInt, assumed, __float_as_int( val * __int_as_float(assumed) ) );
-        }
-        while ( assumed != old );
-        return __int_as_float(old);
+        atomicAdd( address, value );
     }
 
     __device__
-    inline float AtomicMax_Device( float* address, float val )
+    inline float AtomicMul_Device( float* address, int value )
     {
         int* addressInt = (int*)address;
         int old = *addressInt, assumed;
@@ -63,7 +62,22 @@ namespace Flow
         {
             assumed = old;
             old = atomicCAS( addressInt, assumed,
-                __float_as_int( fmaxf(val, __int_as_float(assumed) ) ) );
+                __float_as_int( value * __int_as_float(assumed) ) );
+        }
+        while ( assumed != old );
+        return __int_as_float(old);
+    }
+
+    __device__
+    inline float AtomicMax_Device( float* address, float value )
+    {
+        int* addressInt = (int*)address;
+        int old = *addressInt, assumed;
+        do
+        {
+            assumed = old;
+            old = atomicCAS( addressInt, assumed,
+                __float_as_int( fmaxf(value, __int_as_float(assumed) ) ) );
         }
         while ( assumed != old );
         return __int_as_float(old);
