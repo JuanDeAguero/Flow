@@ -1,9 +1,7 @@
-// Copyright (c) 2023 Juan M. G. de Agüero
+// Copyright (c) 2023-2024 Juan M. G. de Agüero
 
 #include "CUDA.cuh"
 #include "Flow/NArray.h"
-
-using namespace std;
 
 __global__
 void Add_Kernel( Flow::NArrayDevice* arr1, Flow::NArrayDevice* arr2, Flow::NArrayDevice* result,

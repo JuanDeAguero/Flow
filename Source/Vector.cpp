@@ -1,4 +1,4 @@
-// Copyright (c) Juan M. G. de Agüero 2023
+// Copyright (c) 2023-2024 Juan M. G. de Agüero
 
 #include <cmath>
 

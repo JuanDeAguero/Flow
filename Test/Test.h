@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Juan M. G. de Agüero
+// Copyright (c) 2023-2024 Juan M. G. de Agüero
 
 #pragma once
 
@@ -12,5 +12,7 @@ void TestAdd( vector<int> arrShape1, vector<int> arrShape2 );
 void TestBroadcast( vector<int> arrShape, vector<int> broadcastShape );
 
 void TestExp( vector<int> arrShape );
+
+void TestMul( vector<int> arrShape1, vector<int> arrShape2 );
 
 void TestSum( vector<int> arrShape, int dim );
