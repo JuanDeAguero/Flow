@@ -110,37 +110,39 @@ int main()
             optimizer.ZeroGrad();
             loss->Backpropagate();
             optimizer.Step();
-            Flow::Print( "epoch: " + to_string( epoch + 1 ) +
+            /*Flow::Print( "epoch: " + to_string( epoch + 1 ) +
                 "  loss: " + to_string(loss->Get()[0]) +
-                "  free: " + to_string(Flow::GetCUDAFreeMemory()) );
+                "  free: " + to_string(Flow::CUDA_GetFreeMemory()) );*/
         }
-    }
 
-    auto batches = Flow::CreateBatches( xTest, yTest, 100 );
-    int numCorrect = 0;
-    for ( auto batch : batches )
-    {
-        NARRAY yPredicted = network.Forward(batch.first);
-        for ( int i = 0; i < batch.first->GetShape()[0]; i++ )
+        Flow::Print( "epoch: " + to_string( epoch + 1 ) );
+        
+        batches = Flow::CreateBatches( xTest, yTest, 100 );
+        int numCorrect = 0;
+        for ( auto batch : batches )
         {
-            int maxPredIndex = 0;
-            float maxPredValue = 0.0f;
-            for ( int j = 0; j < 10; j++ )
+            NARRAY yPredicted = network.Forward(batch.first);
+            for ( int i = 0; i < batch.first->GetShape()[0]; i++ )
             {
-                float value = yPredicted->Get({ i, j });
-                if ( value > maxPredValue )
+                int maxPredIndex = 0;
+                float maxPredValue = 0.0f;
+                for ( int j = 0; j < 10; j++ )
                 {
-                    maxPredValue = value;
-                    maxPredIndex = j;
+                    float value = yPredicted->Get({ i, j });
+                    if ( value > maxPredValue )
+                    {
+                        maxPredValue = value;
+                        maxPredIndex = j;
+                    }
                 }
+                //Flow::Print( to_string((int)batch.second->Get({ i })) +
+                //    " | " + to_string(maxPredIndex) );
+                if ( batch.second->Get({ i }) == maxPredIndex ) numCorrect++;
             }
-            Flow::Print( to_string((int)batch.second->Get({ i })) +
-                " | " + to_string(maxPredIndex) );
-            if ( batch.second->Get({ i }) == maxPredIndex ) numCorrect++;
         }
+        Flow::Print( to_string(numCorrect) + "/" + to_string(numTest) +
+            " " + to_string( ( (float)numCorrect / (float)numTest ) * 100.0f ) + "%" );
     }
-    Flow::Print( to_string(numCorrect) + "/" + to_string(numTest) +
-        " " + to_string( ( (float)numCorrect / (float)numTest ) * 100.0f ) + "%" );
 }
 
 vector<float> ReadImagesMNIST( string filePath )

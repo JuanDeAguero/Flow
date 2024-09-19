@@ -2,71 +2,58 @@
 
 #include "CUDA.cuh"
 #include "Flow/NArray.h"
-/*
+
 __global__
-void Index_Kernel( float* arr, int* arrShape, int arrShapeSize, int dim, float* index,
-    float* result, int* resultShape, int resultShapeSize )
+void Index_Kernel( Flow::NArrayDevice* arr, Flow::NArrayDevice* result, int dim,
+    Flow::NArrayDevice* index, int n )
 {
-    int i = blockIdx.x;
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if ( i >= n ) return;
     int multiIndex[MAX_DIMS];
-    Flow::FlatToMultiIndex_Device( i, resultShape, resultShapeSize, multiIndex );
-    multiIndex[dim] = index[multiIndex[dim]];
-    int flatIndex = Flow::MultiToFlatIndex_Device( multiIndex, arrShape, arrShapeSize );
-    result[i] = arr[flatIndex];
+    Flow::FlatToMultiIndex_Device( i, multiIndex, result );
+    multiIndex[dim] = index->Data[multiIndex[dim]];
+    int flatIndex = Flow::MultiToFlatIndex_Device( multiIndex, arr );
+    int arrIndex = Flow::GetIndex_Device( flatIndex, arr );
+    int resultIndex = Flow::GetIndex_Device( i, result );
+    result->Data[resultIndex] = arr->Data[arrIndex];
 }
 
 NARRAY Flow::Index( NARRAY arr, int dim, NARRAY index )
 {
     vector<int> resultShape = arr->GetShape();
     resultShape[dim] = SizeFromShape(index->GetShape());
-    int n = SizeFromShape(resultShape);
-    int* arrShape_d;
-    float* result_d;
-    int* resultShape_d;
-    cudaMalloc( (void**)&arrShape_d, arr->GetShape().size() * sizeof(int) );
-    cudaMalloc( (void**)&result_d, n * sizeof(float) );
-    cudaMalloc( (void**)&resultShape_d, resultShape.size() * sizeof(int) );
-    cudaMemcpy( arrShape_d, arr->GetShapeData(), arr->GetShape().size() * sizeof(int),
-        cudaMemcpyHostToDevice );
-    cudaMemcpy( resultShape_d, resultShape.data(), resultShape.size() * sizeof(int),
-        cudaMemcpyHostToDevice );
-    Index_Kernel<<< n, 1 >>>( arr->GetData(), arrShape_d, arr->GetShape().size(), dim,
-        index->GetData(), result_d, resultShape_d, resultShape.size() );
-    cudaDeviceSynchronize();
-    cudaFree(arrShape_d);
-    cudaFree(resultShape_d);
-    NARRAY result = Create( resultShape, result_d, { arr, index }, NArray::Operation::INDEX );
+    NARRAY result = make_shared<NArray>( resultShape, vector<NARRAY>({ arr }),
+        NArray::Operation::INDEX );
     result->IndexDim = dim;
-    result->Index = index;
+    result->IndexIndex = index;
+    int n = SizeFromShape(resultShape);
+    Index_Kernel<<< BLOCKS(n), TPB >>>( arr->DeviceStruct, result->DeviceStruct, dim,
+        index->DeviceStruct, n );
+    CUDA_DeviceSynchronize();
     return result;
 }
 
 __global__
-void BackwardIndex_Kernel( int* shape, int shapeSize, float* gradient, int* operandShape,
-    int operandShapeSize, float* operandGradient, int dim, float* index )
+void BackwardIndex_Kernel( Flow::NArrayDevice* arr, Flow::NArrayDevice* grad,
+    Flow::NArrayDevice* operand, Flow::NArrayDevice* operandGrad, int dim,
+    Flow::NArrayDevice* index, int n )
 {
-    int i = blockIdx.x;
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if ( i >= n ) return;
     int multiIndex[MAX_DIMS];
-    Flow::FlatToMultiIndex_Device( i, shape, shapeSize, multiIndex );
-    multiIndex[dim] = index[multiIndex[dim]];
-    int flatIndex = Flow::MultiToFlatIndex_Device( multiIndex, operandShape, operandShapeSize );
-    atomicAdd( &operandGradient[flatIndex], gradient[i] );
+    Flow::FlatToMultiIndex_Device( i, multiIndex, arr );
+    multiIndex[dim] = index->Data[multiIndex[dim]];
+    int flatIndex = Flow::MultiToFlatIndex_Device( multiIndex, operand );
+    int operandGradIndex = Flow::GetIndex_Device( flatIndex, operandGrad );
+    int gradIndex = Flow::GetIndex_Device( i, grad );
+    Flow::AtomicAdd_Device( &operandGrad->Data[operandGradIndex], grad->Data[gradIndex] );
 }
 
 void Flow::NArray::BackwardIndex()
 {
     int n = SizeFromShape(Gradient->GetShape());
-    int* shape_d;
-    int* operandShape_d;
-    cudaMalloc( (void**)&shape_d, Shape.size() * sizeof(int) );
-    cudaMalloc( (void**)&operandShape_d, Operands[0]->GetShape().size() * sizeof(int) );
-    cudaMemcpy( shape_d, GetShapeData(), Shape.size() * sizeof(int), cudaMemcpyHostToDevice );
-    cudaMemcpy( operandShape_d, Operands[0]->GetShapeData(),
-        Operands[0]->GetShape().size() * sizeof(int), cudaMemcpyHostToDevice );
-    BackwardIndex_Kernel<<< n, 1 >>>( shape_d, Shape.size(), Gradient->GetData(), operandShape_d,
-        Operands[0]->GetShape().size(), Operands[0]->GetGradient()->GetData(), IndexDim,
-        Index->GetData() );
-    cudaDeviceSynchronize();
-    cudaFree(shape_d);
-    cudaFree(operandShape_d);
-}*/
+    BackwardIndex_Kernel<<< BLOCKS(n), TPB >>>( DeviceStruct, Gradient->DeviceStruct,
+        Operands[0]->DeviceStruct, Operands[0]->Gradient->DeviceStruct, IndexDim,
+        IndexIndex->DeviceStruct, n );
+    CUDA_DeviceSynchronize();
+}

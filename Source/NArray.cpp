@@ -140,33 +140,33 @@ void Flow::NArray::Backward()
     for ( int i = 0; i < Operands.size(); i++ )
     {
         if (Operands[i]->Gradient) continue;
-        if ( Op != Operation::RESHAPE && Op != Operation::SQUEEZE && Op != Operation::TRANSPOSE &&
-            Op != Operation::UNSQUEEZE )
-            Operands[i]->Gradient = make_shared<NArray>(Operands[i]->Shape);
+        //if ( Op != Operation::RESHAPE && Op != Operation::SQUEEZE && Op != Operation::TRANSPOSE &&
+        //    Op != Operation::UNSQUEEZE && Op != Operation::BMM )
+        Operands[i]->Gradient = make_shared<NArray>(Operands[i]->Shape);
     }
     switch (Op)
     {
         case NArray::Operation::NONE:                           break;
         case NArray::Operation::ADD:       BackwardAdd();       break;
-        //case NArray::Operation::BMM:       BackwardBMM();       break;
+        case NArray::Operation::BMM:       BackwardBMM();       break;
         case NArray::Operation::BROADCAST: BackwardBroadcast(); break;
         case NArray::Operation::EXP:       BackwardExp();       break;
-        /*case NArray::Operation::FOLD2D:    BackwardFold2d();    break;
+        case NArray::Operation::FOLD2D:    BackwardFold2d();    break;
         case NArray::Operation::GATHER:    BackwardGather();    break;
         case NArray::Operation::INDEX:     BackwardIndex();     break;
         case NArray::Operation::LOG:       BackwardLog();       break;
-        case NArray::Operation::MAX:       BackwardMax();       break;*/
+        case NArray::Operation::MAX:       BackwardMax();       break;
         case NArray::Operation::MUL:       BackwardMul();       break;
-        /*case NArray::Operation::POW:       BackwardPow();       break;
+        case NArray::Operation::POW:       BackwardPow();       break;
         case NArray::Operation::PROD:      BackwardProd();      break;
         case NArray::Operation::RELU:      BackwardReLU();      break;
         case NArray::Operation::RESHAPE:   BackwardReshape();   break;
-        case NArray::Operation::SQUEEZE:   BackwardSqueeze();   break;*/
+        case NArray::Operation::SQUEEZE:   BackwardSqueeze();   break;
         case NArray::Operation::SUM:       BackwardSum();       break;
-        /*case NArray::Operation::TANH:      BackwardTanh();      break;
+        case NArray::Operation::TANH:      BackwardTanh();      break;
         case NArray::Operation::TRANSPOSE: BackwardTranspose(); break;
         case NArray::Operation::UNFOLD2D:  BackwardUnfold2d();  break;
-        case NArray::Operation::UNSQUEEZE: BackwardUnsqueeze(); break;*/
+        case NArray::Operation::UNSQUEEZE: BackwardUnsqueeze(); break;
         default: break;
     }
 }
@@ -214,31 +214,24 @@ NARRAY Flow::Create( const vector<int>& shape, const vector<float>& data )
 
 NARRAY Flow::Random( vector<int> shape )
 {
-    return RandomNormal( shape, 0.0f, 0.01f );
-}
-
-NARRAY Flow::Random( vector<int> shape, function<float(mt19937&)> distribution )
-{
     random_device randomDevice;
     mt19937 generator(randomDevice());
+    normal_distribution<float> distribution( 0.0f, 0.01f );
     int size = SizeFromShape(shape);
-    vector<float> data(size);
+    vector<float> data( size, 0.0f );
     for ( int i = 0; i < size; i++ ) data[i] = distribution(generator);
     return Create( shape, data );
 }
 
-NARRAY Flow::RandomNormal( vector<int> shape, int mean, int std )
-{
-    normal_distribution<float> distribution( mean, std );
-    auto distributionFunc = [&distribution]( mt19937& gen ) { return distribution(gen); };
-    return Random( shape, distributionFunc );
-}
-
 NARRAY Flow::RandomUniform( vector<int> shape, float min, float max )
 {
+    random_device randomDevice;
+    mt19937 generator(randomDevice());
     uniform_real_distribution<float> distribution( min, max );
-    auto distributionFunc = [&distribution]( mt19937& gen ) { return distribution(gen); };
-    return Random( shape, distributionFunc );
+    int size = SizeFromShape(shape);
+    vector<float> data(size);
+    for ( int i = 0; i < size; i++ ) data[i] = distribution(generator);
+    return Create( shape, data );
 }
 
 NARRAY Flow::RandomPermutation( int n )
@@ -268,11 +261,6 @@ void Flow::Print( NARRAY arr )
     vector<float> data(size);
     cudaMemcpy( data.data(), arr->GetData(), size * sizeof(float), cudaMemcpyDeviceToHost );
     for ( float value : data ) Print(value);
-}
-
-void Flow::PrintShape( NARRAY arr )
-{
-    for ( int value : arr->GetShape() ) Print((float)value);
 }
 
 int Flow::SizeFromShape( vector<int> shape )
@@ -314,7 +302,7 @@ int Flow::MultiToFlatIndex( vector<int> multiIndex, vector<int> stride, int offs
     return flatIndex;
 }
 
-/*vector< pair< NARRAY, NARRAY > > Flow::CreateBatches( NARRAY arr1, NARRAY arr2, int batchSize )
+vector< pair< NARRAY, NARRAY > > Flow::CreateBatches( NARRAY arr1, NARRAY arr2, int batchSize )
 {
     vector< pair< NARRAY, NARRAY > > batches;
     int numSamples = arr1->GetShape()[0];
@@ -333,7 +321,7 @@ int Flow::MultiToFlatIndex( vector<int> multiIndex, vector<int> stride, int offs
         batches.push_back(batchPair);
     }
     return batches;
-}*/
+}
 
 NARRAY Flow::FindMetaParent( NARRAY arr )
 {

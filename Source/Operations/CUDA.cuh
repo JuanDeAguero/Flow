@@ -54,15 +54,15 @@ namespace Flow
     }
 
     __device__
-    inline float AtomicMul_Device( float* address, int value )
+    inline float AtomicMul_Device( float* address, float value )
     {
         int* addressInt = (int*)address;
         int old = *addressInt, assumed;
         do
         {
             assumed = old;
-            old = atomicCAS( addressInt, assumed,
-                __float_as_int( value * __int_as_float(assumed) ) );
+            float assumedFloat = __int_as_float(assumed);
+            old = atomicCAS( addressInt, assumed, __float_as_int( value * assumedFloat ) );
         }
         while ( assumed != old );
         return __int_as_float(old);
@@ -76,21 +76,10 @@ namespace Flow
         do
         {
             assumed = old;
-            old = atomicCAS( addressInt, assumed,
-                __float_as_int( fmaxf(value, __int_as_float(assumed) ) ) );
+            float assumedFloat = __int_as_float(assumed);
+            old = atomicCAS( addressInt, assumed, __float_as_int( fmaxf( value, assumedFloat ) ) );
         }
         while ( assumed != old );
         return __int_as_float(old);
     }
-
-    pair< vector<int>, float* > BMMRaw( pair< vector<int>, float* > arr1,
-        pair< vector<int>, float* > arr2 );
-
-    pair< vector<int>, float* > BMMRaw( NARRAY arr1, NARRAY arr2 );
-
-    pair< vector<int>, float* > BMMRaw( pair< vector<int>, float* > arr1, NARRAY arr2 );
-
-    pair< vector<int>, float* > BMMRaw( NARRAY arr1, pair< vector<int>, float* > arr2 );
-
-    pair< vector<int>, float* > TransposeRaw( NARRAY arr, int firstDim, int secondDim );
 }

@@ -106,17 +106,23 @@ namespace Flow
 
         int IndexDim;
 
-        NARRAY Index;
+        NARRAY IndexIndex;
         
         int MaxDim;
 
         int ProdDim;
+
+        vector<int> ReshapeShape;
+
+        vector<int> SqueezeShape;
         
         int SumDim;
         
         int TransposeFirstDim, TransposeSecondDim;
 
         vector<int> UnfoldKernel2d, UnfoldStride2d;
+
+        int UnsqueezeDim;
 
         void Backward();
 
@@ -166,27 +172,33 @@ namespace Flow
         
         void BackwardUnsqueeze();
 
-        friend NARRAY Broadcast( NARRAY arr, vector<int> shape );
+        friend NARRAY FindMetaParent(NARRAY);
 
-        friend NARRAY Fold2d( NARRAY arr, vector<int> outShape, vector<int> kernel );
+        friend NARRAY Broadcast( NARRAY, vector<int> );
 
-        friend NARRAY Gather( NARRAY arr, int dim, NARRAY index );
+        friend NARRAY Fold2d( NARRAY, vector<int>, vector<int> );
 
-        friend NARRAY Index( NARRAY arr, int dim, NARRAY index );
+        friend NARRAY Gather( NARRAY, int, NARRAY );
 
-        friend NARRAY Max( NARRAY arr, int dim );
+        friend NARRAY Index( NARRAY, int, NARRAY );
 
-        friend NARRAY Pow( NARRAY arr, float exponent );
+        friend NARRAY Max( NARRAY, int );
 
-        friend NARRAY Prod( NARRAY arr, int dim );
+        friend NARRAY Pow( NARRAY, float );
+
+        friend NARRAY Prod( NARRAY, int );
         
-        friend NARRAY Sum( NARRAY arr, int dim );
+        friend NARRAY Sum( NARRAY, int );
 
-        friend NARRAY Transpose( NARRAY arr, int firstDim, int secondDim );
+        friend NARRAY Transpose( NARRAY, int, int );
 
-        friend NARRAY Unfold2d( NARRAY arr, vector<int> kernel, vector<int> stride );
+        friend NARRAY Unfold2d( NARRAY, vector<int>, vector<int> );
+        
+        friend NARRAY Reshape( NARRAY, vector<int> );
 
-        friend NARRAY FindMetaParent( NARRAY arr );
+        friend NARRAY Squeeze( NARRAY, int );
+
+        friend NARRAY Unsqueeze( NARRAY, int );
         
     };
 
@@ -265,10 +277,6 @@ namespace Flow
 
     NARRAY Random( vector<int> shape );
 
-    NARRAY Random( vector<int> shape, function<float(mt19937&)> distribution );
-
-    NARRAY RandomNormal( vector<int> shape, int mean, int std );
-
     NARRAY RandomUniform( vector<int> shape, float min, float max );
 
     NARRAY RandomPermutation( int n );
@@ -280,8 +288,6 @@ namespace Flow
     NARRAY OneHot( vector<int> integers, int num );
 
     void Print( NARRAY arr );
-
-    void PrintShape( NARRAY arr );
 
     int SizeFromShape( vector<int> shape );
 

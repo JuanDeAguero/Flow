@@ -9,10 +9,10 @@ void Mul_Kernel( Flow::NArrayDevice* arr1, Flow::NArrayDevice* arr2, Flow::NArra
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if ( i >= n ) return;
-    int arrIndex1 = Flow::GetIndex_Device( i, arr1 );
-    int arrIndex2 = Flow::GetIndex_Device( i, arr2 );
+    int arr1Index = Flow::GetIndex_Device( i, arr1 );
+    int arr2Index = Flow::GetIndex_Device( i, arr2 );
     int resultIndex = Flow::GetIndex_Device( i, result );
-    result->Data[resultIndex] = arr1->Data[arrIndex1] * arr2->Data[arrIndex2];
+    result->Data[resultIndex] = arr1->Data[arr1Index] * arr2->Data[arr2Index];
 }
     
 NARRAY Flow::Mul( NARRAY arr1, NARRAY arr2 )

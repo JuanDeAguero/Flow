@@ -2,7 +2,7 @@
 
 #include "Flow/NArray.h"
 
-/*NARRAY Flow::Conv2d( NARRAY arr, NARRAY weight )
+NARRAY Flow::Conv2d( NARRAY arr, NARRAY weight )
 {
     int batchSize = arr->GetShape()[0];
     int inSize = arr->GetShape()[2];
@@ -16,4 +16,4 @@
     NARRAY weightTransposed = Transpose( Reshape( weight, weightShape ), 0, 1 );
     NARRAY conv = Transpose( Matmul( unfoldedTransposed, weightTransposed ), 1, 2 );
     return Fold2d( conv, { batchSize, outChannels, outSize, outSize }, { 1, 1 } );
-}*/
+}
