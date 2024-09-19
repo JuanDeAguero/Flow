@@ -7,38 +7,66 @@ Machine Learning Library in C++
 - GPU acceleration with CUDA
 - Deep neural networks
 ## Example: MNIST classifier 🔢
-See "Showcase/MNIST/".<br>
+See ```"Showcase/MNIST/"```<br>
 ```cpp
-vector<float> trainImages = ReadImagesMNIST("...");
-vector<float> testImages = ReadImagesMNIST("...");
-vector<float> trainLabels = ReadLabelsMNIST("...");
-vector<float> testLabels = ReadLabelsMNIST("...");
-
-NARRAY xTrain( Flow::Create( { 6000, 784 }, trainImages ) );
-NARRAY xTest( Flow::Create( { 6000, 784 }, testImages ) );
-NARRAY yTrain( Flow::Create( { 6000 }, trainLabels ) );
-NARRAY yTest( Flow::Create( { 6000 }, testLabels ) );
-
-xTrain = Flow::Div( xTrain->Copy(), Flow::Create( { 1 }, { 255.0f } ) );
-xTest = Flow::Div( xTest->Copy(), Flow::Create( { 1 }, { 255.0f } ) );
-
-NARRAY w1( Flow::Random({ 784, 512 }) );
-NARRAY b1( Flow::Random({ 512 }) );
-NARRAY w2( Flow::Random({ 512, 256 }) );
-NARRAY b2( Flow::Random({ 256 }) );
-NARRAY w3( Flow::Random({ 256, 10 }) );
-NARRAY b3( Flow::Random({ 10 }) );
-
-Flow::Optimizer optimizer( { w1, b1, w2, b2, w3, b3 }, 0.0025f, 1e-8f, 0.01f );
-
-for ( int epoch = 0; epoch < 500; epoch++ )
+class CNN : public Flow::Module
 {
-    NARRAY a1 = Flow::ReLU( Add( MM( xTrain, w1 ), b1 ) );
-    NARRAY a2 = Flow::ReLU( Add( MM( a1, w2 ), b2 ) );
-    NARRAY yPredicted = Flow::Add( MM( a2, w3 ), b3 );
-    NARRAY loss = Flow::CrossEntropy( yPredicted, yTrain );
-    optimizer.ZeroGrad();
-    loss->Backpropagate();
-    optimizer.Step();
+
+public:
+
+    shared_ptr<Flow::Convolution> Conv1, Conv2;
+    shared_ptr<Flow::Linear> Linear1, Linear2;
+
+    CNN()
+    {
+        Conv1 = Flow::Convolution::Create( 1, 10, { 5, 5 } );
+        Conv2 = Flow::Convolution::Create( 10, 20, { 5, 5 } );
+        Linear1 = Flow::Linear::Create( { 320, 50 }, { 50 } );
+        Linear2 = Flow::Linear::Create( { 50, 10 }, { 10 } );
+        Modules = { Conv1, Conv2, Linear1, Linear2 };
+    }
+
+    NARRAY Forward( NARRAY arr ) override
+    {
+        NARRAY a1 = Flow::Unsqueeze( arr, 1 );
+        NARRAY a2 = Flow::ReLU( MaxPool2d( Conv1->Forward(a1), { 2, 2 } ) );
+        NARRAY a3 = Flow::ReLU( MaxPool2d( Conv2->Forward(a2), { 2, 2 } ) );
+        NARRAY a4 = Flow::Reshape( a3, { a3->GetShape()[0], 320 } );
+        NARRAY a5 = Flow::ReLU( Linear1->Forward(a4) );
+        NARRAY a6 = Linear2->Forward(a5);
+        return Flow::Softmax( a6, 1 );
+    }
+
+};
+
+int main()
+{
+    // ...
+
+    CNN network;
+    Flow::Optimizer optimizer( network.GetParameters(), 0.001f, 1e-8f, 0.0f );
+
+    for ( int epoch = 0; epoch < 10; epoch++ )
+    {
+        auto batches = Flow::CreateBatches( xTrain, yTrain, 100 );
+        for ( auto batch : batches )
+        {
+            NARRAY yPredicted = network.Forward(batch.first);
+            NARRAY loss = Flow::CrossEntropy( yPredicted, batch.second );
+            optimizer.ZeroGrad();
+            loss->Backpropagate();
+            optimizer.Step();
+        }
+    }
 }
 ```
+<img src="chart1.png" />
+
+## Performance 📈
+```cpp
+int batchSize = 100;
+NARRAY arr1 = Flow::RandomUniform( { batchSize, 3, 4 }, -0.9999f, 0.9999f );
+NARRAY arr2 = Flow::RandomUniform( { batchSize, 4, 5 }, -0.9999f, 0.9999f );
+NARRAY result = Flow::Matmul( arr1, arr2 );
+```
+<img src="chart2.png" />
