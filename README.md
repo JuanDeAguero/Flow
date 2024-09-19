@@ -31,7 +31,7 @@ public:
     }
 
     // Forward pass for the network.
-    // It calls the submodules previously defined and uses other operations that do not store parameters.
+    // Calls submodules previously defined and uses other operations that don't store parameters.
     NARRAY Forward( NARRAY arr ) override
     {
         NARRAY a1 = Flow::Unsqueeze( arr, 1 );
@@ -77,6 +77,7 @@ After running three trials of this code on a machine with a NVIDIA QUADRO P5000,
 The total time for training was 21 minutes for the best trial. Other ML libraries such as Torch would train this network in less time (<10 mins). Nonetheless, <em>Flow</em> is at an early stage of development and it is reassuring to see how it can successfully train a convolutional neural network in reasonable time.
 
 ## Performance 📈
+Running batched matrix multiplications with varying batch sizes (from 100 to 1000000) and comparing the performance to the same operations using Torch.
 ```cpp
 int batchSize = 100;
 NARRAY arr1 = Flow::RandomUniform( { batchSize, 3, 4 }, -0.9999f, 0.9999f );
