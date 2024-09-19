@@ -9,14 +9,18 @@ Machine Learning Library in C++
 ## Example: MNIST classifier 🔢
 See ```"Showcase/MNIST/"```<br>
 ```cpp
+// Create the Convolutional Neural Network module.
 class CNN : public Flow::Module
 {
 
 public:
 
+    // This network has two convolutional layers and two linear layers.
+    // These layers store weights and biases which are used for learning after backpropagation.
     shared_ptr<Flow::Convolution> Conv1, Conv2;
     shared_ptr<Flow::Linear> Linear1, Linear2;
 
+    // Define the network structure and create the submodules on construct.
     CNN()
     {
         Conv1 = Flow::Convolution::Create( 1, 10, { 5, 5 } );
@@ -26,6 +30,8 @@ public:
         Modules = { Conv1, Conv2, Linear1, Linear2 };
     }
 
+    // Forward pass for the network.
+    // It calls the submodules previously defined and uses other operations that do not store parameters.
     NARRAY Forward( NARRAY arr ) override
     {
         NARRAY a1 = Flow::Unsqueeze( arr, 1 );
@@ -43,9 +49,14 @@ int main()
 {
     // ...
 
+    // Define the network object.
     CNN network;
+
+    // Create an optimizer for the network.
+    // It is responsable for updating the parameters based on the new gradients.
     Flow::Optimizer optimizer( network.GetParameters(), 0.001f, 1e-8f, 0.0f );
 
+    // Training loop.
     for ( int epoch = 0; epoch < 10; epoch++ )
     {
         auto batches = Flow::CreateBatches( xTrain, yTrain, 100 );
@@ -60,7 +71,10 @@ int main()
     }
 }
 ```
+<br>
+After running three trials of this code on a machine with a NVIDIA QUADRO P5000, the best accuracy for classifying digits was 96%. This is a very simplistic convolutional network and it can be improved to achieved better accuracy. For example, introducing dropout.<br><br>
 <img src="chart1.png" />
+The total time for training was 21 minutes for the best trial. Other ML libraries such as Torch would train this network in less time (<10 mins). Nonetheless, <em>Flow</em> is at an early stage of development and it is reassuring to see how it can successfully train a convolutional neural network in reasonable time.
 
 ## Performance 📈
 ```cpp
