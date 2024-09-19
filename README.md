@@ -31,7 +31,7 @@ public:
     }
 
     // Forward pass for the network.
-    // Calls submodules previously defined and uses other operations that don't store parameters.
+    // Calls submodules and uses other operations that don't store parameters.
     NARRAY Forward( NARRAY arr ) override
     {
         NARRAY a1 = Flow::Unsqueeze( arr, 1 );
@@ -72,7 +72,7 @@ int main()
 }
 ```
 <br>
-After running three trials of this code on a machine with a NVIDIA QUADRO P5000, the best accuracy for classifying digits was 96%. This is a very simplistic convolutional network and it can be improved to achieved better accuracy. For example, introducing dropout.<br><br>
+After running three trials of this code on a machine with a NVIDIA QUADRO P5000, the best accuracy for classifying digits was 96% after 10 epochs. This is a very simplistic convolutional network and it can be improved to achieve better accuracy. For example, introducing dropout.<br><br>
 <img src="chart1.png" />
 The total time for training was 21 minutes for the best trial. Other ML libraries such as Torch would train this network in less time (<10 mins). Nonetheless, <em>Flow</em> is at an early stage of development and it is reassuring to see how it can successfully train a convolutional neural network in reasonable time.
 
