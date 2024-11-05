@@ -110,12 +110,10 @@ int main()
             optimizer.ZeroGrad();
             loss->Backpropagate();
             optimizer.Step();
-            /*Flow::Print( "epoch: " + to_string( epoch + 1 ) +
+            Flow::Print( "epoch: " + to_string( epoch + 1 ) +
                 "  loss: " + to_string(loss->Get()[0]) +
-                "  free: " + to_string(Flow::CUDA_GetFreeMemory()) );*/
+                "  free: " + to_string(Flow::CUDA_GetFreeMemory()) );
         }
-
-        Flow::Print( "epoch: " + to_string( epoch + 1 ) );
         
         batches = Flow::CreateBatches( xTest, yTest, 100 );
         int numCorrect = 0;
@@ -135,8 +133,8 @@ int main()
                         maxPredIndex = j;
                     }
                 }
-                //Flow::Print( to_string((int)batch.second->Get({ i })) +
-                //    " | " + to_string(maxPredIndex) );
+                Flow::Print( to_string((int)batch.second->Get({ i })) +
+                    " | " + to_string(maxPredIndex) );
                 if ( batch.second->Get({ i }) == maxPredIndex ) numCorrect++;
             }
         }
