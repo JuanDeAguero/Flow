@@ -62,6 +62,17 @@ Flow::NArray::~NArray()
     cudaFree(ShapeDevice);
     cudaFree(StrideDevice);
     cudaFree(DeviceStruct);
+
+    auto reset = [&]( NArray* arr, auto&& reset_ref ) -> void
+    {
+        arr->Gradient.reset();
+        for ( auto& operand : arr->Operands )
+        {
+            if (operand)
+                reset_ref( operand.get(), reset_ref );
+        }
+    };
+    reset(this, reset);
 }
 
 float Flow::NArray::Get( vector<int> coordinates )
