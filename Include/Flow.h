@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Juan M. G. de Agüero
+// Copyright (c) 2023-2025 Juan M. G. de Agüero
 
 #pragma once
 

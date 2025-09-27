@@ -15,13 +15,11 @@ NARRAY Flow::Matmul( NARRAY arr1, NARRAY arr2 )
         NARRAY mm2 = arr2;
         if ( dim2 == 1 ) mm2 = Unsqueeze( arr2, arr2->GetShape().size() );
         vector<int> resultShape;
-        for ( int i = 0; i < arr1->GetShape().size() - 1; i++ )
-            resultShape.push_back(arr1->GetShape()[i]);
+        for ( int i = 0; i < arr1->GetShape().size() - 1; i++ ) resultShape.push_back(arr1->GetShape()[i]);
         if ( dim2 > 1 ) resultShape.push_back(mm2->GetShape()[ mm2->GetShape().size() - 1 ]);
         vector<int> shape1;
         shape1.push_back(arr1->GetShape()[0]);
-        for ( int i = 1; i < arr1->GetShape().size() - 1; i++ )
-            shape1[0] *= arr1->GetShape()[i];
+        for ( int i = 1; i < arr1->GetShape().size() - 1; i++ ) shape1[0] *= arr1->GetShape()[i];
         shape1.push_back(arr1->GetShape()[ arr1->GetShape().size() - 1 ]);
         NARRAY mm1 = Reshape( arr1, shape1 );
         return Reshape( MM( mm1, mm2 ), resultShape );

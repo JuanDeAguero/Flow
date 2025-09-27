@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Juan M. G. de Agüero
+// Copyright (c) 2023-2025 Juan M. G. de Agüero
 
 #include <cmath>
 
@@ -6,27 +6,23 @@
 
 using namespace std;
 
-bool Flow::Equals( vector<float> vec1, vector<float> vec2, float tolerance )
-{
-    if ( vec1.size() != vec2.size() ) return false;
-    for ( int i = 0; i < vec1.size(); i++ )
-    {
-        if ( !( fabs( vec1[i] - vec2[i] ) < tolerance ) )
+bool Flow::Equals(vector<float> vec1, vector<float> vec2, float tolerance) {
+    if (vec1.size() != vec2.size()) return false;
+    for (int i = 0; i < vec1.size(); i++) {
+        if (!(fabs(vec1[i] - vec2[i]) < tolerance))
             return false;
     }
     return true;
 }
 
-vector<int> Flow::ToInt( vector<float> vec )
-{
+vector<int> Flow::ToInt(vector<float> vec) {
     vector<int> vecInt;
-    for ( float value : vec ) vecInt.push_back((int)value);
+    for (float value : vec) vecInt.push_back((int)value);
     return vecInt;
 }
 
-vector<int64_t> Flow::ToInt64( vector<int> vec )
-{
+vector<int64_t> Flow::ToInt64(vector<int> vec) {
     vector<int64_t> vecInt64;
-    for ( int value : vec ) vecInt64.push_back((int64_t)value);
+    for (int value : vec) vecInt64.push_back((int64_t)value);
     return vecInt64;
 }
