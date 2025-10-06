@@ -2,7 +2,7 @@
 
 #include <limits>
 
-#include "../Utils/CUDA.cuh"
+#include "CUDA.cuh"
 #include "Flow/NArray.h"
 
 __global__

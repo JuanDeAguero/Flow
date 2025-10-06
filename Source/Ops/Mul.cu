@@ -1,6 +1,6 @@
 // Copyright (c) 2023-2025 Juan M. G. de Agüero
 
-#include "../Utils/CUDA.cuh"
+#include "CUDA.cuh"
 #include "Flow/NArray.h"
 
 __global__
