@@ -10,7 +10,7 @@ Machine Learning Library in C++
 ## Example: MNIST classifier 🔢
 See ```"Showcase/MNIST/"```<br>
 ```cpp
-// Create the Convolutional Neural Network module
+// Create Convolutional Neural Network module
 class CNN : public Flow::Module {
 public:
     // This network has two convolutional layers and two linear layers
