@@ -41,7 +41,14 @@ Flow::NArray::NArray(vector<int> shape, vector<NARRAY> operands, NArray::Operati
 }
 
 Flow::NArray::NArray(vector<int> shape, vector<int> stride, int storageOffset, NARRAY metaParent, vector<NARRAY> operands, Operation op)
-    : Data(metaParent->Data), Shape(shape), MetaParent(metaParent), Stride(stride), StorageOffset(storageOffset), Gradient(nullptr), Operands(operands), Op(op) {
+    : Data(metaParent->Data),
+    Shape(shape),
+    MetaParent(metaParent),
+    Stride(stride),
+    StorageOffset(storageOffset),
+    Gradient(nullptr),
+    Operands(operands),
+    Op(op) {
     CUDA_AllocateInt(ShapeDevice, Shape);
     CUDA_AllocateInt(StrideDevice, Stride);
     CreateDeviceStruct();
@@ -88,12 +95,19 @@ vector<float> Flow::NArray::Get() {
 }
 
 float* Flow::NArray::GetData() { return Data; }
+
 vector<int> Flow::NArray::GetShape() { return Shape; }
+
 int* Flow::NArray::GetShapeDevice() { return ShapeDevice; }
+
 vector<int> Flow::NArray::GetStride() { return Stride; }
+
 int* Flow::NArray::GetStrideDevice() { return StrideDevice; }
+
 int Flow::NArray::GetOffset() { return StorageOffset; }
+
 NARRAY Flow::NArray::GetGradient() { return Gradient; }
+
 Flow::NArrayDevice* Flow::NArray::GetDeviceStruct() { return DeviceStruct; }
 
 NARRAY Flow::NArray::Copy() {

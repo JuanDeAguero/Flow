@@ -29,7 +29,15 @@ NARRAY Flow::Index(NARRAY arr, int dim, NARRAY index) {
 }
 
 __global__
-void BackwardIndex_Kernel(Flow::NArrayDevice* arr, Flow::NArrayDevice* grad, Flow::NArrayDevice* operand, Flow::NArrayDevice* operandGrad, int dim, Flow::NArrayDevice* index, int n) {
+void BackwardIndex_Kernel(
+    Flow::NArrayDevice* arr,
+    Flow::NArrayDevice* grad,
+    Flow::NArrayDevice* operand,
+    Flow::NArrayDevice* operandGrad,
+    int dim,
+    Flow::NArrayDevice* index,
+    int n
+) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= n) return;
     int multiIndex[MAX_DIMS];
@@ -43,6 +51,14 @@ void BackwardIndex_Kernel(Flow::NArrayDevice* arr, Flow::NArrayDevice* grad, Flo
 
 void Flow::NArray::BackwardIndex() {
     int n = SizeFromShape(Gradient->GetShape());
-    BackwardIndex_Kernel<<<BLOCKS(n), TPB>>>(DeviceStruct, Gradient->DeviceStruct, Operands[0]->DeviceStruct, Operands[0]->Gradient->DeviceStruct, IndexDim, IndexIndex->DeviceStruct, n);
+    BackwardIndex_Kernel<<<BLOCKS(n), TPB>>>(
+        DeviceStruct,
+        Gradient->DeviceStruct,
+        Operands[0]->DeviceStruct,
+        Operands[0]->Gradient->DeviceStruct,
+        IndexDim,
+        IndexIndex->DeviceStruct,
+        n
+    );
     CUDA_DeviceSynchronize();
 }
