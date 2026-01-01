@@ -214,8 +214,8 @@ namespace Flow {
 
     NARRAY FindMetaParent(NARRAY arr);
 
-    bool CUDA_AllocateFloat(float*& deviceData, const const vector<float>& data);
-    bool CUDA_AllocateInt(int*& deviceData, const const vector<int>& data);
+    bool CUDA_AllocateFloat(float*& deviceData, const vector<float>& data);
+    bool CUDA_AllocateInt(int*& deviceData, const vector<int>& data);
     float CUDA_GetFreeMemory();
     void CUDA_DeviceSynchronize();
 }

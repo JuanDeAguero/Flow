@@ -52,6 +52,8 @@ Flow::NArray::~NArray() {
     cudaFree(ShapeDevice);
     cudaFree(StrideDevice);
     cudaFree(DeviceStruct);
+    // TODO: Remove recursive Gradient.reset()
+    // Let shared_ptrs clean up; add a safe ClearGradients() which uses visited set for explicit gradient clearing
     auto reset = [&](NArray* arr, auto&& reset_ref) -> void {
         arr->Gradient.reset();
         for (auto& operand : arr->Operands) {

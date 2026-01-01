@@ -64,10 +64,10 @@ public:
 };
 
 int main() {
-    vector<float> trainImages = ReadImagesMNIST("../train-images-idx3-ubyte");
-    vector<float> testImages = ReadImagesMNIST("../t10k-images-idx3-ubyte");
-    vector<float> trainLabels = ReadLabelsMNIST("../train-labels-idx1-ubyte");
-    vector<float> testLabels = ReadLabelsMNIST("../t10k-labels-idx1-ubyte");
+    vector<float> trainImages = ReadImagesMNIST("train-images-idx3-ubyte");
+    vector<float> testImages = ReadImagesMNIST("t10k-images-idx3-ubyte");
+    vector<float> trainLabels = ReadLabelsMNIST("train-labels-idx1-ubyte");
+    vector<float> testLabels = ReadLabelsMNIST("t10k-labels-idx1-ubyte");
 
     int numTrain = 60000;
     int numTest = 10000;
