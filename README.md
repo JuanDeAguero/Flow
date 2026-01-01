@@ -1,6 +1,7 @@
-# Flow 🌊
-Machine Learning Library in C++ (experimental and built for learning purposes, not production ready)
-## Features ✨
+# Flow
+Machine Learning Library in C++
+### ⚠️ Experimental and built for learning purposes, NOT production ready ⚠️
+## Features
 - N dimensional array operations
   - Addition, multiplication, ReLU, matrix multiplication, ...
 - Autograd system
