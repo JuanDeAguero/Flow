@@ -7,6 +7,8 @@ Machine Learning Library in C++
 - Autograd system
 - GPU acceleration with CUDA
 - Deep neural networks
+## Installation
+[INSTALL.md](INSTALL.md)
 ## Example: MNIST classifier 🔢
 See ```"Showcase/MNIST/"```<br>
 ```cpp
