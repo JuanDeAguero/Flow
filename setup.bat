@@ -27,7 +27,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-if not defined FLOW_CUDA_ROOT set "FLOW_CUDA_ROOT=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.0"
+if not defined FLOW_CUDA_ROOT set "FLOW_CUDA_ROOT=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1"
 if not exist "%FLOW_CUDA_ROOT%\bin\nvcc.exe" (
   echo ERROR: nvcc.exe not found at "%FLOW_CUDA_ROOT%\bin\nvcc.exe".
   echo Set FLOW_CUDA_ROOT to a CUDA Toolkit folder that contains bin\nvcc.exe.
